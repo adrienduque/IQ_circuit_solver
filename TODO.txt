@@ -1,0 +1,10 @@
+modify .gitignore to include all SDL2 files in the last commit in order to see the files on github
+
+    Is there another standard to specify which versions of libraries are in the project dependency list ?, I can think of "requirements.txt" in python, with pip, is there an equivalent in C dev ?
+    + take notes on OneNote if I find the answer
+
+------------------------------- doubtful TODO --------------------------------------------
+
+Make a menu with 2D graphics instead of choosing level in the command line, in short, do everything to avoid having a command line interface in the final build
+
+    If this is the case, don't forget to compile with -mwindows flag too

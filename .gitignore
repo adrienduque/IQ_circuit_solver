@@ -1,0 +1,4 @@
+.vscode
+bin/SDL2.dll
+include/SDL2
+lib
