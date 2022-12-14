@@ -18,7 +18,7 @@ int tests_run = 0;
 static void update_infos(int piece_idx, int side_idx, int flat_base_position, int rotation_state)
 {
 
-    static char *name_array[] = {"Line2 1", "Line2 2", "Line3 2", "Corner 1", "Corner 2", "Square", "L piece", "T piece", "Z piece"};
+    static char *name_array[] = {"Line2 1", "Line2 2", "Line3 1", "Line3 2", "Corner 1", "Corner 2", "Square", "L piece", "T piece", "Z piece"};
     system("cls");
     printf("Piece : %s | side %d at (pos : %d | rota : %d) \n", name_array[piece_idx], side_idx, flat_base_position, rotation_state);
 }
