@@ -9,7 +9,7 @@ BINDIR=bin
 
 BIN=$(BINDIR)/main.exe
 
-LIBFLAGS = -lmingw32 -lSDL2main -lSDL2
+LIBFLAGS = -lraylib -lopengl32 -lgdi32 -lwinmm
 
 SRCS=$(wildcard $(SRC)/*.c)
 OBJS=$(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(SRCS))

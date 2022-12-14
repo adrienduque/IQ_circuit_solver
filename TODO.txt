@@ -1,10 +1,22 @@
-modify .gitignore to include all SDL2 files in the last commit in order to see the files on github
+1) Get rid of flat pos stuff, and do everything in 2D pos, rename RelativePos to Vector2_int, makes more sense
 
-    Is there another standard to specify which versions of libraries are in the project dependency list ?, I can think of "requirements.txt" in python, with pip, is there an equivalent in C dev ?
+2) Caching drawing data and separate drawing computation and actual drawing functions, to recompute data as less as we need by allocating live data holders (1 by piece)
+
+    -> Furthermore, make piece definition 1 part static data, and 1 part dynamic live data, which will be the cache
+    The good thing about this design, is that at every step of computing live data, we can easily access static data reference
+
+3) Board modelization, adding and removing piece to a board, and checking methods to validate or not the future of a board
+
+4) Main computation backtracking algorithm
+
+
+Is there another standard to specify which versions of libraries are in the project dependency list ?, I can think of "requirements.txt" in python, with pip, is there an equivalent in C dev ?
     + take notes on OneNote if I find the answer
 
+    -> Raylib 4.2
 ------------------------------- doubtful TODO --------------------------------------------
 
 Make a menu with 2D graphics instead of choosing level in the command line, in short, do everything to avoid having a command line interface in the final build
 
-    If this is the case, don't forget to compile with -mwindows flag too
+    -> furthermore it's more doable with raylib now
+    + is there an option to not launch a console when executing release app ?
