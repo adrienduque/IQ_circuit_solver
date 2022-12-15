@@ -18,7 +18,7 @@ int tests_run = 0;
 static void update_infos(int piece_idx, int side_idx, Vector2_int base_pos, int rotation_state)
 {
 
-    static char *name_array[] = {"Line2 1", "Line2 2", "Line3 1", "Line3 2", "Corner 1", "Corner 2", "Square", "L piece", "T piece", "Z piece"};
+    char *name_array[] = {"Line2 1", "Line2 2", "Line3 1", "Line3 2", "Corner 1", "Corner 2", "Square", "L piece", "T piece", "Z piece"};
     system("cls");
     printf("Piece : %s | side %d at (pos : {%d,%d} | rota : %d) \n", name_array[piece_idx], side_idx, base_pos.i, base_pos.j, rotation_state);
 }
@@ -27,7 +27,7 @@ static void update_infos(int piece_idx, int side_idx, Vector2_int base_pos, int 
 bool IfAnyIsPressedKey(int *KeyArray, int nb_of_keys)
 {
 
-    static int Key;
+    int Key;
     for (int i = 0; i < nb_of_keys; i++)
     {
         Key = KeyArray[i];
@@ -40,10 +40,8 @@ bool IfAnyIsPressedKey(int *KeyArray, int nb_of_keys)
 char *all_around_display_test()
 {
     /**
-     * @bug This is the first time I spotted a memory corruption bug
-     * This function show garbage values without segfault
-     *
-     * Then I tried to do unit testing in test_piece.c, but without success
+     * @bug 1) seems to disappear if I don't use blit_data
+     * I will continue writing test_piece.c just to make sure
      */
 
     /*
@@ -84,8 +82,6 @@ char *all_around_display_test()
     Vector2_int temp_base_pos = base_pos;
     int temp_rotation_state = rotation_state;
 
-    load_blit_data(piece_idx, side_idx, base_pos, rotation_state);
-
     bool need_update, first_iteration = true;
 
     while (!WindowShouldClose())
@@ -110,7 +106,7 @@ char *all_around_display_test()
         if (IsKeyPressed(KEY_F))
         {
             temp_side_idx += 1;
-            temp_side_idx %= blit_data.piece->nb_of_sides;
+            temp_side_idx %= piece_array[piece_idx].nb_of_sides;
         }
         if (IsKeyPressed(KEY_SPACE))
         {
@@ -134,16 +130,14 @@ char *all_around_display_test()
             first_iteration = false;
 
             // Check if the wanted update can be done
-            load_blit_data(temp_piece_idx, temp_side_idx, temp_base_pos, temp_rotation_state);
-            if (blit_piece_main_data() == PIECE_DOESNT_FIT_INSIDE)
+            if (blit_piece_main_data(temp_piece_idx, temp_side_idx, temp_base_pos, temp_rotation_state) == PIECE_DOESNT_FIT_INSIDE)
             {
                 // we need to revert back changes
                 temp_piece_idx = piece_idx;
                 temp_side_idx = side_idx;
                 temp_base_pos = base_pos;
                 temp_rotation_state = rotation_state;
-                load_blit_data(piece_idx, side_idx, base_pos, rotation_state);
-                blit_piece_main_data();
+                blit_piece_main_data(piece_idx, side_idx, base_pos, rotation_state);
                 // other updates don't have been modified and thus don't need to be reverted
             }
             else
@@ -158,12 +152,12 @@ char *all_around_display_test()
                 rotation_state = temp_rotation_state;
 
                 // other blit data in piece.c
-                blit_outline_tiles();
+                blit_outline_tiles(piece_idx, side_idx, base_pos, rotation_state);
                 if (show_border_tiles)
-                    blit_border_tiles();
+                    blit_border_tiles(piece_idx, side_idx, base_pos, rotation_state);
 
                 // update drawing data cache
-                update_all_piece_draw_data(blit_data.piece, show_missing_connection_tiles, show_border_tiles);
+                update_all_piece_draw_data(piece_array + piece_idx, show_missing_connection_tiles, show_border_tiles);
             }
             // in all cases update infos
             update_infos(piece_idx, side_idx, base_pos, rotation_state);
@@ -173,7 +167,7 @@ char *all_around_display_test()
         BeginDrawing();
         ClearBackground(BLACK);
         draw_grid();
-        draw_all_piece_data(blit_data.piece, show_missing_connection_tiles, show_border_tiles);
+        draw_all_piece_data(piece_array + piece_idx, show_missing_connection_tiles, show_border_tiles);
         EndDrawing();
     }
     CloseWindow();
