@@ -1,10 +1,3 @@
-1) Get rid of flat pos stuff, and do everything in 2D pos, rename RelativePos to Vector2_int, makes more sense
-
-2) Caching drawing data and separate drawing computation and actual drawing functions, to recompute data as less as we need by allocating live data holders (1 by piece)
-
-    -> Furthermore, make piece definition 1 part static data, and 1 part dynamic live data, which will be the cache
-    The good thing about this design, is that at every step of computing live data, we can easily access static data reference
-
 3) Board modelization, adding and removing piece to a board, and checking methods to validate or not the future of a board
 
 4) Main computation backtracking algorithm

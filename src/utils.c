@@ -2,16 +2,10 @@
  * @file utils.c
  *
  * Includes all little math-like functions and macros related to positionning on the board
- * We can refer to a position on the game board, in two main ways :
- *      -by using "RelativePos" struct -> (i,j) (2D : horizontal / vertical int index of a tile)
+ * A position on the board is represented by 2 ints :
+ *      -by using "Vector2_int" struct -> (i,j) (2D : horizontal / vertical int index of a tile)
  *      works like pixel position on a screen (j increments downwards, (0,0) is in top left corner), ...)
  *
- *          -> Used to make calculation like rotation with matrix
- *
- *      -by using 1 int index only, called "flat"
- *      works as if we had cut and put end to end every row of the game board, resulting in one line of tiles.
- *
- *          -> Used to store and iterate over all tiles of the board more easily
  *
  * Also includes helper functions for Direction type (which are encoded as int, and mainly used to specify direction of tile connections)
  */
@@ -62,81 +56,76 @@ static RotationMatrix rotation_mat_array[] = {
     [UP] = {0, 1, -1, 0},
 };
 
-RelativePos matrix_mul(RelativePos pos, RotationMatrix matrix)
+void matrix_mul(Vector2_int *pos, const RotationMatrix *matrix)
 {
-    RelativePos result_pos;
-    result_pos.i = pos.i * matrix.m0 + pos.j * matrix.m1;
-    result_pos.j = pos.i * matrix.m2 + pos.j * matrix.m3;
-    return result_pos;
+    static int temp_new_i, temp_new_j;
+    temp_new_i = pos->i * matrix->m0 + pos->j * matrix->m1;
+    temp_new_j = pos->i * matrix->m2 + pos->j * matrix->m3;
+
+    pos->i = temp_new_i;
+    pos->j = temp_new_j;
 }
 
-RelativePos rotate_pos(RelativePos pos, int rotation_state)
+void rotate_pos(Vector2_int *pos, int rotation_state)
 {
-    return matrix_mul(pos, rotation_mat_array[rotation_state]);
+    matrix_mul(pos, &(rotation_mat_array[rotation_state]));
 }
 
-RelativePos translate_pos(RelativePos pos, RelativePos translate_vector)
+void translate_pos(Vector2_int *pos, const Vector2_int *translate_vector)
 {
-    RelativePos result_pos;
-    result_pos.i = pos.i + translate_vector.i;
-    result_pos.j = pos.j + translate_vector.j;
-    return result_pos;
+    pos->i = pos->i + translate_vector->i;
+    pos->j = pos->j + translate_vector->j;
 }
 
-// -------------------------------------- flat transformation functions ------------------------------------
-
-// Array of increment to add to flat_position, to go right, down, left, up on the board by 1 unit
-// used as a function : int next_flat_pos = flat_pos + flat_pos_direction_increment[Direction]
-int flat_pos_direction_increment[] = {
-    [RIGHT] = 1,
-    [DOWN] = BOARD_WIDTH,
-    [LEFT] = -1,
-    [UP] = -BOARD_WIDTH,
+static Vector2_int pos_directionnal_increment[] = {
+    [RIGHT] = {1, 0},
+    [DOWN] = {0, 1},
+    [LEFT] = {-1, 0},
+    [UP] = {0, -1},
 };
 
-// Function to check flat_pos validity
-// i.e. : is the tile indexed by the flat pos inside the game board (valid) or not (not valid)
-bool is_flat_pos_valid(int flat_pos)
+void increment_pos_in_direction(Vector2_int *pos, Direction direction)
 {
-    return (bool)((flat_pos >= 0) && (flat_pos < BOARD_TOTAL_NB_TILES));
+    translate_pos(pos, &(pos_directionnal_increment[direction]));
 }
 
-// -------------------------------------- Base conversion functions ------------------------------------
-
-int relative_pos_to_flat_pos(RelativePos pos)
+bool is_pos_inside_board(const Vector2_int *pos)
 {
-    if (pos.i < 0 || pos.j < 0 || pos.i >= BOARD_WIDTH || pos.j >= BOARD_HEIGHT)
-        return INVALID_FLAT_POS;
-
-    // e.g : {1,2} -> 17 if BOARD_WIDTH = 8
-    return pos.i + pos.j * BOARD_WIDTH;
+    return ((pos->i >= 0) && (pos->i < BOARD_WIDTH) && (pos->j >= 0) && (pos->j < BOARD_HEIGHT));
 }
 
-RelativePos flat_pos_to_relative_pos(int flat_pos)
+bool are_pos_equal(const Vector2_int *pos1, const Vector2_int *pos2)
 {
-    // we assume that flat_pos is inside board and thus valid
-    RelativePos result_pos;
-    result_pos.j = flat_pos / BOARD_WIDTH;
-    result_pos.i = flat_pos % BOARD_WIDTH;
-
-    return result_pos;
+    return ((pos1->i == pos2->i) && (pos1->j == pos2->j));
 }
 
+static Vector2_int invalid_pos = {-1, -1};
+
+void set_invalid_pos(Vector2_int *pos)
+{
+    pos->i = invalid_pos.i;
+    pos->j = invalid_pos.j;
+}
+
+bool is_pos_valid(const Vector2_int *pos)
+{
+    return !are_pos_equal(pos, &invalid_pos);
+}
 // ---------------------------------------- Direction functions -------------------------------------------
 
 // Function to reverse input direction
 // e.g. : reverse_direction(RIGHT) -> LEFT
-Direction reverse_direction(Direction direction_input)
+Direction reverse_direction(Direction direction)
 {
     // they are underlying ints, see defintion of RIGHT, DOWN, ... macros in utils.h
-    return (direction_input + 2) % NB_OF_DIRECTIONS;
+    return (direction + 2) % NB_OF_DIRECTIONS;
 }
 
 // Function to rotate clockwise the input direction
 // e.g. : rotate_direction(RIGHT,1) -> DOWN
 // e.g. : rotate_direction(DOWN,2) == reverse_direction(DOWN) -> UP
-Direction rotate_direction(Direction direction_input, int nb_of_clockwise_90_degres_rotation)
+Direction rotate_direction(Direction direction, int nb_of_clockwise_90_degres_rotation)
 {
     // they are underlying ints, see defintion of RIGHT, DOWN, ... macros in utils.h
-    return (direction_input + nb_of_clockwise_90_degres_rotation) % NB_OF_DIRECTIONS;
+    return (direction + nb_of_clockwise_90_degres_rotation) % NB_OF_DIRECTIONS;
 }

@@ -1,11 +1,12 @@
 /**
  * @file piece_data.h
- * @see pieceçdata.c
+ * @see piece_data.c
  * Struct members might seem weird, but they all serve a purpose in later algorithms of board checking and display
  *
  */
 
 #include <stdbool.h>
+#include <raylib/raylib.h> //Vector2
 #include <local/utils.h>
 
 #ifndef __PIECE_DATA_H__
@@ -26,9 +27,9 @@
 #define MAX_NB_OF_TILE_PER_SIDE 4
 #define MAX_NB_OF_MISSING_CONNECTION_PER_SIDE 4
 #define MAX_NB_OF_BORDER_TILE_PER_SIDE 10
-#define MAX_NB_OF_EDGE_POINTS 10
+#define MAX_NB_OF_OUTLINE_POINTS 10
 
-#define MAX_NB_OF_CONNECTION_PER_TILE 4
+#define MAX_NB_OF_CONNECTION_PER_TILE 2
 
 #define NB_OF_PIECES 10
 
@@ -68,54 +69,67 @@ typedef enum TileType
 typedef struct Tile
 {
     TileType tile_type;
-    RelativePos relative_pos; // relative position of tile in the definition of a side
-    int flat_position;        // flatten 2D coordinates to locate on the board (initially 0)
-    int nb_of_connections;    // length of matching array (initially 0)
-    int connection_direction_array[MAX_NB_OF_CONNECTION_PER_TILE];
+    Vector2_int relative_pos;                                               // relative position of tile in the definition of a side
+    int nb_of_connections;                                                  // length of matching arrays
+    int constant_connection_direction_array[MAX_NB_OF_CONNECTION_PER_TILE]; // base connections of the tile
+
+    // ----------- Live data part (cache) -----------------
+    Vector2_int absolute_pos;                                      // absolute position of the tile on the board, computed when we blit a piece to the board
+    int connection_direction_array[MAX_NB_OF_CONNECTION_PER_TILE]; // connections are changed by rotation of the piece when it is blitted
+
+    // ------ Drawing data
+    Vector2_int effective_absolute_pos;
+    Vector2_int top_left_corner_pt;
+    Vector2 center_pt;
+    Vector2 connection_pt_array[MAX_NB_OF_CONNECTION_PER_TILE];
+
 } Tile;
 
 /**
- * @struct Side
+ * @struct Side which
  */
 typedef struct Side
 {
-    int nb_of_tiles;                    // length of matching array (initially 0)
-    int nb_of_missing_connection_tiles; // length of matching array (initially 0)
-    int nb_of_border_tiles;             // length of matching array (initially 0)
-    int nb_of_edge_points;              // length of matching array
+    int nb_of_tiles;                    // length of matching array
+    int nb_of_missing_connection_tiles; // length of matching array
     Tile tile_array[MAX_NB_OF_TILE_PER_SIDE];
     Tile missing_connection_tile_array[MAX_NB_OF_MISSING_CONNECTION_PER_SIDE];
-    RelativePos border_tiles_rel_position_array[MAX_NB_OF_BORDER_TILE_PER_SIDE]; // not array of tiles but array of rel position of border tiles
-    RelativePos outline_rel_edge_points[MAX_NB_OF_EDGE_POINTS];                  // used to draw an outline around
 
+    // I would like to generalize below constant data, to have 1 per piece instead of 1 per side
+    // but L_piece is not compatible with this design
+    // the length of these arrays are common to each piece and their cache is also common to a piece instead of a side
+    // see Piece::nb_of_border_tiles for example
+    Vector2_int border_tile_relative_pos_array[MAX_NB_OF_BORDER_TILE_PER_SIDE]; // not array of tiles but array of relative pos of border tiles which are directly in contact with the piece (no diagonal)
+    Vector2_int outline_tile_relative_pos_array[MAX_NB_OF_OUTLINE_POINTS];      // array of relative pos of tiles which have their top-left corners used to draw an outline around the piece
+
+    // ----------- Live data part (cache) -----------------
+    //(None until now)
 } Side;
-
-/**
- * @struct Side_compute_only
- * Side members related to main computation algorithm only
- * @see place_side
- */
-typedef struct Side_compute_only
-{
-    int nb_of_tiles;
-    int nb_of_missing_connection_tiles;
-    Tile tile_array[MAX_NB_OF_TILE_PER_SIDE];
-    Tile missing_connection_tile_array[MAX_NB_OF_MISSING_CONNECTION_PER_SIDE];
-
-} Side_compute_only;
 
 /**
  * @struct Piece
  * A piece is a simple array of sides
  *
- * In the actual game pieces, there can be only one point per piece or no point at all
+ * @note In the actual game pieces, there can be only one point per piece or no point at all
  * We may have to change this limitation if we want to make custom pieces
+ * And I always declared the side with a point first in Piece::side_array
  */
 typedef struct Piece
 {
-    int nb_of_sides; // length of matching array (initially 0)
     bool has_point_on_first_side;
-    Side side_array[MAX_NB_OF_SIDE_PER_PIECE];
+    int nb_of_sides;                           // length of matching array
+    int nb_of_border_tiles;                    // length of matching array
+    int nb_of_outline_tiles;                   // length of matching array
+    Side side_array[MAX_NB_OF_SIDE_PER_PIECE]; // array of sides : main data of the piece
+
+    // ----------- Live data part (cache) -----------------
+    int current_side_idx; // all the cache here is related only to a certain side of the piece, but there is only 1 cache per piece common to all sides
+    Vector2_int border_tile_absolute_pos_array[MAX_NB_OF_BORDER_TILE_PER_SIDE];
+    Vector2_int outline_tile_absolute_pos_array[MAX_NB_OF_OUTLINE_POINTS];
+
+    // ------ Drawing data
+    Vector2_int border_tile_effective_absolute_top_left_corner_pt_array[MAX_NB_OF_BORDER_TILE_PER_SIDE];
+    Vector2 outline_tile_effective_absolute_top_left_corner_pt_array[MAX_NB_OF_OUTLINE_POINTS];
 
 } Piece;
 

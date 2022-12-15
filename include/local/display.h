@@ -13,11 +13,20 @@
 
 void setup_display();
 void DrawLineStripEx(Vector2 *points, int pointCount, float thick, Color color);
-void draw_tile_color(Tile tile, Color connection_color);
-void draw_tile(Tile tile);
-void draw_missing_connection_tile(Tile tile);
-void draw_border_tile(int flat_pos);
-void draw_outline_edge_points(RelativePos *outline_edge_points, int nb_of_edge_points);
+
 void draw_grid();
+
+void load_draw_tile_data(Tile *tile);
+void draw_tile(Tile *tile);
+void draw_missing_connection_tile(Tile *tile);
+
+void load_draw_border_tile_data(Piece *piece);
+void draw_border_tiles(Piece *piece);
+
+void load_draw_outline_tile_data(Piece *piece);
+void draw_outline_edge_points(Piece *piece);
+
+void update_all_piece_draw_data(Piece *piece, bool show_missing_connection_tiles, bool show_border_tiles);
+void draw_all_piece_data(Piece *piece, bool show_missing_connection_tiles, bool show_border_tiles);
 
 #endif
