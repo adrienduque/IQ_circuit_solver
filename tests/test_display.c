@@ -62,6 +62,9 @@ char *all_around_display_test()
     See : "showcase assets"/"test_display first example.png" to see what the output looks like
 
     */
+
+    Piece *piece_array = get_piece_array();
+
     int control_keys[] = {KEY_W, KEY_A, KEY_S, KEY_D, KEY_R, KEY_F, KEY_SPACE, KEY_C, KEY_B};
     int nb_of_keys = 9;
 
@@ -82,7 +85,9 @@ char *all_around_display_test()
     Vector2_int temp_base_pos = base_pos;
     int temp_rotation_state = rotation_state;
 
+    // live data holders
     bool need_update, first_iteration = true;
+    Piece *piece;
 
     while (!WindowShouldClose())
     {
@@ -130,14 +135,15 @@ char *all_around_display_test()
             first_iteration = false;
 
             // Check if the wanted update can be done
-            if (blit_piece_main_data(temp_piece_idx, temp_side_idx, temp_base_pos, temp_rotation_state) == PIECE_DOESNT_FIT_INSIDE)
+            if (blit_piece_main_data(piece_array, temp_piece_idx, temp_side_idx, temp_base_pos, temp_rotation_state) == PIECE_DOESNT_FIT_INSIDE)
             {
                 // we need to revert back changes
                 temp_piece_idx = piece_idx;
                 temp_side_idx = side_idx;
                 temp_base_pos = base_pos;
                 temp_rotation_state = rotation_state;
-                blit_piece_main_data(piece_idx, side_idx, base_pos, rotation_state);
+                blit_piece_main_data(piece_array, piece_idx, side_idx, base_pos, rotation_state);
+                piece = piece_array + piece_idx;
                 // other updates don't have been modified and thus don't need to be reverted
             }
             else
@@ -151,13 +157,15 @@ char *all_around_display_test()
                 base_pos = temp_base_pos;
                 rotation_state = temp_rotation_state;
 
+                piece = piece_array + piece_idx;
+
                 // other blit data in piece.c
-                blit_outline_tiles(piece_idx, side_idx, base_pos, rotation_state);
+                blit_outline_tiles(piece, base_pos, rotation_state);
                 if (show_border_tiles)
-                    blit_border_tiles(piece_idx, side_idx, base_pos, rotation_state);
+                    blit_border_tiles(piece, base_pos, rotation_state);
 
                 // update drawing data cache
-                update_all_piece_draw_data(piece_array + piece_idx, show_missing_connection_tiles, show_border_tiles);
+                update_all_piece_draw_data(piece, show_missing_connection_tiles, show_border_tiles);
             }
             // in all cases update infos
             update_infos(piece_idx, side_idx, base_pos, rotation_state);
@@ -167,10 +175,11 @@ char *all_around_display_test()
         BeginDrawing();
         ClearBackground(BLACK);
         draw_grid();
-        draw_all_piece_data(piece_array + piece_idx, show_missing_connection_tiles, show_border_tiles);
+        draw_all_piece_data(piece, show_missing_connection_tiles, show_border_tiles);
         EndDrawing();
     }
     CloseWindow();
+    free(piece_array);
 
     return 0;
 }

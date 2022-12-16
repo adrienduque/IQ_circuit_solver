@@ -133,6 +133,6 @@ typedef struct Piece
 
 } Piece;
 
-extern Piece piece_array[];
+Piece *get_piece_array();
 
 #endif

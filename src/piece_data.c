@@ -21,8 +21,11 @@
 // And there were algorithms to dynamically figure out the rest of the data, as I needed them for board checking
 // I could have made algorithms that run just once and figure init data before the main loop, but manual it is
 
-Piece piece_array[] = {
-    [LINE2_1] = {
+Piece *get_piece_array()
+{
+    Piece *piece_array = malloc(NB_OF_PIECES * sizeof(Piece));
+
+    piece_array[LINE2_1] = (Piece){
         .has_point_on_first_side = true,
         .nb_of_sides = 3,
         .nb_of_border_tiles = 6,
@@ -65,8 +68,9 @@ Piece piece_array[] = {
                 },
                 .border_tile_relative_pos_array = {{-1, 0}, {0, -1}, {1, -1}, {2, 0}, {1, 1}, {0, 1}},
                 .outline_tile_relative_pos_array = {{0, 0}, {2, 0}, {2, 1}, {0, 1}, {0, 0}},
-            }}},
-    [LINE2_2] = {
+            }}};
+
+    piece_array[LINE2_2] = (Piece){
         .has_point_on_first_side = true,
         .nb_of_sides = 3,
         .nb_of_border_tiles = 6,
@@ -110,8 +114,8 @@ Piece piece_array[] = {
                 .outline_tile_relative_pos_array = {{0, 0}, {2, 0}, {2, 1}, {0, 1}, {0, 0}},
             },
         },
-    },
-    [LINE3_1] = {
+    };
+    piece_array[LINE3_1] = (Piece){
         .has_point_on_first_side = true,
         .nb_of_sides = 3,
         .nb_of_border_tiles = 8,
@@ -158,8 +162,8 @@ Piece piece_array[] = {
                 .outline_tile_relative_pos_array = {{0, 0}, {3, 0}, {3, 1}, {0, 1}, {0, 0}},
             },
         },
-    },
-    [LINE3_2] = {
+    };
+    piece_array[LINE3_2] = (Piece){
         .has_point_on_first_side = true,
         .nb_of_sides = 3,
         .nb_of_border_tiles = 8,
@@ -206,8 +210,8 @@ Piece piece_array[] = {
                 .outline_tile_relative_pos_array = {{0, 0}, {3, 0}, {3, 1}, {0, 1}, {0, 0}},
             },
         },
-    },
-    [CORNER_1] = {
+    };
+    piece_array[CORNER_1] = (Piece){
         .has_point_on_first_side = true,
         .nb_of_sides = 2,
         .nb_of_border_tiles = 7,
@@ -246,8 +250,8 @@ Piece piece_array[] = {
                 .outline_tile_relative_pos_array = {{0, 0}, {1, 0}, {1, 2}, {-1, 2}, {-1, 1}, {0, 1}, {0, 0}},
             },
         },
-    },
-    [CORNER_2] = {
+    };
+    piece_array[CORNER_2] = (Piece){
         .has_point_on_first_side = true,
         .nb_of_sides = 2,
         .nb_of_border_tiles = 7,
@@ -285,8 +289,8 @@ Piece piece_array[] = {
 
             },
         },
-    },
-    [SQUARE] = {
+    };
+    piece_array[SQUARE] = (Piece){
         .has_point_on_first_side = true,
         .nb_of_sides = 2,
         .nb_of_border_tiles = 8,
@@ -326,8 +330,8 @@ Piece piece_array[] = {
                 .outline_tile_relative_pos_array = {{0, 0}, {2, 0}, {2, 2}, {0, 2}, {0, 0}},
             },
         },
-    },
-    [L_PIECE] = {
+    };
+    piece_array[L_PIECE] = (Piece){
         .has_point_on_first_side = false,
         .nb_of_sides = 2,
         .nb_of_border_tiles = 9,
@@ -366,8 +370,8 @@ Piece piece_array[] = {
                 .outline_tile_relative_pos_array = {{0, 0}, {1, 0}, {1, 3}, {-1, 3}, {-1, 2}, {0, 2}, {0, 0}},
             },
         },
-    },
-    [T_PIECE] = {
+    };
+    piece_array[T_PIECE] = (Piece){
         .has_point_on_first_side = false,
         .nb_of_sides = 2,
         .nb_of_border_tiles = 8,
@@ -408,8 +412,8 @@ Piece piece_array[] = {
                 .outline_tile_relative_pos_array = {{-1, 0}, {2, 0}, {2, 1}, {1, 1}, {1, 2}, {0, 2}, {0, 1}, {-1, 1}, {-1, 0}},
             },
         },
-    },
-    [Z_PIECE] = {
+    };
+    piece_array[Z_PIECE] = (Piece){
         .has_point_on_first_side = true,
         .nb_of_sides = 2,
         .nb_of_border_tiles = 8,
@@ -447,5 +451,7 @@ Piece piece_array[] = {
                 .outline_tile_relative_pos_array = {{-1, 0}, {1, 0}, {1, 1}, {2, 1}, {2, 2}, {0, 2}, {0, 1}, {-1, 1}, {-1, 0}},
             },
         },
-    },
-};
+    };
+
+    return piece_array;
+}

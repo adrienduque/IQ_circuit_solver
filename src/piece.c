@@ -16,7 +16,7 @@
 // and check if the piece even fit at the wanted position state
 // return PIECE_DOESNT_FIT_INSIDE (-1) if the piece doesn't fit inside board at the wanted position state (flat_base_position,rotation_state)
 // else 0
-int blit_piece_main_data(int piece_idx, int side_idx, Vector2_int base_pos, int rotation_state)
+int blit_piece_main_data(Piece *piece_array, int piece_idx, int side_idx, Vector2_int base_pos, int rotation_state)
 {
     // We assume that input data is valid and usable
     static Piece *piece = NULL;
@@ -64,14 +64,11 @@ int blit_piece_main_data(int piece_idx, int side_idx, Vector2_int base_pos, int 
 }
 
 // Function to blit only border tiles of piece at the right emplacement in the board
-void blit_border_tiles(int piece_idx, int side_idx, Vector2_int base_pos, int rotation_state)
+void blit_border_tiles(Piece *piece, Vector2_int base_pos, int rotation_state)
 {
     // We assume that input data is valid and usable
-    static Piece *piece = NULL;
     static Side *side = NULL;
-
-    piece = piece_array + piece_idx;
-    side = (piece->side_array) + side_idx;
+    side = (piece->side_array) + (piece->current_side_idx);
 
     static Vector2_int temp_pos;
 
@@ -90,14 +87,11 @@ void blit_border_tiles(int piece_idx, int side_idx, Vector2_int base_pos, int ro
 static Vector2_int outline_edge_correction_values[] = {{0, 0}, {1, 0}, {1, 1}, {0, 1}};
 
 // Function to blit only outline edge points of side at the right emplacement in the board for display
-void blit_outline_tiles(int piece_idx, int side_idx, Vector2_int base_pos, int rotation_state)
+void blit_outline_tiles(Piece *piece, Vector2_int base_pos, int rotation_state)
 {
     // we assume that flat_base_position is inside board
-    static Piece *piece = NULL;
     static Side *side = NULL;
-
-    piece = piece_array + piece_idx;
-    side = (piece->side_array) + side_idx;
+    side = (piece->side_array) + (piece->current_side_idx);
 
     // why do the tile emplacements need a correction after the classic rotation / translation of relative positions ?
     // it's because the drawing function is assuming that when we pass her tile positions, we take the top-left corner of each to draw the outline edge of a piece
