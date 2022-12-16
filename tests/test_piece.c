@@ -19,7 +19,7 @@ char *test_blit_piece_main_data()
 
     printf("------------ Normal case 1 --------------\n");
     int piece_idx = 0;
-    int side_idx = 1;
+    int side_idx = 0;
     Vector2_int base_pos = {1, 2};
     int rotation_state = 0;
 
