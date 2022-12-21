@@ -4,11 +4,10 @@
  *
  */
 
-#include <stdbool.h>
-
 #ifndef __UTILS_H__
 #define __UTILS_H__
 
+#include <stdbool.h>
 // --------------------------- Real game related constants -------------------
 
 #define BOARD_WIDTH 8

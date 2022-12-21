@@ -64,7 +64,7 @@ void DrawLineStripEx(Vector2 *points, int pointCount, float thick, Color color)
 
 // Function to draw the background grid of the game board
 /**
- * @todo separate computing from drawing, by a cache in future board datastructure
+ * @warning depreciated function still used in test_display.c, new function -> load_draw_grid_data + draw_board_grid
  */
 void draw_grid()
 {
@@ -94,6 +94,43 @@ void draw_grid()
 
         DrawLineEx(start_point, end_point, grid_line_px_thick, GRAY);
     }
+}
+
+void load_draw_grid_data(Board *board)
+{
+    float pt_x, pt_y, pt1_y, pt2_y, pt1_x, pt2_x;
+    int current_point_couple_idx = 0;
+    for (int idx = nb_padding_tile; idx <= (BOARD_WIDTH + nb_padding_tile); idx++)
+    {
+        pt_x = idx * tile_px_width;
+        pt1_y = nb_padding_tile * tile_px_width;
+        pt2_y = (nb_padding_tile + BOARD_HEIGHT) * tile_px_width;
+        board->grid_lines_pt_array[current_point_couple_idx][0].x = pt_x;
+        board->grid_lines_pt_array[current_point_couple_idx][0].y = pt1_y;
+        board->grid_lines_pt_array[current_point_couple_idx][1].x = pt_x;
+        board->grid_lines_pt_array[current_point_couple_idx][1].y = pt2_y;
+
+        current_point_couple_idx++;
+    }
+    for (int idx = nb_padding_tile; idx <= (BOARD_HEIGHT + nb_padding_tile); idx++)
+    {
+        pt_y = idx * tile_px_width;
+        pt1_x = nb_padding_tile * tile_px_width;
+        pt2_x = (nb_padding_tile + BOARD_WIDTH) * tile_px_width;
+
+        board->grid_lines_pt_array[current_point_couple_idx][0].x = pt1_x;
+        board->grid_lines_pt_array[current_point_couple_idx][0].y = pt_y;
+        board->grid_lines_pt_array[current_point_couple_idx][1].x = pt2_x;
+        board->grid_lines_pt_array[current_point_couple_idx][1].y = pt_y;
+
+        current_point_couple_idx++;
+    }
+}
+
+void draw_board_grid(Board *board)
+{
+    for (int i = 0; i < NB_OF_GRID_LINES; i++)
+        DrawLineEx(board->grid_lines_pt_array[i][0], board->grid_lines_pt_array[i][1], grid_line_px_thick, GRAY);
 }
 
 // ------------- Drawing normal and missing_connection tiles

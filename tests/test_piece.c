@@ -26,16 +26,6 @@ char *test_blit_piece_main_data()
     Piece *piece = piece_array + piece_idx;
     Side *side = &(piece->side_array[side_idx]);
 
-    printf("nb of connection of the first tile first side first piece : %d -> not normal\n", piece_array[piece_idx].side_array[side_idx].tile_array[0].nb_of_connections);
-
-    /**
-     * @bug 3) this above printf shows 0, which isn't normal at all even before the blitting
-     *
-     * After inspection in debugger, every data seems fine when we look at it through piece_array or piece variable
-     *
-     * But when we look at it through side variable, every member of this struct and substruct is 0
-     */
-
     blit_piece_main_data(piece_array, piece_idx, side_idx, base_pos, rotation_state);
 
     Tile *tile;
@@ -57,15 +47,15 @@ char *test_blit_piece_main_data()
     printf("nb_of_connections : %d | connection_direction 0 : %d\n\n", tile->nb_of_connections, tile->connection_direction_array[0]);
     mu_assert("Bug spotted", ((tile->nb_of_connections == 1) && (tile->connection_direction_array[0] == RIGHT)));
 
-    /**
-     * @bug 2) nb of connections of this tile is 0, which is spotted by the unit test and stop it
-     * I try to see this value before the blitting operation
-     */
-
     tile = &(side->tile_array[1]);
     printf("Normal tile 1 should have 2 connections (DOWN and LEFT)\n");
     printf("nb_of_connections : %d | connection_direction 0 : %d | connection_direction 1 : %d\n\n", tile->nb_of_connections, tile->connection_direction_array[0], tile->connection_direction_array[1]);
     mu_assert("Bug spotted", ((tile->nb_of_connections == 2) && (tile->connection_direction_array[0] == DOWN) && (tile->connection_direction_array[1] == LEFT)));
+
+    /**
+     * @warning this test function and this file are not finished yet, but it seems that everything is right with the visual test of test_display.c
+     * Thus writing this test function is not my priority
+     */
 
     free(piece_array);
     return 0;

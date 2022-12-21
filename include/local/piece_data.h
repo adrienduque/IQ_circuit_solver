@@ -5,12 +5,13 @@
  *
  */
 
-#include <stdbool.h>
-#include <raylib/raylib.h> //Vector2
-#include <local/utils.h>
-
 #ifndef __PIECE_DATA_H__
 #define __PIECE_DATA_H__
+
+#include <stdbool.h>
+#include <stdlib.h>
+#include <raylib/raylib.h> //Vector2
+#include <local/utils.h>
 
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 //-------------------------------------------------------- Struct declarations to organize game pieces data -----------------------------------------------------------
@@ -86,7 +87,7 @@ typedef struct Tile
 } Tile;
 
 /**
- * @struct Side which
+ * @struct Side
  */
 typedef struct Side
 {

@@ -14,7 +14,7 @@
 
 int tests_run = 0;
 
-// function used in all_around_display_test()
+// function used in piece_data_display_test()
 static void update_infos(int piece_idx, int side_idx, Vector2_int base_pos, int rotation_state)
 {
 
@@ -23,7 +23,7 @@ static void update_infos(int piece_idx, int side_idx, Vector2_int base_pos, int 
     printf("Piece : %s | side %d at (pos : {%d,%d} | rota : %d) \n", name_array[piece_idx], side_idx, base_pos.i, base_pos.j, rotation_state);
 }
 
-// helper function for all_around_display_test
+// helper function for piece_data_display_test
 bool IfAnyIsPressedKey(int *KeyArray, int nb_of_keys)
 {
 
@@ -37,13 +37,8 @@ bool IfAnyIsPressedKey(int *KeyArray, int nb_of_keys)
     return false;
 }
 
-char *all_around_display_test()
+char *piece_data_display_test()
 {
-    /**
-     * @bug 1) seems to disappear if I don't use blit_data
-     * I will continue writing test_piece.c just to make sure
-     */
-
     /*
     To display the result of the encoding of game pieces on the board
     And to showcase how the visualization of the main algorithm will look like
@@ -184,9 +179,16 @@ char *all_around_display_test()
     return 0;
 }
 
+char *board_display_test()
+{
+
+    return 0;
+}
+
 char *all_tests()
 {
-    mu_run_test(all_around_display_test);
+    mu_run_test(piece_data_display_test);
+    mu_run_test(board_display_test);
     return 0;
 }
 

@@ -3,18 +3,21 @@
  * @see display.c
  */
 
-#include <local/utils.h>
-#include <raylib/raylib.h>
-#include <local/piece.h>
-#include <stdbool.h>
-
 #ifndef __DISPLAY_H__
 #define __DISPLAY_H__
+
+#include <stdbool.h>
+#include <raylib/raylib.h>
+#include <local/utils.h>
+#include <local/piece.h>
+#include <local/board.h>
 
 void setup_display();
 void DrawLineStripEx(Vector2 *points, int pointCount, float thick, Color color);
 
 void draw_grid();
+void load_draw_grid_data(Board *board);
+void draw_board_grid(Board *board);
 
 void load_draw_tile_data(Tile *tile);
 void draw_tile(Tile *tile);

@@ -10,12 +10,14 @@
  */
 
 #include <local/piece.h>
-#include <stdlib.h>
 
 // Function to blit only piece data used for main computation (normal and missing_connection_tile of the current side of a piece)
 // and check if the piece even fit at the wanted position state
 // return PIECE_DOESNT_FIT_INSIDE (-1) if the piece doesn't fit inside board at the wanted position state (flat_base_position,rotation_state)
 // else 0
+/**
+ * @warning depreciated function but still used in test_display.c, new function -> board.c>add_piece_to_board
+ */
 int blit_piece_main_data(Piece *piece_array, int piece_idx, int side_idx, Vector2_int base_pos, int rotation_state)
 {
     // We assume that input data is valid and usable
