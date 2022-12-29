@@ -7,6 +7,7 @@
 #define __BOARD_H__
 
 #include <stdlib.h>
+#include <math.h>
 #include <local/utils.h>
 #include <local/piece_data.h>
 
@@ -36,6 +37,8 @@ typedef struct Board
     bool has_line2_2_been_added;
     bool has_T_piece_been_added; // these two are special game piece, see board.c > can_piece_be_added_to_board
 
+    // ----------------------------- Last piece added informations needed to revert the addition
+
     // ------ Drawing data
     Vector2 grid_lines_pt_array[NB_OF_GRID_LINES][2];
 
@@ -45,5 +48,7 @@ typedef struct Board
 #define SUPERPOSED_TILES -2
 #define TILE_NOT_MATCHING_MISSING_CONNECTIONS -3
 #define TILE_NOT_MATCHING_LEVEL_HINTS -4
+#define TRIPLE_MISSING_CONNECTION_TILE -5
+#define INVALID_DOUBLE_MISSING_CONNECTION -6
 
 #endif
