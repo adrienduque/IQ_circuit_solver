@@ -1,7 +1,7 @@
 /**
  * @file board.c
  *
- *
+ * @todo let's draw it and do unit testing before adding more code
  */
 
 #include <local/board.h>
@@ -16,7 +16,6 @@ Board *init_board()
 
     // 1) Basic data init
     board->nb_of_missing_connection_tiles = 0;
-    board->nb_of_double_missing_connection_tiles = 0;
     board->nb_of_added_pieces = 0;
     board->has_line2_2_been_added = false;
     board->has_T_piece_been_added = false;
@@ -31,6 +30,14 @@ Board *init_board()
             board->obligatory_tile_matrix[i][j] = UNDEFINED_TILE;
         }
     }
+    for (int i = 0; i < MAX_NB_OF_MISSING_CONNECTION_TIlES_ON_BOARD; i++)
+        board->missing_connection_tile_array[i] = UNDEFINED_TILE;
+
+    for (int i = 0; i < MAX_NB_OF_DOUBLE_MISSING_CONNECTION_TILES_ON_BOARD; i++)
+        board->double_missing_connection_tile_array[i] = UNDEFINED_TILE;
+
+    board->created_double_missing_connection_tile_array[LINE_SHAPE_IDX] = calloc(1, sizeof(Tile));
+    board->created_double_missing_connection_tile_array[BEND_SHAPE_IDX] = calloc(1, sizeof(Tile));
 
     // 3) Get all game pieces informations and their live data cache (loading piece_array)
     board->piece_array = get_piece_array();
@@ -43,6 +50,9 @@ Board *init_board()
 void free_board(Board *board)
 {
     free(board->piece_array);
+
+    free(board->created_double_missing_connection_tile_array[LINE_SHAPE_IDX]);
+    free(board->created_double_missing_connection_tile_array[BEND_SHAPE_IDX]);
 
     free(board);
 }
@@ -74,9 +84,16 @@ void free_board(Board *board)
             current_tile->connection_direction_array[connection_idx] = rotate_direction(current_tile->constant_connection_direction_array[connection_idx], rotation_state); \
     } while (0)
 
+// Assuming the directions of missing connections are different, do their sum is a bend-shape or a line-shape
+#define is_line_shape_computation()                                                                                                 \
+    do                                                                                                                              \
+    {                                                                                                                               \
+        is_line_shape = (abs((current_tile->connection_direction_array[0]) - (existing_tile->connection_direction_array[0]))) == 2; \
+    } while (0)
+
 // helper function to check if a tile respect the obligatory tile matrix which is the data of level hints
 // see can_piece_be_added_to_board
-bool is_tile_matching_level_hints(Tile *current_tile, Tile *obligatory_tile)
+static bool is_tile_matching_level_hints(Tile *current_tile, Tile *obligatory_tile)
 {
     static int connection_idx;
 
@@ -100,7 +117,7 @@ bool is_tile_matching_level_hints(Tile *current_tile, Tile *obligatory_tile)
 
 // helper function to check if a normal tile connection directions fulfill the corresponding missing_connection tile ones
 // see can_piece_be_added_to_board
-bool is_tile_matching_missing_connections(Tile *normal_tile, Tile *missing_connection_tile)
+static bool is_tile_matching_missing_connections(Tile *normal_tile, Tile *missing_connection_tile)
 {
     static int connection_i;
     static int connection_j;
@@ -145,20 +162,15 @@ bool is_tile_matching_missing_connections(Tile *normal_tile, Tile *missing_conne
 // else returns 1 (true)
 // Let the more likely error cases be check in first to make the whole thing faster
 // (It doesn't matter if garbage / incomplete data is left in the piece cache, as only piece cache that had been through this function will be used in the rest of the program)
-int can_piece_be_added_to_board(Board *board, int piece_idx, int side_idx, Vector2_int base_pos, int rotation_state)
+static int can_piece_be_added_to_board(Board *board, Side *side, Vector2_int base_pos, int rotation_state)
 {
 
-    static Piece *piece = NULL;
-    static Side *side = NULL;
     static Tile *current_tile = NULL;
     static Tile *existing_tile = NULL;
     static Tile *obligatory_tile = NULL;
     static int i;
     static int connection_idx;
     static bool is_line_shape;
-
-    piece = board->piece_array + piece_idx;
-    side = (piece->side_array) + side_idx;
 
     // Missing connection tiles are checked in first, as there are usually less of them in game pieces
     // Less checks to be done to them compared to normal tiles
@@ -200,8 +212,7 @@ int can_piece_be_added_to_board(Board *board, int piece_idx, int side_idx, Vecto
             if (existing_tile->nb_of_connections >= 2)
                 return TRIPLE_MISSING_CONNECTION_TILE;
 
-            // Assuming the directions of missing connections are different, do their sum is a bend-shape or a line-shape
-            is_line_shape = (abs((current_tile->connection_direction_array[0]) - (existing_tile->connection_direction_array[0]))) == 2;
+            is_line_shape_computation();
 
             // A line-shape double missing connection tile can only exist if line2 2 piece has not been played yet
             if (is_line_shape && !(board->has_line2_2_been_added))
@@ -260,8 +271,6 @@ int can_piece_be_added_to_board(Board *board, int piece_idx, int side_idx, Vecto
             return TILE_NOT_MATCHING_LEVEL_HINTS;
     }
 
-    piece->current_side_idx = side_idx;
-
     return 1;
 }
 
@@ -291,15 +300,151 @@ bool is_position_already_occupied(Board *board, Vector2_int base_pos)
 // ------------------------------------------------------------- adding and removing functions ------------------------------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-// Function to
+// in similar sub functions we assume input validity
+// otherwise it would not have been very safe, with risk of infinite loops, etc
+
+static void push_missing_connection_tile_to_array(Board *board, Tile *tile)
+{
+    board->missing_connection_tile_array[board->nb_of_missing_connection_tiles] = tile;
+    board->nb_of_missing_connection_tiles++;
+}
+
+static void remove_missing_connection_tile_from_array(Board *board, Tile *tile)
+{
+    //@todo let's add a better data structure to record those things and have ore efficient operations ?
+    // function not tested yet
+    static Tile *current_tile = NULL;
+    static int idx;
+    idx = -1;
+    do
+    {
+        idx++;
+        current_tile = board->missing_connection_tile_array[idx];
+    } while (current_tile != tile);
+
+    // board->missing_connection_tile_array[idx] = UNDEFINED_TILE;
+    idx++;
+    while (idx < board->nb_of_missing_connection_tiles)
+    {
+        board->missing_connection_tile_array[idx - 1] = board->missing_connection_tile_array[idx];
+        idx++;
+    }
+    board->missing_connection_tile_array[idx - 1] = UNDEFINED_TILE;
+    board->nb_of_missing_connection_tiles--;
+}
+
+static void pop_missing_connection_tile_from_array(Board *board)
+{
+    board->nb_of_missing_connection_tiles--;
+    board->missing_connection_tile_array[board->nb_of_missing_connection_tiles] = UNDEFINED_TILE;
+}
+
+// Function to blit a piece to the board
+// Return false if the piece doesn't fit at all (by checking "can_piece_be_added_to_board")
+// Return true if the piece has been successfully added
 bool add_piece_to_board(Board *board, int piece_idx, int side_idx, Vector2_int base_pos, int rotation_state)
 {
-    /**
-     * @warning can_piece_be_added_to_board -> 1 is true, but -1 -2, etc are also true by default
-     * don't forget to check exact return value instead of doing "if(can_piece_be_added_to_board(...)){}"
-     */
+
+    static Piece *piece = NULL;
+    static Side *side = NULL;
+    static Tile *current_tile = NULL;
+    static Tile *existing_tile = NULL;
+    static int tile_idx = 0;
+    static bool is_line_shape = false;
+    static int shape_idx = 0;
+    static Direction direction;
+    static int temp_connection_idx;
+
+    piece = board->piece_array + piece_idx;
+    side = piece->side_array + side_idx;
+
+    // check if the piece can even fit in the board while loading it by the same occasion
+    if (can_piece_be_added_to_board(board, side, base_pos, rotation_state) != true) // to confirm only the case where 1 is returned
+        return false;
+
+    piece->current_side_idx = side_idx;
+
+    // adding normal tile data to the board
+    for (tile_idx = 0; tile_idx < side->nb_of_tiles; tile_idx++)
+    {
+        current_tile = side->tile_array + tile_idx;
+        existing_tile = board->tile_matrix[current_tile->absolute_pos.i][current_tile->absolute_pos.j];
+        if (existing_tile != UNDEFINED_TILE && existing_tile->tile_type == missing_connection)
+            remove_missing_connection_tile_from_array(board, existing_tile);
+
+        board->tile_matrix[current_tile->absolute_pos.i][current_tile->absolute_pos.j] = current_tile; // pointer copy
+    }
+
+    // adding missing connection tile data to the board
+    for (tile_idx = 0; tile_idx < side->nb_of_missing_connection_tiles; tile_idx++)
+    {
+        current_tile = side->missing_connection_tile_array + tile_idx;
+        existing_tile = board->tile_matrix[current_tile->absolute_pos.i][current_tile->absolute_pos.j];
+
+        if (existing_tile == UNDEFINED_TILE)
+        {
+            board->tile_matrix[current_tile->absolute_pos.i][current_tile->absolute_pos.j] = current_tile;
+            push_missing_connection_tile_to_array(board, current_tile);
+        }
+        else
+        {
+            // double missing connection case
+            // 1) find out either line double connection shape, or bend shape
+            is_line_shape_computation();
+            // 2) fill informations of the double connection tile in an independent new tile object
+            shape_idx = is_line_shape ? LINE_SHAPE_IDX : BEND_SHAPE_IDX;
+            board->created_double_missing_connection_tile_array[shape_idx]->tile_type = missing_connection;
+            board->created_double_missing_connection_tile_array[shape_idx]->absolute_pos = existing_tile->absolute_pos;
+            board->created_double_missing_connection_tile_array[shape_idx]->nb_of_connections = 2;
+
+            // /!\ for other methods to work, the connection directions must be put in a precise order
+            temp_connection_idx = 0;
+            for (direction = RIGHT; direction < NB_OF_DIRECTIONS; direction++)
+            {
+                if (direction == current_tile->connection_direction_array[0] || direction == existing_tile->connection_direction_array[0])
+                {
+                    board->created_double_missing_connection_tile_array[shape_idx]->connection_direction_array[temp_connection_idx] = direction;
+                    temp_connection_idx++;
+                }
+            }
+            /**
+             * @todo maybe there are other fields to fill for this to work
+             **/
+
+            // 3) record wth pointer
+            board->tile_matrix[current_tile->absolute_pos.i][current_tile->absolute_pos.j] = board->created_double_missing_connection_tile_array[shape_idx];
+            board->double_missing_connection_tile_array[shape_idx] = board->created_double_missing_connection_tile_array[shape_idx];
+        }
+    }
+
+    // check if the piece added is a special piece that we care for double missing connection tiles
+    switch (piece_idx)
+    {
+    case LINE2_2:
+        board->has_line2_2_been_added = true;
+        break;
+    case T_PIECE:
+        board->has_T_piece_been_added = true;
+    default:
+        break;
+    }
+    board->added_piece_idx_array[board->nb_of_added_pieces] = piece_idx;
+    board->nb_of_added_pieces++;
 
     return true;
+}
+
+// Function to undo the last "add_piece_to_board" operation
+void undo_last_piece_adding()
+{
+    // la question, c'est "est-ce que je le fais inplace ou plutôt de façon dumb ?"
+
+    // la méthode inplace, ça serait de trouver une giga logique pour record tout ce qu'on a ajouté et remettre la board en place
+
+    // ou alors faire un nouvel objet "prec_board" dont on charge et décharge la mémoire bit par bit
+    // genre une board temporaire, on doit copier la board actuelle dans la prec board au début de l'opération d'adding (mais après le check que l'adding passe bien)
+
+    // go faire la 2ème méthode, mais en revoyant les vidéos pour bien copier des structs
 }
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
