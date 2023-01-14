@@ -21,7 +21,7 @@
  * @def MAX_NB_OF_SIDE_PER_PIECE
  * On the actual pieces of the game, there are a maximum of 3 playable side per piece
  * If we want to create custom pieces, we might have to change (raise) this number
- * The same applies to similar MAX macros beneath
+ * The same applies to similar MAX macros below
  */
 #define MAX_NB_OF_SIDE_PER_PIECE 3
 
@@ -69,14 +69,20 @@ typedef enum TileType
  */
 typedef struct Tile
 {
+    // ----------- Definition of a tile ----------
     TileType tile_type;
     Vector2_int relative_pos;                                               // relative position of tile in the definition of a side
     int nb_of_connections;                                                  // length of matching arrays
     int constant_connection_direction_array[MAX_NB_OF_CONNECTION_PER_TILE]; // base connections of the tile
 
-    // ----------- Live data part (cache) -----------------
+    // ----------- Live data part -----------------
+
+    // ------ Main
     Vector2_int absolute_pos;                                      // absolute position of the tile on the board, computed when we blit a piece to the board
     int connection_direction_array[MAX_NB_OF_CONNECTION_PER_TILE]; // connections are changed by rotation of the piece when it is blitted
+
+    // ------ Only useful to board matrix see board.c
+    struct Tile *next; // start of a stack
 
     // ------ Drawing data
     Vector2_int effective_absolute_pos;
@@ -91,6 +97,7 @@ typedef struct Tile
  */
 typedef struct Side
 {
+    // ----------- Definition of a side ----------
     int nb_of_tiles;                    // length of matching array
     int nb_of_missing_connection_tiles; // length of matching array
     Tile tile_array[MAX_NB_OF_TILE_PER_SIDE];
@@ -103,7 +110,7 @@ typedef struct Side
     Vector2_int border_tile_relative_pos_array[MAX_NB_OF_BORDER_TILE_PER_SIDE]; // not array of tiles but array of relative pos of border tiles which are directly in contact with the piece (no diagonal)
     Vector2_int outline_tile_relative_pos_array[MAX_NB_OF_OUTLINE_POINTS];      // array of relative pos of tiles which have their top-left corners used to draw an outline around the piece
 
-    // ----------- Live data part (cache) -----------------
+    // ----------- Live data part -----------------
     //(None until now)
 } Side;
 
@@ -117,14 +124,22 @@ typedef struct Side
  */
 typedef struct Piece
 {
+    // ----------- Definition of a piece ----------
+    const char *name;
     bool has_point_on_first_side;
     int nb_of_sides;                           // length of matching array
     int nb_of_border_tiles;                    // length of matching array
     int nb_of_outline_tiles;                   // length of matching array
     Side side_array[MAX_NB_OF_SIDE_PER_PIECE]; // array of sides : main data of the piece
 
-    // ----------- Live data part (cache) -----------------
-    int current_side_idx; // all the cache here is related only to a certain side of the piece, but there is only 1 cache per piece common to all sides
+    // ----------- Live data part -----------------
+
+    // ------ Current blit inputs
+    int current_side_idx;
+    Vector2_int current_base_pos;
+    int current_rotation_state;
+
+    // ------ Cached blit results
     Vector2_int border_tile_absolute_pos_array[MAX_NB_OF_BORDER_TILE_PER_SIDE];
     Vector2_int outline_tile_absolute_pos_array[MAX_NB_OF_OUTLINE_POINTS];
 

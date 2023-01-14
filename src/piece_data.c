@@ -2,7 +2,7 @@
  * @file piece_data.c defines the numeric model of the game puzzle pieces
  * Each piece in the game is composed of many sides, each side is composed of tiles
  * And there are a limited number of elementary tiles composing each side : point, line, bend, empty, (and missing_connection)
- * (missing_connection is a special type of tile related to the future main algorithm)
+ * (missing_connection is a special type of tile related to the future main algorithm, it's like an "expected neighbour tile" type of thing)
  *
  * Other constant data is defined, which will be useful in the main algorithm like (border tiles of sides, edge tiles, ...)
  * @see piece_data.h
@@ -25,6 +25,7 @@ Piece *get_piece_array()
     Piece *piece_array = malloc(NB_OF_PIECES * sizeof(Piece));
 
     piece_array[LINE2_1] = (Piece){
+        .name = "Line2 1",
         .has_point_on_first_side = true,
         .nb_of_sides = 3,
         .nb_of_border_tiles = 6,
@@ -70,6 +71,7 @@ Piece *get_piece_array()
             }}};
 
     piece_array[LINE2_2] = (Piece){
+        .name = "Line2 2",
         .has_point_on_first_side = true,
         .nb_of_sides = 3,
         .nb_of_border_tiles = 6,
@@ -115,6 +117,7 @@ Piece *get_piece_array()
         },
     };
     piece_array[LINE3_1] = (Piece){
+        .name = "Line3 1",
         .has_point_on_first_side = true,
         .nb_of_sides = 3,
         .nb_of_border_tiles = 8,
@@ -163,6 +166,7 @@ Piece *get_piece_array()
         },
     };
     piece_array[LINE3_2] = (Piece){
+        .name = "Line3 2",
         .has_point_on_first_side = true,
         .nb_of_sides = 3,
         .nb_of_border_tiles = 8,
@@ -211,6 +215,7 @@ Piece *get_piece_array()
         },
     };
     piece_array[CORNER_1] = (Piece){
+        .name = "Corner 1",
         .has_point_on_first_side = true,
         .nb_of_sides = 2,
         .nb_of_border_tiles = 7,
@@ -251,6 +256,7 @@ Piece *get_piece_array()
         },
     };
     piece_array[CORNER_2] = (Piece){
+        .name = "Corner 2",
         .has_point_on_first_side = true,
         .nb_of_sides = 2,
         .nb_of_border_tiles = 7,
@@ -290,6 +296,7 @@ Piece *get_piece_array()
         },
     };
     piece_array[SQUARE] = (Piece){
+        .name = "Square",
         .has_point_on_first_side = true,
         .nb_of_sides = 2,
         .nb_of_border_tiles = 8,
@@ -331,6 +338,7 @@ Piece *get_piece_array()
         },
     };
     piece_array[L_PIECE] = (Piece){
+        .name = "L piece",
         .has_point_on_first_side = false,
         .nb_of_sides = 2,
         .nb_of_border_tiles = 9,
@@ -371,6 +379,7 @@ Piece *get_piece_array()
         },
     };
     piece_array[T_PIECE] = (Piece){
+        .name = "T piece",
         .has_point_on_first_side = false,
         .nb_of_sides = 2,
         .nb_of_border_tiles = 8,
@@ -413,6 +422,7 @@ Piece *get_piece_array()
         },
     };
     piece_array[Z_PIECE] = (Piece){
+        .name = "Z piece",
         .has_point_on_first_side = true,
         .nb_of_sides = 2,
         .nb_of_border_tiles = 8,

@@ -13,23 +13,35 @@
 #include <local/board.h>
 
 void setup_display();
+void setup_display_once();
 void DrawLineStripEx(Vector2 *points, int pointCount, float thick, Color color);
 
 void draw_grid();
-void load_draw_grid_data(Board *board);
+void update_board_grid_drawing(Board *board);
 void draw_board_grid(Board *board);
 
-void load_draw_tile_data(Tile *tile);
+void update_tile_drawing(Tile *tile);
 void draw_tile(Tile *tile);
 void draw_missing_connection_tile(Tile *tile);
 
-void load_draw_border_tile_data(Piece *piece);
-void draw_border_tiles(Piece *piece);
+void update_piece_border_tiles_drawing(Piece *piece);
+void draw_piece_border_tiles(Piece *piece);
 
-void load_draw_outline_tile_data(Piece *piece);
-void draw_outline_edge_points(Piece *piece);
+void update_piece_outline_drawing(Piece *piece);
+void draw_piece_outline(Piece *piece);
 
-void update_all_piece_draw_data(Piece *piece, bool show_missing_connection_tiles, bool show_border_tiles);
-void draw_all_piece_data(Piece *piece, bool show_missing_connection_tiles, bool show_border_tiles);
+// --------------------------------------------------------- Convenience functions
+
+void update_tile_array_drawing(Tile *tile_array, int nb_of_tiles);
+void draw_tile_array(Tile *tile_array, int nb_of_tiles);
+void draw_missing_connection_tile_array(Tile *tile_array, int nb_of_tiles);
+
+void update_piece_tiles_drawing(Piece *piece);
+void draw_piece_tiles(Piece *piece, bool show_missing_connection_tiles);
+
+void update_piece_all_drawing(Piece *piece, bool show_border_tiles);
+void draw_piece(Piece *piece, bool show_missing_connection_tiles, bool show_border_tiles);
+
+void draw_board(Board *board, bool show_missing_connection_tiles);
 
 #endif

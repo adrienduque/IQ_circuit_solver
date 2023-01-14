@@ -24,9 +24,9 @@ char *test_blit_piece_main_data()
     int rotation_state = 0;
 
     Piece *piece = piece_array + piece_idx;
-    Side *side = &(piece->side_array[side_idx]);
+    Side *side = (piece->side_array) + side_idx;
 
-    blit_piece_main_data(piece_array, piece_idx, side_idx, base_pos, rotation_state);
+    blit_piece_main_data(piece, side_idx, base_pos, rotation_state);
 
     Tile *tile;
 

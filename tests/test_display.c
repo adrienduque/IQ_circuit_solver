@@ -15,12 +15,9 @@
 int tests_run = 0;
 
 // function used in piece_data_display_test()
-static void update_infos(int piece_idx, int side_idx, Vector2_int base_pos, int rotation_state)
+static void print_piece_pos_infos(Piece *piece)
 {
-
-    char *name_array[] = {"Line2 1", "Line2 2", "Line3 1", "Line3 2", "Corner 1", "Corner 2", "Square", "L piece", "T piece", "Z piece"};
-    system("cls");
-    printf("Piece : %s | side %d at (pos : {%d,%d} | rota : %d) \n", name_array[piece_idx], side_idx, base_pos.i, base_pos.j, rotation_state);
+    printf("Piece : %s | side %d at (pos : {%d,%d} | rota : %d) \n", piece->name, piece->current_side_idx, piece->current_base_pos.i, piece->current_base_pos.j, piece->current_rotation_state);
 }
 
 // helper function for piece_data_display_test
@@ -48,8 +45,6 @@ char *piece_data_display_test()
         - R : rotate the piece clockwise
 
         - ZQSD (or WASD) : move the piece accross the board (up,left,down,right respectively)
-        Disclaimer : positions where the piece location doesn't make sense are not displayed
-        (because I was testing this feature too)
 
         - C : to toggle drawing of missing connection tiles
         - B : to toggle drawing of border tiles
@@ -65,7 +60,7 @@ char *piece_data_display_test()
 
     setup_display();
 
-    // Initial state displayed
+    // Initial state displayed and input parameters
     int piece_idx = 0;
     int side_idx = 0;
     Vector2_int base_pos = {1, 2}; // to start near the middle of the board
@@ -73,46 +68,45 @@ char *piece_data_display_test()
     bool show_missing_connection_tiles = true;
     bool show_border_tiles = true;
 
-    // Convenience variables to reverse update when it cannot be drawn
-    // only useful in this context and not in the automated backtracking algorithm
-    int temp_piece_idx = piece_idx;
-    int temp_side_idx = side_idx;
-    Vector2_int temp_base_pos = base_pos;
-    int temp_rotation_state = rotation_state;
+    // piece main live data holder
+    Piece *piece = piece_array + piece_idx;
 
-    // live data holders
-    bool need_update, first_iteration = true;
-    Piece *piece;
+    // initialize piece first state
+    blit_piece_main_data(piece, side_idx, base_pos, rotation_state);
+    update_piece_border_tiles(piece);
+    update_piece_all_drawing(piece, show_border_tiles);
+
+    printf("Now entering interactive piece display test.\n\n");
+    print_piece_pos_infos(piece);
 
     while (!WindowShouldClose())
     {
-        need_update = false;
-
         if (IsKeyPressed(KEY_W))
-            increment_pos_in_direction(&temp_base_pos, UP);
+            increment_pos_in_direction(&base_pos, UP);
         if (IsKeyPressed(KEY_A))
-            increment_pos_in_direction(&temp_base_pos, LEFT);
+            increment_pos_in_direction(&base_pos, LEFT);
         if (IsKeyPressed(KEY_S))
-            increment_pos_in_direction(&temp_base_pos, DOWN);
+            increment_pos_in_direction(&base_pos, DOWN);
         if (IsKeyPressed(KEY_D))
-            increment_pos_in_direction(&temp_base_pos, RIGHT);
+            increment_pos_in_direction(&base_pos, RIGHT);
 
         if (IsKeyPressed(KEY_R))
         {
-            temp_rotation_state += 1;
-            temp_rotation_state %= NB_OF_DIRECTIONS;
+            rotation_state += 1;
+            rotation_state %= NB_OF_DIRECTIONS;
         }
 
         if (IsKeyPressed(KEY_F))
         {
-            temp_side_idx += 1;
-            temp_side_idx %= piece_array[piece_idx].nb_of_sides;
+            side_idx += 1;
+            side_idx %= piece->nb_of_sides;
         }
         if (IsKeyPressed(KEY_SPACE))
         {
-            temp_piece_idx += 1;
-            temp_piece_idx %= NB_OF_PIECES;
-            temp_side_idx = 0;
+            piece_idx += 1;
+            piece_idx %= NB_OF_PIECES;
+            piece = piece_array + piece_idx;
+            side_idx = 0;
         }
 
         if (IsKeyPressed(KEY_C))
@@ -122,55 +116,21 @@ char *piece_data_display_test()
             show_border_tiles = !show_border_tiles;
 
         if (IfAnyIsPressedKey(control_keys, nb_of_keys))
-            need_update = true;
-
-        // Update cache live data and drawing data only when its necessary
-        if (need_update || first_iteration)
         {
-            first_iteration = false;
+            // Update all cache live data even the unnecessary ones to simplify debug mode
+            blit_piece_main_data(piece, side_idx, base_pos, rotation_state);
+            update_piece_border_tiles(piece);
+            update_piece_all_drawing(piece, show_border_tiles);
 
-            // Check if the wanted update can be done
-            if (blit_piece_main_data(piece_array, temp_piece_idx, temp_side_idx, temp_base_pos, temp_rotation_state) == PIECE_DOESNT_FIT_INSIDE)
-            {
-                // we need to revert back changes
-                temp_piece_idx = piece_idx;
-                temp_side_idx = side_idx;
-                temp_base_pos = base_pos;
-                temp_rotation_state = rotation_state;
-                blit_piece_main_data(piece_array, piece_idx, side_idx, base_pos, rotation_state);
-                piece = piece_array + piece_idx;
-                // other updates don't have been modified and thus don't need to be reverted
-            }
-            else
-            {
-
-                // we can update everything else
-
-                // first off : tracking update variables
-                piece_idx = temp_piece_idx;
-                side_idx = temp_side_idx;
-                base_pos = temp_base_pos;
-                rotation_state = temp_rotation_state;
-
-                piece = piece_array + piece_idx;
-
-                // other blit data in piece.c
-                blit_outline_tiles(piece, base_pos, rotation_state);
-                if (show_border_tiles)
-                    blit_border_tiles(piece, base_pos, rotation_state);
-
-                // update drawing data cache
-                update_all_piece_draw_data(piece, show_missing_connection_tiles, show_border_tiles);
-            }
-            // in all cases update infos
-            update_infos(piece_idx, side_idx, base_pos, rotation_state);
+            system("cls");
+            print_piece_pos_infos(piece);
         }
 
         // Always draw cached data
         BeginDrawing();
         ClearBackground(BLACK);
         draw_grid();
-        draw_all_piece_data(piece, show_missing_connection_tiles, show_border_tiles);
+        draw_piece(piece, show_missing_connection_tiles, show_border_tiles);
         EndDrawing();
     }
     CloseWindow();
@@ -179,16 +139,373 @@ char *piece_data_display_test()
     return 0;
 }
 
+int add_piece_to_board_with_draw_data(Board *board, int piece_idx, int side_idx, Vector2_int base_pos, int rotation_state)
+{
+    int return_val;
+    return_val = add_piece_to_board(board, piece_idx, side_idx, base_pos, rotation_state);
+    update_piece_all_drawing(board->piece_array + piece_idx, false);
+
+    return return_val;
+}
+
 char *board_display_test()
 {
 
+    system("cls");
+    printf("Now entering complete board display test.\n\n");
+
+    Board *board = init_board();
+    update_board_grid_drawing(board);
+    bool show_missing_connection_tiles = false;
+
+    int return_val;
+    int piece_idx, side_idx, rotation_state;
+    Vector2_int base_pos;
+
+    // time to add pieces to the board
+
+    if (false) // first test -> only 1 piece
+    {
+        piece_idx = 0;
+        side_idx = 0;
+        base_pos.i = 1;
+        base_pos.j = 2;
+        rotation_state = 0;
+        return_val = add_piece_to_board_with_draw_data(board, piece_idx, side_idx, base_pos, rotation_state);
+        printf("Adding Piece %d (%-8s) | side %d | pos : {%d,%d} | rota : %d ==> %d\n", piece_idx, board->piece_array[piece_idx].name, side_idx, base_pos.i, base_pos.j, rotation_state, return_val);
+    }
+
+    if (true) // full valid board test (I compiled it one by one and keep going if it doesn't fail)
+    {
+        piece_idx = 0;
+        side_idx = 0;
+        base_pos.i = 1;
+        base_pos.j = 2;
+        rotation_state = 0;
+        return_val = add_piece_to_board_with_draw_data(board, piece_idx, side_idx, base_pos, rotation_state);
+        printf("Adding Piece %d (%-8s) | side %d | pos : {%d,%d} | rota : %d ==> %d\n", piece_idx, board->piece_array[piece_idx].name, side_idx, base_pos.i, base_pos.j, rotation_state, return_val);
+
+        piece_idx = 1;
+        side_idx = 0;
+        base_pos.i = 4;
+        base_pos.j = 0;
+        rotation_state = 0;
+        return_val = add_piece_to_board_with_draw_data(board, piece_idx, side_idx, base_pos, rotation_state);
+        printf("Adding Piece %d (%-8s) | side %d | pos : {%d,%d} | rota : %d ==> %d\n", piece_idx, board->piece_array[piece_idx].name, side_idx, base_pos.i, base_pos.j, rotation_state, return_val);
+
+        piece_idx = 2;
+        side_idx = 0;
+        base_pos.i = 3;
+        base_pos.j = 3;
+        rotation_state = 0;
+        return_val = add_piece_to_board_with_draw_data(board, piece_idx, side_idx, base_pos, rotation_state);
+        printf("Adding Piece %d (%-8s) | side %d | pos : {%d,%d} | rota : %d ==> %d\n", piece_idx, board->piece_array[piece_idx].name, side_idx, base_pos.i, base_pos.j, rotation_state, return_val);
+
+        piece_idx = 3;
+        side_idx = 0;
+        base_pos.i = 0;
+        base_pos.j = 3;
+        rotation_state = 0;
+        return_val = add_piece_to_board_with_draw_data(board, piece_idx, side_idx, base_pos, rotation_state);
+        printf("Adding Piece %d (%-8s) | side %d | pos : {%d,%d} | rota : %d ==> %d\n", piece_idx, board->piece_array[piece_idx].name, side_idx, base_pos.i, base_pos.j, rotation_state, return_val);
+
+        piece_idx = 4;
+        side_idx = 0;
+        base_pos.i = 2;
+        base_pos.j = 1;
+        rotation_state = 2;
+        return_val = add_piece_to_board_with_draw_data(board, piece_idx, side_idx, base_pos, rotation_state);
+        printf("Adding Piece %d (%-8s) | side %d | pos : {%d,%d} | rota : %d ==> %d\n", piece_idx, board->piece_array[piece_idx].name, side_idx, base_pos.i, base_pos.j, rotation_state, return_val);
+
+        piece_idx = 5;
+        side_idx = 1;
+        base_pos.i = 7;
+        base_pos.j = 2;
+        rotation_state = 0;
+        return_val = add_piece_to_board_with_draw_data(board, piece_idx, side_idx, base_pos, rotation_state);
+        printf("Adding Piece %d (%-8s) | side %d | pos : {%d,%d} | rota : %d ==> %d\n", piece_idx, board->piece_array[piece_idx].name, side_idx, base_pos.i, base_pos.j, rotation_state, return_val);
+
+        piece_idx = 6;
+        side_idx = 0;
+        base_pos.i = 7;
+        base_pos.j = 0;
+        rotation_state = 1;
+        return_val = add_piece_to_board_with_draw_data(board, piece_idx, side_idx, base_pos, rotation_state);
+        printf("Adding Piece %d (%-8s) | side %d | pos : {%d,%d} | rota : %d ==> %d\n", piece_idx, board->piece_array[piece_idx].name, side_idx, base_pos.i, base_pos.j, rotation_state, return_val);
+
+        piece_idx = 7;
+        side_idx = 0;
+        base_pos.i = 3;
+        base_pos.j = 0;
+        rotation_state = 0;
+        return_val = add_piece_to_board_with_draw_data(board, piece_idx, side_idx, base_pos, rotation_state);
+        printf("Adding Piece %d (%-8s) | side %d | pos : {%d,%d} | rota : %d ==> %d\n", piece_idx, board->piece_array[piece_idx].name, side_idx, base_pos.i, base_pos.j, rotation_state, return_val);
+
+        piece_idx = 8;
+        side_idx = 0;
+        base_pos.i = 0;
+        base_pos.j = 1;
+        rotation_state = 3;
+        return_val = add_piece_to_board_with_draw_data(board, piece_idx, side_idx, base_pos, rotation_state);
+        printf("Adding Piece %d (%-8s) | side %d | pos : {%d,%d} | rota : %d ==> %d\n", piece_idx, board->piece_array[piece_idx].name, side_idx, base_pos.i, base_pos.j, rotation_state, return_val);
+
+        piece_idx = 9;
+        side_idx = 1;
+        base_pos.i = 5;
+        base_pos.j = 1;
+        rotation_state = 0;
+        return_val = add_piece_to_board_with_draw_data(board, piece_idx, side_idx, base_pos, rotation_state);
+        printf("Adding Piece %d (%-8s) | side %d | pos : {%d,%d} | rota : %d ==> %d\n", piece_idx, board->piece_array[piece_idx].name, side_idx, base_pos.i, base_pos.j, rotation_state, return_val);
+    }
+    // and everything worked first time !
+
+    setup_display();
+    while (!WindowShouldClose())
+    {
+        BeginDrawing();
+        ClearBackground(BLACK);
+        draw_board(board, show_missing_connection_tiles);
+        EndDrawing();
+    }
+
+    CloseWindow();
+    free_board(board);
+    return 0;
+}
+
+bool is_piece_idx_already_played(Board *board, int piece_idx)
+{
+
+    for (int i = 0; i < board->nb_of_added_pieces; i++)
+    {
+        if (board->added_piece_idx_array[i] == piece_idx)
+            return true;
+    }
+    return false;
+}
+
+int get_next_piece_idx(Board *board, int piece_idx)
+{
+    if (board->nb_of_added_pieces == 10)
+        return -1;
+    do
+    {
+        piece_idx += 1;
+        piece_idx %= NB_OF_PIECES;
+    } while (is_piece_idx_already_played(board, piece_idx));
+
+    return piece_idx;
+}
+
+void print_adding_result(int return_val)
+{
+
+    switch (return_val)
+    {
+    case 1:
+        printf("Success !\n");
+        break;
+
+    case -1:
+        printf("Error : One or more tiles are out of bounds ! (or missing connection tiles which are not drawn) \n");
+        break;
+
+    case -2:
+        printf("Error : One or more tiles are superposed !\n");
+        break;
+
+    case -3:
+        printf("Error : Connections are not right !\n");
+        break;
+
+    case -4:
+        printf("Error : One or more tiles don't match level hints !\n");
+        break;
+
+    case -5:
+        printf("Error : A tile is expecting 3 connections at a time, not allowed\n");
+        break;
+
+    case -6:
+        printf("Error : A tile is expecting 2 connections at a time, but can't be filled with current playable remaining pieces\n");
+        break;
+
+    default:
+        break;
+    }
+}
+
+char *board_interactive_display_test()
+{
+    /*
+    To display the result of the encoding of game board adding and removing pieces
+    Controls :
+        - spacebar : change piece selected
+        - F : change side displayed of current piece
+        - R : rotate the piece clockwise
+
+        - ZQSD (or WASD) : move the piece accross the board (up,left,down,right respectively)
+
+        - Enter : Try to add current piece to the board in its current state
+            Displays various comments when the piece can't be added, see "print_adding_result" function and board.c > "can_piece_be_added_to_board"
+
+        - E : Undo last piece adding from the board
+
+        - (P : pause exécution in debugger mode (by going to a breakpoint line))
+
+    */
+
+    /*
+    Results so far :
+    I feel like everything is working as expected, even without going into debug mode to see the inner values
+    I'll go into it nonetheless and see if I can spot a bug manually
+        -> It seems ok, further unit testing might be needed if it goes wrong later, but for now, not priority
+     */
+    system("cls");
+    printf("Now entering interactive board display test.\n\n");
+
+    int control_keys[] = {KEY_W, KEY_A, KEY_S, KEY_D, KEY_R, KEY_F, KEY_SPACE, KEY_ENTER}; // KEY_E is intentionally kept out from this list
+    int nb_of_keys = 8;
+
+    // Setup of variables and parameters
+    Board *board = init_board();
+    update_board_grid_drawing(board);
+    bool show_missing_connection_tiles = false;
+    bool show_border_tiles = false;
+
+    int piece_idx = 0;
+    int side_idx = 0;
+    int rotation_state = 0;
+    Vector2_int base_pos = {0, 0};
+
+    setup_display();
+
+    bool try_adding_piece = false;
+    bool board_complete = false;
+    int return_val;
+    Piece *piece = (board->piece_array) + piece_idx;
+
+    // initialize piece first state
+    blit_piece_main_data(piece, side_idx, base_pos, rotation_state);
+    update_piece_all_drawing(piece, show_border_tiles);
+    print_piece_pos_infos(piece);
+
+    while (!WindowShouldClose())
+    {
+        if (IsKeyPressed(KEY_W))
+            increment_pos_in_direction(&base_pos, UP);
+        if (IsKeyPressed(KEY_A))
+            increment_pos_in_direction(&base_pos, LEFT);
+        if (IsKeyPressed(KEY_S))
+            increment_pos_in_direction(&base_pos, DOWN);
+        if (IsKeyPressed(KEY_D))
+            increment_pos_in_direction(&base_pos, RIGHT);
+
+        if (IsKeyPressed(KEY_R))
+        {
+            rotation_state += 1;
+            rotation_state %= NB_OF_DIRECTIONS;
+        }
+
+        if (IsKeyPressed(KEY_F))
+        {
+            side_idx += 1;
+            side_idx %= piece->nb_of_sides;
+        }
+        if (IsKeyPressed(KEY_SPACE))
+        {
+            piece_idx = get_next_piece_idx(board, piece_idx);
+            if (piece_idx == -1)
+            {
+                board_complete = true;
+                break;
+            }
+            piece = (board->piece_array) + piece_idx;
+            side_idx = 0;
+        }
+
+        if (IsKeyPressed(KEY_E))
+        {
+            system("cls");
+            printf("Currently trying to remove the last piece added to the board...\n");
+            if (board->nb_of_added_pieces > 0)
+            {
+                undo_last_piece_adding(board);
+                printf("Success !\n");
+            }
+            else
+                printf("Error : There is no piece left to remove.\n");
+        }
+
+        if (IsKeyPressed(KEY_ENTER))
+            try_adding_piece = true;
+
+        if (IfAnyIsPressedKey(control_keys, nb_of_keys))
+        {
+
+            if (!try_adding_piece)
+            {
+                blit_piece_main_data(piece, side_idx, base_pos, rotation_state);
+                system("cls");
+                print_piece_pos_infos(piece);
+            }
+            else
+            {
+                system("cls");
+                print_piece_pos_infos(piece);
+                printf("Currently trying to add the piece to the board...\n");
+                return_val = add_piece_to_board(board, piece_idx, side_idx, base_pos, rotation_state);
+                print_adding_result(return_val);
+
+                if (return_val == 1)
+                {
+                    update_piece_all_drawing(piece, show_border_tiles);
+
+                    // move on to next piece automatically
+                    piece_idx = get_next_piece_idx(board, piece_idx);
+                    if (piece_idx == -1)
+                    {
+                        board_complete = true;
+                        break;
+                    }
+                    piece = (board->piece_array) + piece_idx;
+                    side_idx = 0;
+                    base_pos.i = 0;
+                    base_pos.j = 0;
+                    rotation_state = 0;
+                    blit_piece_main_data(piece, side_idx, base_pos, rotation_state);
+                }
+
+                try_adding_piece = false;
+            }
+
+            update_piece_all_drawing(piece, show_border_tiles);
+        }
+        if (IsKeyPressed(KEY_P))
+            printf("pause breakpoint.\n");
+
+        BeginDrawing();
+        ClearBackground(BLACK);
+        draw_board(board, show_missing_connection_tiles);
+        draw_piece(piece, show_missing_connection_tiles, show_border_tiles);
+        EndDrawing();
+    }
+
+    CloseWindow();
+    free_board(board);
+    if (board_complete)
+    {
+        system("cls");
+        printf("Board complete ! Stopping display test.\n");
+    }
     return 0;
 }
 
 char *all_tests()
 {
-    mu_run_test(piece_data_display_test);
-    mu_run_test(board_display_test);
+    // mu_run_test(piece_data_display_test);
+    // mu_run_test(board_display_test);
+    mu_run_test(board_interactive_display_test);
     return 0;
 }
 

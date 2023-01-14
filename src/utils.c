@@ -12,6 +12,25 @@
 
 #include <local/utils.h>
 
+// ---------------------------------------- Direction functions -------------------------------------------
+
+// Function to reverse input direction
+// e.g. : reverse_direction(RIGHT) -> LEFT
+Direction reverse_direction(Direction direction)
+{
+    // directions are underlying ints, see defintion of RIGHT, DOWN, ... macros in utils.h
+    return (direction + 2) % NB_OF_DIRECTIONS;
+}
+
+// Function to rotate clockwise the input direction
+// e.g. : rotate_direction(RIGHT,1) -> DOWN
+// e.g. : rotate_direction(DOWN,2) == reverse_direction(DOWN) -> UP
+Direction rotate_direction(Direction direction, int nb_of_clockwise_90_degres_rotation)
+{
+    // directions are underlying ints, see defintion of RIGHT, DOWN, ... macros in utils.h
+    return (direction + nb_of_clockwise_90_degres_rotation) % NB_OF_DIRECTIONS;
+}
+
 // -------------------------------------- 2D transformation functions ------------------------------------
 
 /**
@@ -48,7 +67,7 @@
 
 // Array of matrices used for rotation from RIGHT (assumed based direction of all relative positionning data) to another direction
 // See rotate_pos function
-// (Explanation of why the data is what it is, in the comments above)
+// (Explanation of why the raw data is what it is, in the comments above)
 static RotationMatrix rotation_mat_array[] = {
     [RIGHT] = {1, 0, 0, 1},
     [DOWN] = {0, -1, 1, 0},
@@ -110,22 +129,4 @@ void set_invalid_pos(Vector2_int *pos)
 bool is_pos_valid(const Vector2_int *pos)
 {
     return !are_pos_equal(pos, &invalid_pos);
-}
-// ---------------------------------------- Direction functions -------------------------------------------
-
-// Function to reverse input direction
-// e.g. : reverse_direction(RIGHT) -> LEFT
-Direction reverse_direction(Direction direction)
-{
-    // they are underlying ints, see defintion of RIGHT, DOWN, ... macros in utils.h
-    return (direction + 2) % NB_OF_DIRECTIONS;
-}
-
-// Function to rotate clockwise the input direction
-// e.g. : rotate_direction(RIGHT,1) -> DOWN
-// e.g. : rotate_direction(DOWN,2) == reverse_direction(DOWN) -> UP
-Direction rotate_direction(Direction direction, int nb_of_clockwise_90_degres_rotation)
-{
-    // they are underlying ints, see defintion of RIGHT, DOWN, ... macros in utils.h
-    return (direction + nb_of_clockwise_90_degres_rotation) % NB_OF_DIRECTIONS;
 }
