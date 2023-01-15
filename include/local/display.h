@@ -42,6 +42,7 @@ void draw_piece_tiles(Piece *piece, bool show_missing_connection_tiles);
 void update_piece_all_drawing(Piece *piece, bool show_border_tiles);
 void draw_piece(Piece *piece, bool show_missing_connection_tiles, bool show_border_tiles);
 
+void update_board_obligatory_tiles_drawing(Board *board);
 void draw_board(Board *board, bool show_missing_connection_tiles);
 
 #endif

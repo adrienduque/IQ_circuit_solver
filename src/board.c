@@ -16,7 +16,7 @@
 // ------------------------------------------------------------- Board constructor / destructor ------------------------------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-Board *init_board()
+Board *init_board(LevelHints *level_hints)
 {
     Board *board = malloc(sizeof(Board));
 
@@ -64,7 +64,28 @@ Board *init_board()
     }
 
     // 5) Load level hints (add obligatory pieces and load obligatory tile matrix)
-    // @todo
+    board->obligatory_tile_array = NULL;
+    board->nb_of_obligatory_tiles = 0;
+
+    if (level_hints != NULL)
+    {
+        board->obligatory_tile_array = level_hints->obligatory_tile_array;
+        board->nb_of_obligatory_tiles = level_hints->nb_of_obligatory_tiles;
+
+        Tile *current_tile = NULL;
+        for (int i = 0; i < level_hints->nb_of_obligatory_tiles; i++)
+        {
+            current_tile = (level_hints->obligatory_tile_array) + i;
+            board->obligatory_tile_matrix[current_tile->absolute_pos.i][current_tile->absolute_pos.j] = current_tile;
+        }
+
+        PieceAddInfos *piece_add_infos = NULL;
+        for (int i = 0; i < level_hints->nb_of_obligatory_pieces; i++)
+        {
+            piece_add_infos = (level_hints->obligatory_piece_array) + i;
+            add_piece_to_board(board, piece_add_infos->piece_idx, piece_add_infos->side_idx, piece_add_infos->base_pos, piece_add_infos->rotation_state);
+        }
+    }
 
     return board;
 }
@@ -88,7 +109,12 @@ static bool is_tile_matching_level_hints(Tile *current_tile, Tile *obligatory_ti
     static int connection_idx;
 
     if (obligatory_tile == UNDEFINED_TILE)
+    {
+        if (current_tile->tile_type == point)
+            return false; // Exception where points can't exist without obligatory point tile underneath, (in the game rules we can't add extra points)
+
         return true; // Case where there's no obligatory data on this position
+    }
 
     if (current_tile->tile_type != obligatory_tile->tile_type)
         return false; // If their type is not matching, neither their connection directions

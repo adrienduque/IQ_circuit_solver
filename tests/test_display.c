@@ -148,131 +148,6 @@ int add_piece_to_board_with_draw_data(Board *board, int piece_idx, int side_idx,
     return return_val;
 }
 
-char *board_display_test()
-{
-
-    system("cls");
-    printf("Now entering complete board display test.\n\n");
-
-    Board *board = init_board();
-    update_board_grid_drawing(board);
-    bool show_missing_connection_tiles = false;
-
-    int return_val;
-    int piece_idx, side_idx, rotation_state;
-    Vector2_int base_pos;
-
-    // time to add pieces to the board
-
-    if (false) // first test -> only 1 piece
-    {
-        piece_idx = 0;
-        side_idx = 0;
-        base_pos.i = 1;
-        base_pos.j = 2;
-        rotation_state = 0;
-        return_val = add_piece_to_board_with_draw_data(board, piece_idx, side_idx, base_pos, rotation_state);
-        printf("Adding Piece %d (%-8s) | side %d | pos : {%d,%d} | rota : %d ==> %d\n", piece_idx, board->piece_array[piece_idx].name, side_idx, base_pos.i, base_pos.j, rotation_state, return_val);
-    }
-
-    if (true) // full valid board test (I compiled it one by one and keep going if it doesn't fail)
-    {
-        piece_idx = 0;
-        side_idx = 0;
-        base_pos.i = 1;
-        base_pos.j = 2;
-        rotation_state = 0;
-        return_val = add_piece_to_board_with_draw_data(board, piece_idx, side_idx, base_pos, rotation_state);
-        printf("Adding Piece %d (%-8s) | side %d | pos : {%d,%d} | rota : %d ==> %d\n", piece_idx, board->piece_array[piece_idx].name, side_idx, base_pos.i, base_pos.j, rotation_state, return_val);
-
-        piece_idx = 1;
-        side_idx = 0;
-        base_pos.i = 4;
-        base_pos.j = 0;
-        rotation_state = 0;
-        return_val = add_piece_to_board_with_draw_data(board, piece_idx, side_idx, base_pos, rotation_state);
-        printf("Adding Piece %d (%-8s) | side %d | pos : {%d,%d} | rota : %d ==> %d\n", piece_idx, board->piece_array[piece_idx].name, side_idx, base_pos.i, base_pos.j, rotation_state, return_val);
-
-        piece_idx = 2;
-        side_idx = 0;
-        base_pos.i = 3;
-        base_pos.j = 3;
-        rotation_state = 0;
-        return_val = add_piece_to_board_with_draw_data(board, piece_idx, side_idx, base_pos, rotation_state);
-        printf("Adding Piece %d (%-8s) | side %d | pos : {%d,%d} | rota : %d ==> %d\n", piece_idx, board->piece_array[piece_idx].name, side_idx, base_pos.i, base_pos.j, rotation_state, return_val);
-
-        piece_idx = 3;
-        side_idx = 0;
-        base_pos.i = 0;
-        base_pos.j = 3;
-        rotation_state = 0;
-        return_val = add_piece_to_board_with_draw_data(board, piece_idx, side_idx, base_pos, rotation_state);
-        printf("Adding Piece %d (%-8s) | side %d | pos : {%d,%d} | rota : %d ==> %d\n", piece_idx, board->piece_array[piece_idx].name, side_idx, base_pos.i, base_pos.j, rotation_state, return_val);
-
-        piece_idx = 4;
-        side_idx = 0;
-        base_pos.i = 2;
-        base_pos.j = 1;
-        rotation_state = 2;
-        return_val = add_piece_to_board_with_draw_data(board, piece_idx, side_idx, base_pos, rotation_state);
-        printf("Adding Piece %d (%-8s) | side %d | pos : {%d,%d} | rota : %d ==> %d\n", piece_idx, board->piece_array[piece_idx].name, side_idx, base_pos.i, base_pos.j, rotation_state, return_val);
-
-        piece_idx = 5;
-        side_idx = 1;
-        base_pos.i = 7;
-        base_pos.j = 2;
-        rotation_state = 0;
-        return_val = add_piece_to_board_with_draw_data(board, piece_idx, side_idx, base_pos, rotation_state);
-        printf("Adding Piece %d (%-8s) | side %d | pos : {%d,%d} | rota : %d ==> %d\n", piece_idx, board->piece_array[piece_idx].name, side_idx, base_pos.i, base_pos.j, rotation_state, return_val);
-
-        piece_idx = 6;
-        side_idx = 0;
-        base_pos.i = 7;
-        base_pos.j = 0;
-        rotation_state = 1;
-        return_val = add_piece_to_board_with_draw_data(board, piece_idx, side_idx, base_pos, rotation_state);
-        printf("Adding Piece %d (%-8s) | side %d | pos : {%d,%d} | rota : %d ==> %d\n", piece_idx, board->piece_array[piece_idx].name, side_idx, base_pos.i, base_pos.j, rotation_state, return_val);
-
-        piece_idx = 7;
-        side_idx = 0;
-        base_pos.i = 3;
-        base_pos.j = 0;
-        rotation_state = 0;
-        return_val = add_piece_to_board_with_draw_data(board, piece_idx, side_idx, base_pos, rotation_state);
-        printf("Adding Piece %d (%-8s) | side %d | pos : {%d,%d} | rota : %d ==> %d\n", piece_idx, board->piece_array[piece_idx].name, side_idx, base_pos.i, base_pos.j, rotation_state, return_val);
-
-        piece_idx = 8;
-        side_idx = 0;
-        base_pos.i = 0;
-        base_pos.j = 1;
-        rotation_state = 3;
-        return_val = add_piece_to_board_with_draw_data(board, piece_idx, side_idx, base_pos, rotation_state);
-        printf("Adding Piece %d (%-8s) | side %d | pos : {%d,%d} | rota : %d ==> %d\n", piece_idx, board->piece_array[piece_idx].name, side_idx, base_pos.i, base_pos.j, rotation_state, return_val);
-
-        piece_idx = 9;
-        side_idx = 1;
-        base_pos.i = 5;
-        base_pos.j = 1;
-        rotation_state = 0;
-        return_val = add_piece_to_board_with_draw_data(board, piece_idx, side_idx, base_pos, rotation_state);
-        printf("Adding Piece %d (%-8s) | side %d | pos : {%d,%d} | rota : %d ==> %d\n", piece_idx, board->piece_array[piece_idx].name, side_idx, base_pos.i, base_pos.j, rotation_state, return_val);
-    }
-    // and everything worked first time !
-
-    setup_display();
-    while (!WindowShouldClose())
-    {
-        BeginDrawing();
-        ClearBackground(BLACK);
-        draw_board(board, show_missing_connection_tiles);
-        EndDrawing();
-    }
-
-    CloseWindow();
-    free_board(board);
-    return 0;
-}
-
 bool is_piece_idx_already_played(Board *board, int piece_idx)
 {
 
@@ -368,21 +243,31 @@ char *board_interactive_display_test()
     int nb_of_keys = 8;
 
     // Setup of variables and parameters
-    Board *board = init_board();
-    update_board_grid_drawing(board);
+    LevelHints *level_hints = get_level_hints(83); // test level is number 83
+    Board *board = init_board(level_hints);
+
     bool show_missing_connection_tiles = false;
     bool show_border_tiles = false;
 
-    int piece_idx = 0;
+    int piece_idx = -1;
     int side_idx = 0;
     int rotation_state = 0;
     Vector2_int base_pos = {0, 0};
 
     setup_display();
 
+    update_board_grid_drawing(board);
+    update_board_obligatory_tiles_drawing(board);
+
+    for (int i = 0; i < board->nb_of_added_pieces; i++)
+        update_piece_all_drawing((board->piece_array) + board->added_piece_idx_array[i], show_border_tiles);
+
     bool try_adding_piece = false;
     bool board_complete = false;
+    int nb_of_level_pieces = board->nb_of_added_pieces;
     int return_val;
+
+    piece_idx = get_next_piece_idx(board, piece_idx); // to account for already played pieces (obligatory pieces from level hints)
     Piece *piece = (board->piece_array) + piece_idx;
 
     // initialize piece first state
@@ -428,13 +313,13 @@ char *board_interactive_display_test()
         {
             system("cls");
             printf("Currently trying to remove the last piece added to the board...\n");
-            if (board->nb_of_added_pieces > 0)
+            if (board->nb_of_added_pieces > nb_of_level_pieces)
             {
                 undo_last_piece_adding(board);
                 printf("Success !\n");
             }
             else
-                printf("Error : There is no piece left to remove.\n");
+                printf("Error : There is no piece left to remove. (can't remove those that come from level hints)\n");
         }
 
         if (IsKeyPressed(KEY_ENTER))
@@ -493,6 +378,7 @@ char *board_interactive_display_test()
 
     CloseWindow();
     free_board(board);
+    free(level_hints);
     if (board_complete)
     {
         system("cls");
@@ -504,7 +390,6 @@ char *board_interactive_display_test()
 char *all_tests()
 {
     // mu_run_test(piece_data_display_test);
-    // mu_run_test(board_display_test);
     mu_run_test(board_interactive_display_test);
     return 0;
 }

@@ -11,6 +11,7 @@
 #include <local/utils.h>
 #include <local/piece_data.h>
 #include <local/piece.h>
+#include <local/level_data.h>
 
 #define MAX_NB_OF_MISSING_CONNECTION_TIlES_ON_BOARD 25
 #define NB_OF_GRID_LINES (BOARD_WIDTH + BOARD_HEIGHT + 2)
@@ -24,7 +25,7 @@ typedef struct Board
 {
 
     Tile *tile_matrix[BOARD_WIDTH][BOARD_HEIGHT];            // Matrix of Tile pointers which represents the main data of the board (array of columns), each location is now a start for a stack (history of tile superposition)
-    Tile *obligatory_tile_matrix[BOARD_WIDTH][BOARD_HEIGHT]; // Matrix of Tile pointers which will be the selected level hints @todo change desc when I add level.c
+    Tile *obligatory_tile_matrix[BOARD_WIDTH][BOARD_HEIGHT]; // Matrix of Tile pointers which are part of level hints, see level_data.c
 
     // ------------------- Board needs pieces to work
 
@@ -37,6 +38,8 @@ typedef struct Board
 
     // ------ Drawing data specific to the board
     Vector2 grid_lines_pt_array[NB_OF_GRID_LINES][2];
+    Tile *obligatory_tile_array; // instead of finding them in obligatory tile matrix to draw them, it's directly a copy from level hints see level_data.c
+    int nb_of_obligatory_tiles;
 
 } Board;
 
@@ -45,7 +48,7 @@ typedef struct Board
 // ------------------------------------------------------------------------------------------------------------------------------------------------------
 
 // ------------- Board constructor / destructor ----------------------------------------------------------------
-Board *init_board();
+Board *init_board(LevelHints *level_hints);
 void free_board(Board *board);
 
 // ------------- pre-adding public checks ----------------------------------------------------------------------

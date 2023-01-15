@@ -319,6 +319,11 @@ void update_piece_tiles_drawing(Piece *piece)
     update_tile_array_drawing(side->missing_connection_tile_array, side->nb_of_missing_connection_tiles);
 }
 
+void update_board_obligatory_tiles_drawing(Board *board)
+{
+    update_tile_array_drawing(board->obligatory_tile_array, board->nb_of_obligatory_tiles);
+}
+
 void draw_piece_tiles(Piece *piece, bool show_missing_connection_tiles)
 {
     static Side *side = NULL;
@@ -359,9 +364,12 @@ void draw_board(Board *board, bool show_missing_connection_tiles)
 
     draw_board_grid(board);
 
+    for (i = 0; i < board->nb_of_obligatory_tiles; i++)
+        draw_tile_color((board->obligatory_tile_array + i), GRAY);
+
     for (i = 0; i < board->nb_of_added_pieces; i++)
     {
         piece_idx = board->added_piece_idx_array[i];
-        draw_piece(&(board->piece_array[piece_idx]), show_missing_connection_tiles, false);
+        draw_piece((board->piece_array) + piece_idx, show_missing_connection_tiles, false);
     }
 }
