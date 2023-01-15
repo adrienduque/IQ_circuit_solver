@@ -139,13 +139,16 @@ char *piece_data_display_test()
     return 0;
 }
 
-int add_piece_to_board_with_draw_data(Board *board, int piece_idx, int side_idx, Vector2_int base_pos, int rotation_state)
+Board *setup_board_with_level_hints(LevelHints *level_hints, bool show_border_tiles)
 {
-    int return_val;
-    return_val = add_piece_to_board(board, piece_idx, side_idx, base_pos, rotation_state);
-    update_piece_all_drawing(board->piece_array + piece_idx, false);
+    Board *board = init_board(level_hints);
+    update_board_grid_drawing(board);
+    update_board_obligatory_tiles_drawing(board);
 
-    return return_val;
+    for (int i = 0; i < board->nb_of_added_pieces; i++)
+        update_piece_all_drawing((board->piece_array) + board->added_piece_idx_array[i], show_border_tiles);
+
+    return board;
 }
 
 bool is_piece_idx_already_played(Board *board, int piece_idx)
@@ -213,8 +216,12 @@ void print_adding_result(int return_val)
 char *board_interactive_display_test()
 {
     /*
-    To display the result of the encoding of game board adding and removing pieces
+    To display the result of the encoding of game board adding and removing pieces + level hints
+    It is basically an IQ circuit game simulator now, where we can play levels 49 to 120 included
     Controls :
+
+        - left/right arrow keys : change current level /!\ everything will be reset if level is changed
+
         - spacebar : change piece selected
         - F : change side displayed of current piece
         - R : rotate the piece clockwise
@@ -239,38 +246,41 @@ char *board_interactive_display_test()
     system("cls");
     printf("Now entering interactive board display test.\n\n");
 
-    int control_keys[] = {KEY_W, KEY_A, KEY_S, KEY_D, KEY_R, KEY_F, KEY_SPACE, KEY_ENTER}; // KEY_E is intentionally kept out from this list
-    int nb_of_keys = 8;
+    setup_display();
+
+    int control_keys[] = {KEY_W, KEY_A, KEY_S, KEY_D, KEY_R, KEY_F, KEY_SPACE, KEY_ENTER, KEY_RIGHT, KEY_LEFT}; // KEY_E is intentionally kept out from this list
+    int nb_of_keys = 10;
 
     // Setup of variables and parameters
-    LevelHints *level_hints = get_level_hints(83); // test level is number 83
-    Board *board = init_board(level_hints);
 
+    // constants
     bool show_missing_connection_tiles = false;
     bool show_border_tiles = false;
 
+    // main data variables
+    int level_num = 85;
+    LevelHints *level_hints = get_level_hints(level_num);
+    Board *board = setup_board_with_level_hints(level_hints, show_border_tiles);
+    int nb_of_level_pieces = board->nb_of_added_pieces;
+
+    // input variables
     int piece_idx = -1;
     int side_idx = 0;
     int rotation_state = 0;
     Vector2_int base_pos = {0, 0};
 
-    setup_display();
-
-    update_board_grid_drawing(board);
-    update_board_obligatory_tiles_drawing(board);
-
-    for (int i = 0; i < board->nb_of_added_pieces; i++)
-        update_piece_all_drawing((board->piece_array) + board->added_piece_idx_array[i], show_border_tiles);
-
+    // state of the game variables
+    char level_num_str[4];
     bool try_adding_piece = false;
+    bool need_level_reset = false;
     bool board_complete = false;
-    int nb_of_level_pieces = board->nb_of_added_pieces;
     int return_val;
 
+    // initialize piece first state and first level
+    sprintf(level_num_str, "%d", level_num);
     piece_idx = get_next_piece_idx(board, piece_idx); // to account for already played pieces (obligatory pieces from level hints)
     Piece *piece = (board->piece_array) + piece_idx;
 
-    // initialize piece first state
     blit_piece_main_data(piece, side_idx, base_pos, rotation_state);
     update_piece_all_drawing(piece, show_border_tiles);
     print_piece_pos_infos(piece);
@@ -300,11 +310,6 @@ char *board_interactive_display_test()
         if (IsKeyPressed(KEY_SPACE))
         {
             piece_idx = get_next_piece_idx(board, piece_idx);
-            if (piece_idx == -1)
-            {
-                board_complete = true;
-                break;
-            }
             piece = (board->piece_array) + piece_idx;
             side_idx = 0;
         }
@@ -324,6 +329,37 @@ char *board_interactive_display_test()
 
         if (IsKeyPressed(KEY_ENTER))
             try_adding_piece = true;
+
+        if (IsKeyPressed(KEY_RIGHT) && level_num < 120)
+        {
+            need_level_reset = true;
+            level_num++;
+        }
+        if (IsKeyPressed(KEY_LEFT) && level_num > 49)
+        {
+            need_level_reset = true;
+            level_num--;
+        }
+
+        if (need_level_reset)
+        {
+            need_level_reset = false;
+            try_adding_piece = false;
+            free(level_hints);
+            free_board(board);
+
+            sprintf(level_num_str, "%d", level_num);
+
+            level_hints = get_level_hints(level_num);
+            board = setup_board_with_level_hints(level_hints, show_border_tiles);
+            nb_of_level_pieces = board->nb_of_added_pieces;
+
+            // to account for already played pieces (obligatory pieces from level hints)
+            piece_idx = -1;
+            piece_idx = get_next_piece_idx(board, piece_idx);
+            piece = (board->piece_array) + piece_idx;
+            side_idx = 0;
+        }
 
         if (IfAnyIsPressedKey(control_keys, nb_of_keys))
         {
@@ -372,6 +408,7 @@ char *board_interactive_display_test()
         BeginDrawing();
         ClearBackground(BLACK);
         draw_board(board, show_missing_connection_tiles);
+        DrawText(level_num_str, 10, 10, 50, ORANGE);
         draw_piece(piece, show_missing_connection_tiles, show_border_tiles);
         EndDrawing();
     }

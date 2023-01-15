@@ -106,7 +106,9 @@ void free_board(Board *board)
 // see can_piece_be_added_to_board
 static bool is_tile_matching_level_hints(Tile *current_tile, Tile *obligatory_tile)
 {
-    static int connection_idx;
+    static int connection_i, connection_j;
+    static Direction direction_searched_for = 0;
+    static bool direction_found = false;
 
     if (obligatory_tile == UNDEFINED_TILE)
     {
@@ -119,15 +121,28 @@ static bool is_tile_matching_level_hints(Tile *current_tile, Tile *obligatory_ti
     if (current_tile->tile_type != obligatory_tile->tile_type)
         return false; // If their type is not matching, neither their connection directions
 
-    if (obligatory_tile->tile_type == point)
+    if (obligatory_tile->tile_type == point || obligatory_tile->tile_type == empty)
         return true; // In this special case, we don't need to check for connection directions
 
     // Connection directions matching check
-    for (connection_idx = 0; connection_idx < obligatory_tile->nb_of_connections; connection_idx++)
+    for (connection_i = 0; connection_i < obligatory_tile->nb_of_connections; connection_i++)
     {
-        if (obligatory_tile->connection_direction_array[connection_idx] != current_tile->connection_direction_array[connection_idx])
-            return false; // it is dangerous to have a fixed order check, but if I encoded all the connection direction datas correctly (by following always the same adding order (RIGHT,DOWN,LEFT,UP)), it shouldn't be an issue even with rotation_direction operation
+        direction_searched_for = obligatory_tile->connection_direction_array[connection_i];
+        direction_found = false;
+        for (connection_j = 0; connection_j < current_tile->nb_of_connections; connection_j++)
+        {
+            if (current_tile->connection_direction_array[connection_j] == direction_searched_for)
+            {
+                direction_found = true;
+                break;
+            }
+        }
+        if (!direction_found)
+            return false;
     }
+    // There might be a false positive case where current_tile have more connections than obligatory_tile
+    // but with current datas, it doesn't happen
+
     return true;
 }
 
