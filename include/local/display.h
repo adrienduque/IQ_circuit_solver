@@ -7,6 +7,7 @@
 #define __DISPLAY_H__
 
 #include <stdbool.h>
+#include <stdio.h>
 #include <raylib/raylib.h>
 #include <local/utils.h>
 #include <local/piece.h>
@@ -44,5 +45,8 @@ void draw_piece(Piece *piece, bool show_missing_connection_tiles, bool show_bord
 
 void update_board_obligatory_tiles_drawing(Board *board);
 void draw_board(Board *board, bool show_missing_connection_tiles);
+
+// ------------------------- Debug functions
+void draw_pos_text(void);
 
 #endif

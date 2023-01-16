@@ -6,8 +6,9 @@
  * This is not really a proper "unit testing" file where tests are automated with assertions
  */
 
-#include <local/display.h>
 #include <local/piece.h>
+#include <local/check_board.h>
+#include <local/display.h>
 #include <minunit.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -213,6 +214,19 @@ void print_adding_result(int return_val)
     }
 }
 
+void print_check_result(int return_result)
+{
+    printf("\nCurrently running post-adding checks...\n");
+    if (return_result == ISOLATED_EMPTY_TILE)
+    {
+        printf("1) Error : Adding this piece creates an isolated empty tile, which can't be filled anymore.\n");
+        return;
+    }
+    printf("1) OK    : No isolated empty tile created.\n");
+
+    printf("All checks passed !\n\n");
+}
+
 char *board_interactive_display_test()
 {
     /*
@@ -233,6 +247,7 @@ char *board_interactive_display_test()
 
         - E : Undo last piece adding from the board
 
+        - (T : toggle tile pos(i,j) display)
         - (P : pause exécution in debugger mode (by going to a breakpoint line))
 
     */
@@ -271,6 +286,7 @@ char *board_interactive_display_test()
 
     // state of the game variables
     char level_num_str[4];
+    bool display_tile_pos = false;
     bool try_adding_piece = false;
     bool need_level_reset = false;
     bool board_complete = false;
@@ -287,6 +303,9 @@ char *board_interactive_display_test()
 
     while (!WindowShouldClose())
     {
+        if (IsKeyPressed(KEY_T))
+            display_tile_pos = !display_tile_pos;
+
         if (IsKeyPressed(KEY_W))
             increment_pos_in_direction(&base_pos, UP);
         if (IsKeyPressed(KEY_A))
@@ -374,29 +393,39 @@ char *board_interactive_display_test()
             {
                 system("cls");
                 print_piece_pos_infos(piece);
-                printf("Currently trying to add the piece to the board...\n");
+                printf("\nCurrently trying to add the piece to the board...\n");
                 return_val = add_piece_to_board(board, piece_idx, side_idx, base_pos, rotation_state);
                 print_adding_result(return_val);
 
                 if (return_val == 1)
                 {
-                    update_piece_all_drawing(piece, show_border_tiles);
 
-                    // move on to next piece automatically
-                    piece_idx = get_next_piece_idx(board, piece_idx);
-                    if (piece_idx == -1)
+                    return_val = run_all_checks(board);
+                    print_check_result(return_val);
+
+                    if (return_val != 1)
                     {
-                        board_complete = true;
-                        break;
+                        printf("Currently removing last added piece to the board as it will not lead to a complete board with previous played piece.\n");
+                        undo_last_piece_adding(board);
                     }
-                    piece = (board->piece_array) + piece_idx;
-                    side_idx = 0;
-                    base_pos.i = 0;
-                    base_pos.j = 0;
-                    rotation_state = 0;
-                    blit_piece_main_data(piece, side_idx, base_pos, rotation_state);
+                    else
+                    {
+                        update_piece_all_drawing(piece, show_border_tiles);
+                        // move on to next piece automatically only if adding and checks all passed
+                        piece_idx = get_next_piece_idx(board, piece_idx);
+                        if (piece_idx == -1)
+                        {
+                            board_complete = true;
+                            break;
+                        }
+                        piece = (board->piece_array) + piece_idx;
+                        side_idx = 0;
+                        base_pos.i = 0;
+                        base_pos.j = 0;
+                        rotation_state = 0;
+                        blit_piece_main_data(piece, side_idx, base_pos, rotation_state);
+                    }
                 }
-
                 try_adding_piece = false;
             }
 
@@ -408,8 +437,10 @@ char *board_interactive_display_test()
         BeginDrawing();
         ClearBackground(BLACK);
         draw_board(board, show_missing_connection_tiles);
-        DrawText(level_num_str, 10, 10, 50, ORANGE);
         draw_piece(piece, show_missing_connection_tiles, show_border_tiles);
+        DrawText(level_num_str, 10, 10, 50, ORANGE);
+        if (display_tile_pos)
+            draw_pos_text();
         EndDrawing();
     }
 

@@ -1,6 +1,9 @@
-3) Board modelization, adding and removing piece to a board, and checking methods to validate or not the future of a board
-
 4) Main computation backtracking algorithm
+
+5) Adding other post-adding checks
+
+6) Polishing project (proofreading comments, readme, release build) 
+    -> See other similar projects on github, how do they share their project ?
 
 
 Is there another standard to specify which versions of libraries are in the project dependency list ?, I can think of "requirements.txt" in python, with pip, is there an equivalent in C dev ?
@@ -10,6 +13,17 @@ Is there another standard to specify which versions of libraries are in the proj
 ------------------------------- doubtful TODO --------------------------------------------
 
 Make a menu with 2D graphics instead of choosing level in the command line, in short, do everything to avoid having a command line interface in the final build
+    Like pages that contains levels, buttons to go to next page, each level button is a thumbnail with the level num on top
 
     -> furthermore it's more doable with raylib now
     + is there an option to not launch a console when executing release app ?
+
+Make another mode where, instead of launching the solving algorithm, we can play the game with the help of my pre-adding and post-adding piece functions
+    Like in test_display.c
+
+    Or maybe, it's the only game mode when we launch the app, and there's a button to launch the solving algorithm live
+    (like adding a description of controls on the right of the board display) + buttons to reset level and launch algorithm
+    + slowed version of solving algorithm
+
+After all of that, let's make an headless mode only to see the speed at which it can solves levels without the hassle of drawing everything
+    and compare to the speed of my python project

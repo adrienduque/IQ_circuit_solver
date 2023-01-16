@@ -373,3 +373,29 @@ void draw_board(Board *board, bool show_missing_connection_tiles)
         draw_piece((board->piece_array) + piece_idx, show_missing_connection_tiles, false);
     }
 }
+
+// ------------------------------------------------ Debug functions
+
+// function used to draw all tile poses on the window
+// to help me when I'm debugging post-adding check methods
+void draw_pos_text(void)
+{
+    static int corner_offset;
+
+    static int x;
+    static int y;
+    static char temp_text[4];
+
+    corner_offset = nb_padding_tile * tile_px_width + 10;
+
+    for (int i = 0; i < BOARD_WIDTH; i++)
+    {
+        for (int j = 0; j < BOARD_HEIGHT; j++)
+        {
+            sprintf(temp_text, "%d;%d", i, j);
+            x = i * tile_px_width + corner_offset;
+            y = j * tile_px_width + corner_offset;
+            DrawText(temp_text, x, y, 20, WHITE);
+        }
+    }
+}

@@ -6,4 +6,10 @@
 #ifndef __CHECK_BOARD_H__
 #define __CHECK_BOARD_H__
 
+#include <local/board.h>
+
+#define ISOLATED_EMPTY_TILE -1
+
+int run_all_checks(Board *board);
+
 #endif
