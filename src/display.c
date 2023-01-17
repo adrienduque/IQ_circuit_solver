@@ -32,7 +32,8 @@ static Color outline_color = {200, 255, 0, 255};
 // Driven parameters
 static const int grid_line_px_thick = tile_px_width / 10;
 static const int connection_line_px_thick = grid_line_px_thick;
-static const int outline_px_thick = tile_px_width / 25;
+// static const int outline_px_thick = tile_px_width / 25;
+static const int outline_px_thick = (int)(tile_px_width * 0.08);
 
 static const int total_px_width = tile_px_width * (BOARD_WIDTH + 2 * nb_padding_tile);
 static const int total_px_height = tile_px_width * (BOARD_HEIGHT + 2 * nb_padding_tile);
@@ -372,6 +373,11 @@ void draw_board(Board *board, bool show_missing_connection_tiles)
         piece_idx = board->added_piece_idx_array[i];
         draw_piece((board->piece_array) + piece_idx, show_missing_connection_tiles, false);
     }
+}
+
+void draw_level_num(const char *level_num_str)
+{
+    DrawText(level_num_str, 10, 10, 50, ORANGE);
 }
 
 // ------------------------------------------------ Debug functions

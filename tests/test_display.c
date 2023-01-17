@@ -438,7 +438,7 @@ char *board_interactive_display_test()
         ClearBackground(BLACK);
         draw_board(board, show_missing_connection_tiles);
         draw_piece(piece, show_missing_connection_tiles, show_border_tiles);
-        DrawText(level_num_str, 10, 10, 50, ORANGE);
+        draw_level_num(level_num_str);
         if (display_tile_pos)
             draw_pos_text();
         EndDrawing();

@@ -46,6 +46,8 @@ void draw_piece(Piece *piece, bool show_missing_connection_tiles, bool show_bord
 void update_board_obligatory_tiles_drawing(Board *board);
 void draw_board(Board *board, bool show_missing_connection_tiles);
 
+void draw_level_num(const char *level_num_str);
+
 // ------------------------- Debug functions
 void draw_pos_text(void);
 
