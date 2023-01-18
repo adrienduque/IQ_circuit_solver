@@ -130,3 +130,55 @@ bool is_pos_valid(const Vector2_int *pos)
 {
     return !are_pos_equal(pos, &invalid_pos);
 }
+
+// -------------------------------------- Math needed for main search algorithm ------------------------------------
+
+// function to generate all r-combinations of input array (which is necessary an array of ints here)
+// the result is stored in next_combination_placeholder by reference
+// the function needs to be called repeatedly for all combinations to be yield
+// function derived from : https://scvalex.net/posts/cp5/
+int generate_next_combination(const int *input_int_array, int input_array_length, int *next_combination_placeholder, int r)
+{
+    if (r == 0)
+        return 0;
+
+    static int i;
+    static int n;
+    static int *comb;
+    static bool is_init = false;
+
+    if (!is_init)
+    {
+        n = input_array_length;
+        comb = malloc(sizeof(*comb) * r);
+        for (i = 0; i < r; i++)
+            comb[i] = i;
+        is_init = true;
+    }
+    else
+    {
+
+        i = r - 1;
+        comb[i]++;
+        while ((i >= 0) && (comb[i] >= n - r + 1 + i))
+        {
+            i--;
+            comb[i]++;
+        }
+
+        if (comb[0] > n - r)
+        {
+            // end of current generation, we reach the end of possible combinations
+            free(comb);
+            is_init = false;
+            return 0;
+        }
+
+        for (i = i + 1; i < r; ++i)
+            comb[i] = comb[i - 1] + 1;
+    }
+
+    for (i = 0; i < r; i++)
+        next_combination_placeholder[i] = input_int_array[comb[i]];
+    return 1;
+}

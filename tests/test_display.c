@@ -227,6 +227,25 @@ void print_check_result(int return_result)
     printf("All checks passed !\n\n");
 }
 
+void print_controls(void)
+{
+
+    printf("Controls :\n\n");
+    printf("\t- left/right arrow keys : change current level /!\\ everything will be reset if level is changed\n");
+    printf("\n");
+    printf("\t- ZQSD(or WASD)         : move the piece accross the board (up, left, down, right respectively)\n");
+    printf("\t- spacebar              : change piece selected\n");
+    printf("\t- F                     : change side displayed of current piece\n");
+    printf("\t- R                     : rotate the piece clockwise\n");
+    printf("\n");
+    printf("\t- Enter                 :  Try to add current piece to the board in its current state\n");
+    printf("\t                           Displays various comments when the piece can't be added\n");
+    printf("\t- E                     : Undo last piece adding from the board\n");
+    printf("\n");
+    printf("\t- T                     : toggle tile pos display (i, j) on each tile\n");
+    printf("\n\n");
+}
+
 char *board_interactive_display_test()
 {
     /*
@@ -299,6 +318,7 @@ char *board_interactive_display_test()
 
     blit_piece_main_data(piece, side_idx, base_pos, rotation_state);
     update_piece_all_drawing(piece, show_border_tiles);
+    // print_controls();
     print_piece_pos_infos(piece);
 
     while (!WindowShouldClose())
@@ -336,6 +356,7 @@ char *board_interactive_display_test()
         if (IsKeyPressed(KEY_E))
         {
             system("cls");
+            // print_controls();
             printf("Currently trying to remove the last piece added to the board...\n");
             if (board->nb_of_added_pieces > nb_of_level_pieces)
             {
@@ -387,11 +408,13 @@ char *board_interactive_display_test()
             {
                 blit_piece_main_data(piece, side_idx, base_pos, rotation_state);
                 system("cls");
+                // print_controls();
                 print_piece_pos_infos(piece);
             }
             else
             {
                 system("cls");
+                // print_controls();
                 print_piece_pos_infos(piece);
                 printf("\nCurrently trying to add the piece to the board...\n");
                 return_val = add_piece_to_board(board, piece_idx, side_idx, base_pos, rotation_state);
@@ -450,6 +473,7 @@ char *board_interactive_display_test()
     if (board_complete)
     {
         system("cls");
+        // print_controls();
         printf("Board complete ! Stopping display test.\n");
     }
     return 0;

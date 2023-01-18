@@ -20,7 +20,7 @@ TESTOBJS=$(filter-out $(OBJ)/main.o,$(OBJS))
 all : $(BIN)
 
 release : CFLAGS=-Wall -O2 -DNDEBUG
-release : clean
+# release : clean
 release : $(BIN)
 
 run : $(BIN)

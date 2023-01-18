@@ -51,10 +51,6 @@ typedef struct Board
 Board *init_board(LevelHints *level_hints);
 void free_board(Board *board);
 
-// ------------- pre-adding public checks ----------------------------------------------------------------------
-
-bool is_position_already_occupied(Board *board, Vector2_int base_pos);
-
 // ------------- main functions (add and remove pieces from board) ----------------------------------------------
 
 // Error codes related to "can_piece_be_added_to_board" and transfered to "add_piece_to_board"

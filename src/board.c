@@ -16,6 +16,22 @@
 // ------------------------------------------------------------- Board constructor / destructor ------------------------------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+// function to initialize pieces current position data fields
+static void set_all_board_pieces_pos_to_zero(Board *board)
+{
+    static int piece_idx;
+    static Piece *piece;
+
+    for (piece_idx = 0; piece_idx < NB_OF_PIECES; piece_idx++)
+    {
+        piece = (board->piece_array) + piece_idx;
+
+        piece->current_side_idx = 0;
+        piece->current_base_pos = (Vector2_int){0, 0};
+        piece->current_rotation_state = 0;
+    }
+}
+
 Board *init_board(LevelHints *level_hints)
 {
     Board *board = malloc(sizeof(Board));
@@ -38,6 +54,12 @@ Board *init_board(LevelHints *level_hints)
 
     // 3) Get all game pieces informations and their live data cache (loading piece_array)
     board->piece_array = get_piece_array();
+
+    // 3.5) pieces position intialization
+
+    // because the main algorithm relies on values like "piece->current_base_pos"
+    // to see where the piece was previously, and continue from this position when the backtracking happens
+    set_all_board_pieces_pos_to_zero(board);
 
     // 4) set stop end of stacks in tile matrix (implemented like linked lists)
     int piece_idx;
@@ -342,25 +364,6 @@ static int can_piece_be_added_to_board(Board *board, Side *side, Vector2_int bas
         if (!is_tile_matching_level_hints(current_tile, obligatory_tile))
             return TILE_NOT_MATCHING_LEVEL_HINTS;
     }
-
-    return true;
-}
-
-// --------------------
-
-/**
- * @todo clarify this function when the search module is added
- */
-// Function to only check if a position is already taken by a normal tile on the board
-// used to skip multiple iterations of differents positions even before trying to add the piece to the board
-// see
-bool is_position_already_occupied(Board *board, Vector2_int base_pos)
-{
-    static Tile *tile_stack;
-    tile_stack = board->tile_matrix[base_pos.i][base_pos.j];
-
-    if (extract_normal_tile_from_stack(tile_stack) == UNDEFINED_TILE)
-        return false;
 
     return true;
 }

@@ -20,7 +20,6 @@
 #include <local/level_data.h>
 
 // Function to load level hints from the level number
-// @warning @todo don't forget to limit user inputs to only implemented level numbers
 LevelHints *get_level_hints(int level_num)
 {
     LevelHints *level_hints = malloc(sizeof(LevelHints));
