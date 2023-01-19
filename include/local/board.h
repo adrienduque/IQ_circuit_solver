@@ -66,7 +66,7 @@ int add_piece_to_board(Board *board, int piece_idx, int side_idx, Vector2_int ba
 void undo_last_piece_adding(Board *board);
 
 // ------------ other public tools to interact with the board ----------------------------------------------------
-
+Tile *extract_normal_tile_from_stack(Tile *tile_stack);
 Tile *extract_normal_tile_at_pos(Board *board, Vector2_int *base_pos);
 
 #endif

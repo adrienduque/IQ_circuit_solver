@@ -209,7 +209,7 @@ static bool is_tile_matching_missing_connections(Tile *normal_tile, Tile *missin
 
 // Return a pointer to a normal tile in the input stack (linked list) of tiles
 // Return UNDEFINED_TILE if not found
-static Tile *extract_normal_tile_from_stack(Tile *tile_stack)
+Tile *extract_normal_tile_from_stack(Tile *tile_stack)
 {
     static Tile *temp_tile = NULL;
     temp_tile = tile_stack;

@@ -27,6 +27,7 @@
 
 #define MAX_NB_OF_TILE_PER_SIDE 4
 #define MAX_NB_OF_MISSING_CONNECTION_PER_SIDE 4
+#define MAX_NB_OF_DISTINCT_PATH_PER_SIDE 2
 #define MAX_NB_OF_BORDER_TILE_PER_SIDE 9
 #define MAX_NB_OF_OUTLINE_POINTS 9
 
@@ -109,6 +110,14 @@ typedef struct Side
     // see Piece::nb_of_border_tiles for example
     Vector2_int border_tile_relative_pos_array[MAX_NB_OF_BORDER_TILE_PER_SIDE]; // not array of tiles but array of relative pos of border tiles which are directly in contact with the piece (no diagonal)
     Vector2_int outline_tile_relative_pos_array[MAX_NB_OF_OUTLINE_POINTS];      // array of relative pos of tiles which have their top-left corners used to draw an outline around the piece
+
+    // For the no loop post-adding check -> see check_board.c
+    // what is contained in this array ?
+    // 1) missing connection tile idx of a side, that are not directly linked to a point tile
+    // 2) if 2 of these missing connection tiles pass the condition 1), but are linked together -> take only one of them
+    // encoded by hand for each side of each piece
+    int susceptible_loop_generator_missing_connection_tile_idx_array[MAX_NB_OF_DISTINCT_PATH_PER_SIDE];
+    int nb_of_susceptible_loop_generator_tiles;
 
     // ----------- Live data part -----------------
     //(None until now)

@@ -255,6 +255,15 @@ static bool is_position_already_occupied(Board *board, Vector2_int *base_pos)
 
 // -------------------------------------------------------------------------------------------------------------------------------
 
+/**
+ * @todo does the order of pieces affect the average number of valid boards found ?
+ *
+ * I might test like : the actual order for the algorithm that chooses the combination (it will force pieces with 3 sides to play only 1 side)
+ * but to fill the remaining pieces -> let's reverse the order ?
+ *
+ * + a test with full reversed order and have the 3 columns next to each other in the excel file
+ */
+
 // Main function
 void run_algorithm_with_display(int level_num, double wait_seconds)
 {
@@ -419,6 +428,9 @@ last_state_display_freeze:
     time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
     printf("Solving time : %.3f seconds\n", time_spent);
     printf("Number of valid boards : %d\n", valid_board_count);
+
+    // temp : sum up for automated runs :
+    // printf("%d | %d", valid_board_count, (int)(time_spent * 1000));
 
     // display last board state until user close the window
     while (!WindowShouldClose())
@@ -587,6 +599,9 @@ last_state_display_freeze:
     time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
     printf("Solving time : %.3f seconds\n", time_spent);
     printf("Number of valid boards : %d\n", valid_board_count);
+
+    // temp : sum up for automated runs :
+    // printf("%d | %d ", valid_board_count, (int)(time_spent * 1000));
 
     // Display only the last board state
     char level_num_str[4];
