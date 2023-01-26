@@ -9,7 +9,8 @@
 #include <local/board.h>
 
 #define ISOLATED_EMPTY_TILE -1
-#define LOOP_PATH -2
+#define DEAD_END -2
+#define LOOP_PATH -3
 
 int run_all_checks(Board *board);
 

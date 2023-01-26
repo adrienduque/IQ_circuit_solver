@@ -9,6 +9,8 @@
 #include <local/utils.h>
 #include <local/piece_data.h>
 
+#define MAX_NB_OF_OPEN_POINT_TILES_PER_LEVEL 6
+
 /**
  * @struct PieceAddInfos
  * Struct to record obligatory piece hints in levels
@@ -35,6 +37,7 @@ typedef struct LevelHints
     Tile obligatory_tile_array[BOARD_TOTAL_NB_TILES];
     int nb_of_obligatory_tiles;
 
+    int open_obligatory_point_tile_idx_array[MAX_NB_OF_OPEN_POINT_TILES_PER_LEVEL];
     int nb_of_open_obligatory_point_tiles;
 
 } LevelHints;

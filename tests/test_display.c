@@ -224,12 +224,18 @@ void print_check_result(int return_result)
     }
     printf("1) OK    : No isolated empty tile created.\n");
 
-    if (return_result == LOOP_PATH)
+    if (return_result == DEAD_END)
     {
-        printf("2) Error : Adding this piece creates a loop path, which is not allowed by game rules.\n");
+        printf("2) Error : Adding this piece creates a dead end, certain tiles can't be linked by a path anymore.\n");
         return;
     }
-    printf("2) OK    : No loop path created.\n");
+    printf("2) OK    : No dead end created.\n");
+    if (return_result == LOOP_PATH)
+    {
+        printf("3) Error : Adding this piece creates a loop path, which is not allowed by game rules.\n");
+        return;
+    }
+    printf("3) OK    : No loop path created.\n");
 
     printf("All checks passed !\n\n");
 }

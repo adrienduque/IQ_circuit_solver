@@ -107,6 +107,10 @@ Board *init_board(LevelHints *level_hints)
             piece_add_infos = (level_hints->obligatory_piece_array) + i;
             add_piece_to_board(board, piece_add_infos->piece_idx, piece_add_infos->side_idx, piece_add_infos->base_pos, piece_add_infos->rotation_state);
         }
+
+        board->nb_of_open_obligatory_point_tiles = level_hints->nb_of_open_obligatory_point_tiles;
+        for (int i = 0; i < level_hints->nb_of_open_obligatory_point_tiles; i++)
+            board->open_obligatory_point_tile_array[i] = &(level_hints->obligatory_tile_array[level_hints->open_obligatory_point_tile_idx_array[i]]);
     }
 
     return board;

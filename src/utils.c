@@ -131,6 +131,11 @@ bool is_pos_valid(const Vector2_int *pos)
     return !are_pos_equal(pos, &invalid_pos);
 }
 
+int manhattan_dist(const Vector2_int *pos1, const Vector2_int *pos2)
+{
+    return abs((pos1->i) - (pos2->i)) + abs((pos1->j) - (pos2->j));
+}
+
 // -------------------------------------- Math needed for main search algorithm ------------------------------------
 
 // function to generate all r-combinations of input array (which is necessary an array of ints here)

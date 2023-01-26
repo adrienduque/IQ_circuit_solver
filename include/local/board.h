@@ -36,6 +36,10 @@ typedef struct Board
     bool has_line2_2_been_added;
     bool has_T_piece_been_added; // these two are special game piece, see board.c > can_piece_be_added_to_board
 
+    // informations inherited from level hints, useful for no dead end check
+    Tile *open_obligatory_point_tile_array[MAX_NB_OF_OPEN_POINT_TILES_PER_LEVEL];
+    int nb_of_open_obligatory_point_tiles;
+
     // ------ Drawing data specific to the board
     Vector2 grid_lines_pt_array[NB_OF_GRID_LINES][2];
     Tile *obligatory_tile_array; // instead of finding them in obligatory tile matrix to draw them, it's directly a copy from level hints see level_data.c

@@ -13,8 +13,9 @@
  *
  * (Data comes from my python project where I programmed a level builder, which outputs the code for corresponding level hints (+ a python script to transfer data to this project))
  *
- * (In the data we can see extra obligatory tile points, where the pre-added pieces should go)
+ * (In the data we can see extra obligatory point tiles, where the pre-added pieces should go)
  * (To understand why, see board.c > "is_tile_matching_level_hints")
+ * (the new open_obligatory_point_tile_idx_array contains indexes of tile in the obligatory_tile_array, that are point tiles (but only the "true" point tiles, not the extra points explained above))
  */
 
 #include <local/level_data.h>
@@ -62,6 +63,11 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[31] = (Tile){.tile_type = point, .absolute_pos = {7, 3}, .nb_of_connections = 1, .connection_direction_array = {LEFT}};
         level_hints->nb_of_obligatory_tiles = 32;
 
+        level_hints->open_obligatory_point_tile_idx_array[0] = 3;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 24;
+        level_hints->open_obligatory_point_tile_idx_array[2] = 28;
+        level_hints->open_obligatory_point_tile_idx_array[3] = 31;
+
         level_hints->nb_of_open_obligatory_point_tiles = 4;
         break;
     case 50:
@@ -99,6 +105,11 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[30] = (Tile){.tile_type = line, .absolute_pos = {0, 2}, .nb_of_connections = 2, .connection_direction_array = {DOWN, UP}};
         level_hints->obligatory_tile_array[31] = (Tile){.tile_type = line, .absolute_pos = {0, 1}, .nb_of_connections = 2, .connection_direction_array = {DOWN, UP}};
         level_hints->nb_of_obligatory_tiles = 32;
+
+        level_hints->open_obligatory_point_tile_idx_array[0] = 13;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 14;
+        level_hints->open_obligatory_point_tile_idx_array[2] = 15;
+        level_hints->open_obligatory_point_tile_idx_array[3] = 26;
 
         level_hints->nb_of_open_obligatory_point_tiles = 4;
         break;
@@ -138,6 +149,9 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[31] = (Tile){.tile_type = empty, .absolute_pos = {5, 2}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 32;
 
+        level_hints->open_obligatory_point_tile_idx_array[0] = 1;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 2;
+
         level_hints->nb_of_open_obligatory_point_tiles = 2;
         break;
     case 52:
@@ -175,6 +189,11 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[30] = (Tile){.tile_type = empty, .absolute_pos = {1, 1}, .nb_of_connections = 0};
         level_hints->obligatory_tile_array[31] = (Tile){.tile_type = empty, .absolute_pos = {2, 1}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 32;
+
+        level_hints->open_obligatory_point_tile_idx_array[0] = 15;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 21;
+        level_hints->open_obligatory_point_tile_idx_array[2] = 22;
+        level_hints->open_obligatory_point_tile_idx_array[3] = 27;
 
         level_hints->nb_of_open_obligatory_point_tiles = 4;
         break;
@@ -214,6 +233,13 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[31] = (Tile){.tile_type = empty, .absolute_pos = {1, 3}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 32;
 
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 1;
+        level_hints->open_obligatory_point_tile_idx_array[2] = 2;
+        level_hints->open_obligatory_point_tile_idx_array[3] = 3;
+        level_hints->open_obligatory_point_tile_idx_array[4] = 4;
+        level_hints->open_obligatory_point_tile_idx_array[5] = 5;
+
         level_hints->nb_of_open_obligatory_point_tiles = 6;
         break;
     case 54:
@@ -251,6 +277,13 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[30] = (Tile){.tile_type = empty, .absolute_pos = {5, 0}, .nb_of_connections = 0};
         level_hints->obligatory_tile_array[31] = (Tile){.tile_type = empty, .absolute_pos = {4, 0}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 32;
+
+        level_hints->open_obligatory_point_tile_idx_array[0] = 5;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 11;
+        level_hints->open_obligatory_point_tile_idx_array[2] = 14;
+        level_hints->open_obligatory_point_tile_idx_array[3] = 22;
+        level_hints->open_obligatory_point_tile_idx_array[4] = 24;
+        level_hints->open_obligatory_point_tile_idx_array[5] = 25;
 
         level_hints->nb_of_open_obligatory_point_tiles = 6;
         break;
@@ -290,6 +323,11 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[31] = (Tile){.tile_type = empty, .absolute_pos = {7, 0}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 32;
 
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 17;
+        level_hints->open_obligatory_point_tile_idx_array[2] = 18;
+        level_hints->open_obligatory_point_tile_idx_array[3] = 19;
+
         level_hints->nb_of_open_obligatory_point_tiles = 4;
         break;
     case 56:
@@ -327,6 +365,11 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[30] = (Tile){.tile_type = empty, .absolute_pos = {4, 1}, .nb_of_connections = 0};
         level_hints->obligatory_tile_array[31] = (Tile){.tile_type = empty, .absolute_pos = {4, 0}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 32;
+
+        level_hints->open_obligatory_point_tile_idx_array[0] = 3;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 15;
+        level_hints->open_obligatory_point_tile_idx_array[2] = 16;
+        level_hints->open_obligatory_point_tile_idx_array[3] = 26;
 
         level_hints->nb_of_open_obligatory_point_tiles = 4;
         break;
@@ -366,6 +409,11 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[31] = (Tile){.tile_type = empty, .absolute_pos = {6, 1}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 32;
 
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 10;
+        level_hints->open_obligatory_point_tile_idx_array[2] = 12;
+        level_hints->open_obligatory_point_tile_idx_array[3] = 28;
+
         level_hints->nb_of_open_obligatory_point_tiles = 4;
         break;
     case 58:
@@ -403,6 +451,9 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[30] = (Tile){.tile_type = empty, .absolute_pos = {6, 1}, .nb_of_connections = 0};
         level_hints->obligatory_tile_array[31] = (Tile){.tile_type = empty, .absolute_pos = {5, 1}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 32;
+
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 21;
 
         level_hints->nb_of_open_obligatory_point_tiles = 2;
         break;
@@ -442,6 +493,11 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[31] = (Tile){.tile_type = empty, .absolute_pos = {6, 1}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 32;
 
+        level_hints->open_obligatory_point_tile_idx_array[0] = 10;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 17;
+        level_hints->open_obligatory_point_tile_idx_array[2] = 19;
+        level_hints->open_obligatory_point_tile_idx_array[3] = 29;
+
         level_hints->nb_of_open_obligatory_point_tiles = 4;
         break;
     case 60:
@@ -479,6 +535,11 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[30] = (Tile){.tile_type = line, .absolute_pos = {5, 0}, .nb_of_connections = 2, .connection_direction_array = {RIGHT, LEFT}};
         level_hints->obligatory_tile_array[31] = (Tile){.tile_type = point, .absolute_pos = {4, 0}, .nb_of_connections = 1, .connection_direction_array = {RIGHT}};
         level_hints->nb_of_obligatory_tiles = 32;
+
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 1;
+        level_hints->open_obligatory_point_tile_idx_array[2] = 7;
+        level_hints->open_obligatory_point_tile_idx_array[3] = 31;
 
         level_hints->nb_of_open_obligatory_point_tiles = 4;
         break;
@@ -518,6 +579,9 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[31] = (Tile){.tile_type = empty, .absolute_pos = {4, 0}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 32;
 
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 24;
+
         level_hints->nb_of_open_obligatory_point_tiles = 2;
         break;
     case 62:
@@ -555,6 +619,11 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[30] = (Tile){.tile_type = empty, .absolute_pos = {3, 3}, .nb_of_connections = 0};
         level_hints->obligatory_tile_array[31] = (Tile){.tile_type = empty, .absolute_pos = {4, 3}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 32;
+
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 8;
+        level_hints->open_obligatory_point_tile_idx_array[2] = 9;
+        level_hints->open_obligatory_point_tile_idx_array[3] = 24;
 
         level_hints->nb_of_open_obligatory_point_tiles = 4;
         break;
@@ -594,6 +663,11 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[31] = (Tile){.tile_type = empty, .absolute_pos = {4, 0}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 32;
 
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 24;
+        level_hints->open_obligatory_point_tile_idx_array[2] = 25;
+        level_hints->open_obligatory_point_tile_idx_array[3] = 28;
+
         level_hints->nb_of_open_obligatory_point_tiles = 4;
         break;
     case 64:
@@ -631,6 +705,11 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[30] = (Tile){.tile_type = empty, .absolute_pos = {1, 0}, .nb_of_connections = 0};
         level_hints->obligatory_tile_array[31] = (Tile){.tile_type = empty, .absolute_pos = {2, 0}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 32;
+
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 6;
+        level_hints->open_obligatory_point_tile_idx_array[2] = 7;
+        level_hints->open_obligatory_point_tile_idx_array[3] = 25;
 
         level_hints->nb_of_open_obligatory_point_tiles = 4;
         break;
@@ -670,6 +749,11 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[31] = (Tile){.tile_type = empty, .absolute_pos = {5, 3}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 32;
 
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 3;
+        level_hints->open_obligatory_point_tile_idx_array[2] = 4;
+        level_hints->open_obligatory_point_tile_idx_array[3] = 23;
+
         level_hints->nb_of_open_obligatory_point_tiles = 4;
         break;
     case 66:
@@ -707,6 +791,11 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[30] = (Tile){.tile_type = empty, .absolute_pos = {6, 3}, .nb_of_connections = 0};
         level_hints->obligatory_tile_array[31] = (Tile){.tile_type = empty, .absolute_pos = {7, 3}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 32;
+
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 18;
+        level_hints->open_obligatory_point_tile_idx_array[2] = 24;
+        level_hints->open_obligatory_point_tile_idx_array[3] = 28;
 
         level_hints->nb_of_open_obligatory_point_tiles = 4;
         break;
@@ -746,6 +835,9 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[31] = (Tile){.tile_type = empty, .absolute_pos = {6, 1}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 32;
 
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 24;
+
         level_hints->nb_of_open_obligatory_point_tiles = 2;
         break;
     case 68:
@@ -783,6 +875,9 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[30] = (Tile){.tile_type = empty, .absolute_pos = {1, 2}, .nb_of_connections = 0};
         level_hints->obligatory_tile_array[31] = (Tile){.tile_type = empty, .absolute_pos = {1, 1}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 32;
+
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 25;
 
         level_hints->nb_of_open_obligatory_point_tiles = 2;
         break;
@@ -822,6 +917,9 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[31] = (Tile){.tile_type = empty, .absolute_pos = {2, 0}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 32;
 
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 20;
+
         level_hints->nb_of_open_obligatory_point_tiles = 2;
         break;
     case 70:
@@ -859,6 +957,9 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[30] = (Tile){.tile_type = empty, .absolute_pos = {0, 2}, .nb_of_connections = 0};
         level_hints->obligatory_tile_array[31] = (Tile){.tile_type = empty, .absolute_pos = {0, 3}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 32;
+
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 22;
 
         level_hints->nb_of_open_obligatory_point_tiles = 2;
         break;
@@ -898,6 +999,9 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[31] = (Tile){.tile_type = empty, .absolute_pos = {0, 3}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 32;
 
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 23;
+
         level_hints->nb_of_open_obligatory_point_tiles = 2;
         break;
     case 72:
@@ -935,6 +1039,9 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[30] = (Tile){.tile_type = empty, .absolute_pos = {5, 0}, .nb_of_connections = 0};
         level_hints->obligatory_tile_array[31] = (Tile){.tile_type = empty, .absolute_pos = {5, 1}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 32;
+
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 23;
 
         level_hints->nb_of_open_obligatory_point_tiles = 2;
         break;
@@ -1034,6 +1141,10 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[5] = (Tile){.tile_type = point, .absolute_pos = {6, 3}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 6;
 
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 1;
+        level_hints->open_obligatory_point_tile_idx_array[2] = 2;
+
         level_hints->nb_of_open_obligatory_point_tiles = 3;
         break;
     case 80:
@@ -1050,6 +1161,10 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[5] = (Tile){.tile_type = point, .absolute_pos = {5, 2}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 6;
 
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 1;
+        level_hints->open_obligatory_point_tile_idx_array[2] = 2;
+
         level_hints->nb_of_open_obligatory_point_tiles = 3;
         break;
     case 81:
@@ -1062,6 +1177,9 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[2] = (Tile){.tile_type = point, .absolute_pos = {1, 0}, .nb_of_connections = 0};
         level_hints->obligatory_tile_array[3] = (Tile){.tile_type = point, .absolute_pos = {0, 3}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 4;
+
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 1;
 
         level_hints->nb_of_open_obligatory_point_tiles = 2;
         break;
@@ -1077,6 +1195,8 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[3] = (Tile){.tile_type = point, .absolute_pos = {4, 3}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 4;
 
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+
         level_hints->nb_of_open_obligatory_point_tiles = 1;
         break;
     case 83:
@@ -1089,6 +1209,9 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[2] = (Tile){.tile_type = point, .absolute_pos = {2, 1}, .nb_of_connections = 0};
         level_hints->obligatory_tile_array[3] = (Tile){.tile_type = point, .absolute_pos = {6, 0}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 4;
+
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 1;
 
         level_hints->nb_of_open_obligatory_point_tiles = 2;
         break;
@@ -1106,6 +1229,10 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[5] = (Tile){.tile_type = point, .absolute_pos = {5, 3}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 6;
 
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 1;
+        level_hints->open_obligatory_point_tile_idx_array[2] = 2;
+
         level_hints->nb_of_open_obligatory_point_tiles = 3;
         break;
     case 85:
@@ -1118,6 +1245,9 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[2] = (Tile){.tile_type = point, .absolute_pos = {1, 1}, .nb_of_connections = 0};
         level_hints->obligatory_tile_array[3] = (Tile){.tile_type = point, .absolute_pos = {6, 3}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 4;
+
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 1;
 
         level_hints->nb_of_open_obligatory_point_tiles = 2;
         break;
@@ -1132,6 +1262,9 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[3] = (Tile){.tile_type = point, .absolute_pos = {4, 0}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 4;
 
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 1;
+
         level_hints->nb_of_open_obligatory_point_tiles = 2;
         break;
     case 87:
@@ -1144,6 +1277,9 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[2] = (Tile){.tile_type = point, .absolute_pos = {7, 0}, .nb_of_connections = 0};
         level_hints->obligatory_tile_array[3] = (Tile){.tile_type = point, .absolute_pos = {6, 3}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 4;
+
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 1;
 
         level_hints->nb_of_open_obligatory_point_tiles = 2;
         break;
@@ -1201,6 +1337,10 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[3] = (Tile){.tile_type = point, .absolute_pos = {7, 3}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 4;
 
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 1;
+        level_hints->open_obligatory_point_tile_idx_array[2] = 2;
+
         level_hints->nb_of_open_obligatory_point_tiles = 3;
         break;
     case 93:
@@ -1212,6 +1352,10 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[2] = (Tile){.tile_type = point, .absolute_pos = {5, 2}, .nb_of_connections = 0};
         level_hints->obligatory_tile_array[3] = (Tile){.tile_type = point, .absolute_pos = {1, 2}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 4;
+
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 1;
+        level_hints->open_obligatory_point_tile_idx_array[2] = 2;
 
         level_hints->nb_of_open_obligatory_point_tiles = 3;
         break;
@@ -1225,6 +1369,10 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[3] = (Tile){.tile_type = point, .absolute_pos = {3, 3}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 4;
 
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 1;
+        level_hints->open_obligatory_point_tile_idx_array[2] = 2;
+
         level_hints->nb_of_open_obligatory_point_tiles = 3;
         break;
     case 95:
@@ -1237,6 +1385,10 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[3] = (Tile){.tile_type = point, .absolute_pos = {0, 0}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 4;
 
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 1;
+        level_hints->open_obligatory_point_tile_idx_array[2] = 2;
+
         level_hints->nb_of_open_obligatory_point_tiles = 3;
         break;
     case 96:
@@ -1248,6 +1400,10 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[2] = (Tile){.tile_type = point, .absolute_pos = {6, 3}, .nb_of_connections = 0};
         level_hints->obligatory_tile_array[3] = (Tile){.tile_type = point, .absolute_pos = {0, 0}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 4;
+
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 1;
+        level_hints->open_obligatory_point_tile_idx_array[2] = 2;
 
         level_hints->nb_of_open_obligatory_point_tiles = 3;
         break;
@@ -1262,6 +1418,13 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[5] = (Tile){.tile_type = point, .absolute_pos = {5, 1}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 6;
 
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 1;
+        level_hints->open_obligatory_point_tile_idx_array[2] = 2;
+        level_hints->open_obligatory_point_tile_idx_array[3] = 3;
+        level_hints->open_obligatory_point_tile_idx_array[4] = 4;
+        level_hints->open_obligatory_point_tile_idx_array[5] = 5;
+
         level_hints->nb_of_open_obligatory_point_tiles = 6;
         break;
     case 98:
@@ -1272,6 +1435,11 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[2] = (Tile){.tile_type = point, .absolute_pos = {7, 3}, .nb_of_connections = 0};
         level_hints->obligatory_tile_array[3] = (Tile){.tile_type = point, .absolute_pos = {7, 0}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 4;
+
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 1;
+        level_hints->open_obligatory_point_tile_idx_array[2] = 2;
+        level_hints->open_obligatory_point_tile_idx_array[3] = 3;
 
         level_hints->nb_of_open_obligatory_point_tiles = 4;
         break;
@@ -1284,6 +1452,11 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[3] = (Tile){.tile_type = point, .absolute_pos = {7, 3}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 4;
 
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 1;
+        level_hints->open_obligatory_point_tile_idx_array[2] = 2;
+        level_hints->open_obligatory_point_tile_idx_array[3] = 3;
+
         level_hints->nb_of_open_obligatory_point_tiles = 4;
         break;
     case 100:
@@ -1294,6 +1467,11 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[2] = (Tile){.tile_type = point, .absolute_pos = {2, 3}, .nb_of_connections = 0};
         level_hints->obligatory_tile_array[3] = (Tile){.tile_type = point, .absolute_pos = {7, 1}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 4;
+
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 1;
+        level_hints->open_obligatory_point_tile_idx_array[2] = 2;
+        level_hints->open_obligatory_point_tile_idx_array[3] = 3;
 
         level_hints->nb_of_open_obligatory_point_tiles = 4;
         break;
@@ -1306,6 +1484,11 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[3] = (Tile){.tile_type = point, .absolute_pos = {3, 3}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 4;
 
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 1;
+        level_hints->open_obligatory_point_tile_idx_array[2] = 2;
+        level_hints->open_obligatory_point_tile_idx_array[3] = 3;
+
         level_hints->nb_of_open_obligatory_point_tiles = 4;
         break;
     case 102:
@@ -1316,6 +1499,11 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[2] = (Tile){.tile_type = point, .absolute_pos = {6, 0}, .nb_of_connections = 0};
         level_hints->obligatory_tile_array[3] = (Tile){.tile_type = point, .absolute_pos = {7, 2}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 4;
+
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 1;
+        level_hints->open_obligatory_point_tile_idx_array[2] = 2;
+        level_hints->open_obligatory_point_tile_idx_array[3] = 3;
 
         level_hints->nb_of_open_obligatory_point_tiles = 4;
         break;
@@ -1330,6 +1518,13 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[5] = (Tile){.tile_type = point, .absolute_pos = {7, 3}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 6;
 
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 1;
+        level_hints->open_obligatory_point_tile_idx_array[2] = 2;
+        level_hints->open_obligatory_point_tile_idx_array[3] = 3;
+        level_hints->open_obligatory_point_tile_idx_array[4] = 4;
+        level_hints->open_obligatory_point_tile_idx_array[5] = 5;
+
         level_hints->nb_of_open_obligatory_point_tiles = 6;
         break;
     case 104:
@@ -1343,6 +1538,13 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[5] = (Tile){.tile_type = point, .absolute_pos = {6, 1}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 6;
 
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 1;
+        level_hints->open_obligatory_point_tile_idx_array[2] = 2;
+        level_hints->open_obligatory_point_tile_idx_array[3] = 3;
+        level_hints->open_obligatory_point_tile_idx_array[4] = 4;
+        level_hints->open_obligatory_point_tile_idx_array[5] = 5;
+
         level_hints->nb_of_open_obligatory_point_tiles = 6;
         break;
     case 105:
@@ -1354,6 +1556,11 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[3] = (Tile){.tile_type = point, .absolute_pos = {7, 3}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 4;
 
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 1;
+        level_hints->open_obligatory_point_tile_idx_array[2] = 2;
+        level_hints->open_obligatory_point_tile_idx_array[3] = 3;
+
         level_hints->nb_of_open_obligatory_point_tiles = 4;
         break;
     case 106:
@@ -1362,6 +1569,9 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[0] = (Tile){.tile_type = point, .absolute_pos = {2, 2}, .nb_of_connections = 0};
         level_hints->obligatory_tile_array[1] = (Tile){.tile_type = point, .absolute_pos = {3, 3}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 2;
+
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 1;
 
         level_hints->nb_of_open_obligatory_point_tiles = 2;
         break;
@@ -1376,6 +1586,13 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[5] = (Tile){.tile_type = point, .absolute_pos = {6, 3}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 6;
 
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 1;
+        level_hints->open_obligatory_point_tile_idx_array[2] = 2;
+        level_hints->open_obligatory_point_tile_idx_array[3] = 3;
+        level_hints->open_obligatory_point_tile_idx_array[4] = 4;
+        level_hints->open_obligatory_point_tile_idx_array[5] = 5;
+
         level_hints->nb_of_open_obligatory_point_tiles = 6;
         break;
     case 108:
@@ -1386,6 +1603,11 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[2] = (Tile){.tile_type = point, .absolute_pos = {4, 1}, .nb_of_connections = 0};
         level_hints->obligatory_tile_array[3] = (Tile){.tile_type = point, .absolute_pos = {6, 1}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 4;
+
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 1;
+        level_hints->open_obligatory_point_tile_idx_array[2] = 2;
+        level_hints->open_obligatory_point_tile_idx_array[3] = 3;
 
         level_hints->nb_of_open_obligatory_point_tiles = 4;
         break;
@@ -1398,6 +1620,11 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[3] = (Tile){.tile_type = point, .absolute_pos = {7, 3}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 4;
 
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 1;
+        level_hints->open_obligatory_point_tile_idx_array[2] = 2;
+        level_hints->open_obligatory_point_tile_idx_array[3] = 3;
+
         level_hints->nb_of_open_obligatory_point_tiles = 4;
         break;
     case 110:
@@ -1408,6 +1635,11 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[2] = (Tile){.tile_type = point, .absolute_pos = {5, 1}, .nb_of_connections = 0};
         level_hints->obligatory_tile_array[3] = (Tile){.tile_type = point, .absolute_pos = {6, 3}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 4;
+
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 1;
+        level_hints->open_obligatory_point_tile_idx_array[2] = 2;
+        level_hints->open_obligatory_point_tile_idx_array[3] = 3;
 
         level_hints->nb_of_open_obligatory_point_tiles = 4;
         break;
@@ -1420,6 +1652,11 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[3] = (Tile){.tile_type = point, .absolute_pos = {6, 3}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 4;
 
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 1;
+        level_hints->open_obligatory_point_tile_idx_array[2] = 2;
+        level_hints->open_obligatory_point_tile_idx_array[3] = 3;
+
         level_hints->nb_of_open_obligatory_point_tiles = 4;
         break;
     case 112:
@@ -1430,6 +1667,11 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[2] = (Tile){.tile_type = point, .absolute_pos = {4, 2}, .nb_of_connections = 0};
         level_hints->obligatory_tile_array[3] = (Tile){.tile_type = point, .absolute_pos = {7, 3}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 4;
+
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 1;
+        level_hints->open_obligatory_point_tile_idx_array[2] = 2;
+        level_hints->open_obligatory_point_tile_idx_array[3] = 3;
 
         level_hints->nb_of_open_obligatory_point_tiles = 4;
         break;
@@ -1442,6 +1684,11 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[3] = (Tile){.tile_type = point, .absolute_pos = {7, 1}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 4;
 
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 1;
+        level_hints->open_obligatory_point_tile_idx_array[2] = 2;
+        level_hints->open_obligatory_point_tile_idx_array[3] = 3;
+
         level_hints->nb_of_open_obligatory_point_tiles = 4;
         break;
     case 114:
@@ -1453,6 +1700,11 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[3] = (Tile){.tile_type = point, .absolute_pos = {6, 3}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 4;
 
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 1;
+        level_hints->open_obligatory_point_tile_idx_array[2] = 2;
+        level_hints->open_obligatory_point_tile_idx_array[3] = 3;
+
         level_hints->nb_of_open_obligatory_point_tiles = 4;
         break;
     case 115:
@@ -1461,6 +1713,9 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[0] = (Tile){.tile_type = point, .absolute_pos = {0, 3}, .nb_of_connections = 0};
         level_hints->obligatory_tile_array[1] = (Tile){.tile_type = point, .absolute_pos = {2, 0}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 2;
+
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 1;
 
         level_hints->nb_of_open_obligatory_point_tiles = 2;
         break;
@@ -1471,6 +1726,9 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[1] = (Tile){.tile_type = point, .absolute_pos = {4, 3}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 2;
 
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 1;
+
         level_hints->nb_of_open_obligatory_point_tiles = 2;
         break;
     case 117:
@@ -1479,6 +1737,9 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[0] = (Tile){.tile_type = point, .absolute_pos = {0, 0}, .nb_of_connections = 0};
         level_hints->obligatory_tile_array[1] = (Tile){.tile_type = point, .absolute_pos = {6, 3}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 2;
+
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 1;
 
         level_hints->nb_of_open_obligatory_point_tiles = 2;
         break;
@@ -1489,6 +1750,9 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[1] = (Tile){.tile_type = point, .absolute_pos = {7, 0}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 2;
 
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 1;
+
         level_hints->nb_of_open_obligatory_point_tiles = 2;
         break;
     case 119:
@@ -1498,6 +1762,9 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[1] = (Tile){.tile_type = point, .absolute_pos = {4, 2}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 2;
 
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 1;
+
         level_hints->nb_of_open_obligatory_point_tiles = 2;
         break;
     case 120:
@@ -1506,6 +1773,9 @@ LevelHints *get_level_hints(int level_num)
         level_hints->obligatory_tile_array[0] = (Tile){.tile_type = point, .absolute_pos = {2, 2}, .nb_of_connections = 0};
         level_hints->obligatory_tile_array[1] = (Tile){.tile_type = point, .absolute_pos = {5, 2}, .nb_of_connections = 0};
         level_hints->nb_of_obligatory_tiles = 2;
+
+        level_hints->open_obligatory_point_tile_idx_array[0] = 0;
+        level_hints->open_obligatory_point_tile_idx_array[1] = 1;
 
         level_hints->nb_of_open_obligatory_point_tiles = 2;
         break;

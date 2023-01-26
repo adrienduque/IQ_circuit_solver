@@ -69,6 +69,7 @@ bool is_pos_inside_board(const Vector2_int *pos);
 bool are_pos_equal(const Vector2_int *pos1, const Vector2_int *pos2);
 void set_invalid_pos(Vector2_int *pos);
 bool is_pos_valid(const Vector2_int *pos);
+int manhattan_dist(const Vector2_int *pos1, const Vector2_int *pos2);
 
 // --------------------------- Math needed for main search algorithm --------------------------
 int generate_next_combination(const int *input_int_array, int input_array_length, int *next_combination_placeholder, int r);

@@ -14,6 +14,11 @@ Is there another standard to specify which versions of libraries are in the proj
     -> Raylib 4.2
 ------------------------------- doubtful TODO --------------------------------------------
 
+Check more how raylib works, by loading examples and games in clone_raylib folder
+    + maybe there's a more advance way of managing frames instead of BeginDrawing and EndDrawing, that would allow this program to have more fps ?
+    like strip everything useless to our use case, that these functions are doing
+    (ctrl+shift+f in the folder, search functions names that endrawing replace for example and see if there's stand alone examples)
+
 Make a menu with 2D graphics instead of choosing level in the command line, in short, do everything to avoid having a command line interface in the final build
     Like pages that contains levels, buttons to go to next page, each level button is a thumbnail with the level num on top
 
@@ -26,3 +31,5 @@ Make another mode where, instead of launching the solving algorithm, we can play
     Or maybe, it's the only game mode when we launch the app, and there's a button to launch the solving algorithm live
     (like adding a description of controls on the right of the board display) + buttons to reset level and launch algorithm
     + slowed version of solving algorithm
+
+    + SetWindowIcon

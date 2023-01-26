@@ -90,16 +90,30 @@
 
 // ----------------- Main algorithm data pre-processing ----------------------------------------------------------------------------
 
+/**
+ * @struct StartCombinations
+ * struct to store all the combinations of the different choices we can make,
+ * when we are choosing which pieces will fill the open points of the level hints
+ * see search_algorithm.c description
+ */
+typedef struct StartCombinations
+{
+
+    int combination_array[MAX_NB_OF_COMBINATIONS][MAX_NB_OF_OPEN_POINTS];
+    int nb_of_combinations;
+
+} StartCombinations;
+
 // Function to figure out all possible piece start combinations.
 // In the search algorithm we fill the board by adding piece one by one
 // starting by pieces with point on their first side, and starting by filling open points in level hints
 // But there are a lot more game pieces with a point than point to fill
 // That's why we need to test different combinations
-static StartCombinations determine_start_combinations(Board *board, LevelHints *level_hints)
+static StartCombinations determine_start_combinations(Board *board)
 {
     StartCombinations start_combinations;
 
-    if (level_hints->nb_of_open_obligatory_point_tiles == 0)
+    if (board->nb_of_open_obligatory_point_tiles == 0)
     {
         // special case where we don't need to test different combinations
         // to make it part of the general case for the main algorithm, we need to do this:
@@ -157,7 +171,7 @@ static StartCombinations determine_start_combinations(Board *board, LevelHints *
 
     // 3) Figure out the all the possible combinations from this list, depending on the nb of open points of the level
     start_combinations.nb_of_combinations = 0;
-    while (generate_next_combination(piece_idx_that_are_playable, nb_of_remaining_pieces, start_combinations.combination_array[start_combinations.nb_of_combinations], level_hints->nb_of_open_obligatory_point_tiles))
+    while (generate_next_combination(piece_idx_that_are_playable, nb_of_remaining_pieces, start_combinations.combination_array[start_combinations.nb_of_combinations], board->nb_of_open_obligatory_point_tiles))
         start_combinations.nb_of_combinations++;
 
     return start_combinations;
@@ -168,7 +182,7 @@ static StartCombinations determine_start_combinations(Board *board, LevelHints *
 // Also load by reference which piece sides are playable
 // as a combination is the current set of chosen point piece, they only can play their side with a point
 // other pieces are forced to play their sides without a point (as we can't add point tiles that don't belong to level hints, it is written in gamerules)
-static void load_combination_data(Board *board, StartCombinations *start_combinations, LevelHints *level_hints, int combination_idx, int *piece_idx_priority_array, int *nb_of_playable_pieces, bool playable_side_per_piece_idx_mask[][MAX_NB_OF_SIDE_PER_PIECE])
+static void load_combination_data(Board *board, StartCombinations *start_combinations, int combination_idx, int *piece_idx_priority_array, int *nb_of_playable_pieces, bool playable_side_per_piece_idx_mask[][MAX_NB_OF_SIDE_PER_PIECE])
 {
 
     static int i, piece_idx;
@@ -177,7 +191,7 @@ static void load_combination_data(Board *board, StartCombinations *start_combina
     *nb_of_playable_pieces = 0;
 
     // add the first piece indexes dictate by start_combinations
-    for (i = 0; i < level_hints->nb_of_open_obligatory_point_tiles; i++)
+    for (i = 0; i < board->nb_of_open_obligatory_point_tiles; i++)
     {
         piece_idx = start_combinations->combination_array[combination_idx][i];
         piece_idx_priority_array[*nb_of_playable_pieces] = piece_idx;
@@ -193,7 +207,7 @@ static void load_combination_data(Board *board, StartCombinations *start_combina
     for (piece_idx = 0; piece_idx < NB_OF_PIECES; piece_idx++)
     {
         piece_found = false;
-        for (i = 0; i < level_hints->nb_of_open_obligatory_point_tiles; i++)
+        for (i = 0; i < board->nb_of_open_obligatory_point_tiles; i++)
         {
             if (piece_idx_priority_array[i] == piece_idx)
             {
@@ -244,6 +258,7 @@ static void draw(Board *board, const char *level_num_str)
     ClearBackground(BLACK);
     draw_board(board, false);
     draw_level_num(level_num_str);
+    // DrawFPS(100, 10);
     EndDrawing();
 }
 
@@ -255,17 +270,8 @@ static bool is_position_already_occupied(Board *board, Vector2_int *base_pos)
 
 // -------------------------------------------------------------------------------------------------------------------------------
 
-/**
- * @todo does the order of pieces affect the average number of valid boards found ?
- *
- * I might test like : the actual order for the algorithm that chooses the combination (it will force pieces with 3 sides to play only 1 side)
- * but to fill the remaining pieces -> let's reverse the order ?
- *
- * + a test with full reversed order and have the 3 columns next to each other in the excel file
- */
-
 // Main function
-void run_algorithm_with_display(int level_num, double wait_seconds)
+void run_algorithm_with_display(int level_num, int FPS)
 {
 
     // Main data variables init
@@ -273,15 +279,17 @@ void run_algorithm_with_display(int level_num, double wait_seconds)
     Board *board = init_board(level_hints);
 
     // Preprocessed constants of current setup
-    StartCombinations start_combinations = determine_start_combinations(board, level_hints);
+    StartCombinations start_combinations = determine_start_combinations(board);
 
     // Functions only needed because we display things
     char level_num_str[4];
     setup_draw(board, level_num, level_num_str);
-
-    static bool enable_print = true;
-    if (wait_seconds == 0)
-        enable_print = false;
+    static bool enable_print = false;
+    if (FPS != 0)
+    {
+        SetTargetFPS(FPS);
+        enable_print = true;
+    }
 
     // data placeholders for each combination test
     int piece_idx_priority_array[NB_OF_PIECES];
@@ -309,6 +317,7 @@ void run_algorithm_with_display(int level_num, double wait_seconds)
     // convenience placeholder variables used in the loop
     Piece *piece;
     bool backtrack_iteration = false;
+    bool solved = false;
 
     // Updating and drawing loop for algorithm visualization
     for (int combination_idx = 0; combination_idx < start_combinations.nb_of_combinations; combination_idx++)
@@ -318,7 +327,7 @@ void run_algorithm_with_display(int level_num, double wait_seconds)
         // and also which piece sides it can play, as a combination is the current set of chosen point piece, they only can play their side with a point
         // other pieces are forced to play their sides without a point (as we can't add point tiles that don't belong to level hints, it is written in gamerules)
         // the algorithm can work without this last informations, but it is meant to skip obviously useless iterations
-        load_combination_data(board, &start_combinations, level_hints, combination_idx, piece_idx_priority_array, &nb_of_playable_pieces, playable_side_per_piece_idx_mask);
+        load_combination_data(board, &start_combinations, combination_idx, piece_idx_priority_array, &nb_of_playable_pieces, playable_side_per_piece_idx_mask);
 
         // Setup the exploration of the current combination
         piece_selected = 0;
@@ -339,8 +348,8 @@ void run_algorithm_with_display(int level_num, double wait_seconds)
             else if (piece_selected == nb_of_playable_pieces)
             {
                 // case where the successfully added the last piece to the board
-                printf("Solution found !\n");
-                goto last_state_display_freeze;
+                solved = true;
+                goto end_loop;
             }
             // ---
 
@@ -403,7 +412,6 @@ void run_algorithm_with_display(int level_num, double wait_seconds)
                             // so there's no point to separate update_drawing and draw functions :/
                             // my whole display.c design intention was "update only data when we need to but draw at each iteration even with no updates"
                             // that means there is a lot of useless drawing cache variables
-                            WaitTime(wait_seconds);
                             goto next_piece;
                         }
                         piece->current_rotation_state = 0;
@@ -419,22 +427,33 @@ void run_algorithm_with_display(int level_num, double wait_seconds)
             backtrack_iteration = true;
         }
     }
-    // case where there is no solution at all
-    // the algorithm went through all possible combinations
-    printf("No solution found...\n");
 
-last_state_display_freeze:
+end_loop:
     end = clock();
     time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-    printf("Solving time : %.3f seconds\n", time_spent);
-    printf("Number of valid boards : %d\n", valid_board_count);
 
-    // temp : sum up for automated runs :
-    // printf("%d | %d", valid_board_count, (int)(time_spent * 1000));
+#ifndef AUTOMATED_RUNS
+
+    if (solved)
+        printf("Solution found !\n");
+    else
+        printf("No solution found...\n");
+    printf("Time : %.3f seconds\n", time_spent);
+    printf("Number of valid boards : %d\n", valid_board_count);
 
     // display last board state until user close the window
     while (!WindowShouldClose())
         draw(board, level_num_str);
+
+#else
+    printf("%3d : ", level_num);
+    if (solved)
+        printf("solved -> ");
+    else
+        printf("unsolved -> ");
+    printf("%d | %d\n", valid_board_count, (int)(time_spent * 1000));
+
+#endif
 
 quit_algorithm:
     CloseWindow();
@@ -461,7 +480,7 @@ void run_algorithm_without_display(int level_num)
     Board *board = init_board(level_hints);
 
     // Preprocessed constants of current setup
-    StartCombinations start_combinations = determine_start_combinations(board, level_hints);
+    StartCombinations start_combinations = determine_start_combinations(board);
 
     // data placeholders for each combination test
     int piece_idx_priority_array[NB_OF_PIECES];
@@ -489,6 +508,7 @@ void run_algorithm_without_display(int level_num)
     // convenience placeholder variables used in the loop
     Piece *piece;
     bool backtrack_iteration = false;
+    bool solved = false;
 
     // Updating and drawing loop for algorithm visualization
     for (int combination_idx = 0; combination_idx < start_combinations.nb_of_combinations; combination_idx++)
@@ -498,7 +518,7 @@ void run_algorithm_without_display(int level_num)
         // and also which piece sides it can play, as a combination is the current set of chosen point piece, they only can play their side with a point
         // other pieces are forced to play their sides without a point (as we can't add point tiles that don't belong to level hints, it is written in gamerules)
         // the algorithm can work without this last informations, but it is meant to skip obviously useless iterations
-        load_combination_data(board, &start_combinations, level_hints, combination_idx, piece_idx_priority_array, &nb_of_playable_pieces, playable_side_per_piece_idx_mask);
+        load_combination_data(board, &start_combinations, combination_idx, piece_idx_priority_array, &nb_of_playable_pieces, playable_side_per_piece_idx_mask);
 
         // Setup the exploration of the current combination
         piece_selected = 0;
@@ -519,8 +539,8 @@ void run_algorithm_without_display(int level_num)
             else if (piece_selected == nb_of_playable_pieces)
             {
                 // case where the successfully added the last piece to the board
-                // printf("Solution found !\n");
-                goto last_state_display_freeze;
+                solved = true;
+                goto end_loop;
             }
             // ---
 
@@ -590,18 +610,19 @@ void run_algorithm_without_display(int level_num)
             backtrack_iteration = true;
         }
     }
-    // case where there is no solution at all
-    // the algorithm went through all possible combinations
-    // printf("No solution found...\n");
 
-last_state_display_freeze:
+end_loop:
     end = clock();
     time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-    printf("Solving time : %.3f seconds\n", time_spent);
-    printf("Number of valid boards : %d\n", valid_board_count);
 
-    // temp : sum up for automated runs :
-    // printf("%d | %d ", valid_board_count, (int)(time_spent * 1000));
+#ifndef AUTOMATED_RUNS
+
+    if (solved)
+        printf("Solution found!\n");
+    else
+        printf("No solution found...\n");
+    printf("Time : %.3f seconds\n", time_spent);
+    printf("Number of valid boards : %d\n", valid_board_count);
 
     // Display only the last board state
     char level_num_str[4];
@@ -612,6 +633,17 @@ last_state_display_freeze:
         draw(board, level_num_str);
 
     CloseWindow();
+
+#else
+    printf("%3d : ", level_num);
+    if (solved)
+        printf("solved -> ");
+    else
+        printf("unsolved -> ");
+    printf("%d | %d\n", valid_board_count, (int)(time_spent * 1000));
+
+#endif
+
     free_board(board);
     free(level_hints);
 }

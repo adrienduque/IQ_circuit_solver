@@ -23,6 +23,9 @@ release : CFLAGS=-Wall -O2 -DNDEBUG
 # release : clean
 release : $(BIN)
 
+automated : CFLAGS=-Wall -O2 -DNDEBUG -DAUTOMATED_RUNS
+automated : $(BIN)
+
 run : $(BIN)
 	./$(BIN)
 
