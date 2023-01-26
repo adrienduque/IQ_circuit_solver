@@ -137,7 +137,7 @@ static StartCombinations determine_start_combinations(Board *board)
     // do only this computation once, because it is the same for every level
     if (nb_of_point_pieces == 0)
     {
-        for (piece_idx = 0; piece_idx < NB_OF_PIECES; piece_idx++)
+        for (piece_idx = 0; piece_idx < NB_OF_PIECES; piece_idx++) // @todo
         {
             piece = (board->piece_array) + piece_idx;
             if (piece->has_point_on_first_side)
@@ -204,7 +204,7 @@ static void load_combination_data(Board *board, StartCombinations *start_combina
     }
 
     // add the remaining pieces (all pieces except those who are already in the list or already played by level hints)
-    for (piece_idx = 0; piece_idx < NB_OF_PIECES; piece_idx++)
+    for (piece_idx = 0; piece_idx < NB_OF_PIECES; piece_idx++) //@todo
     {
         piece_found = false;
         for (i = 0; i < board->nb_of_open_obligatory_point_tiles; i++)
@@ -380,7 +380,7 @@ void run_algorithm_with_display(int level_num, int FPS)
                         if (is_position_already_occupied(board, &base_pos))
                             continue;
 
-                        for (rotation_state = piece->current_rotation_state; rotation_state < NB_OF_DIRECTIONS; rotation_state++)
+                        for (rotation_state = piece->current_rotation_state; rotation_state < piece->side_array[side_idx].max_nb_of_rotations; rotation_state++)
                         {
                             if (WindowShouldClose())
                                 goto quit_algorithm;
@@ -571,7 +571,7 @@ void run_algorithm_without_display(int level_num)
                         if (is_position_already_occupied(board, &base_pos))
                             continue;
 
-                        for (rotation_state = piece->current_rotation_state; rotation_state < NB_OF_DIRECTIONS; rotation_state++)
+                        for (rotation_state = piece->current_rotation_state; rotation_state < piece->side_array[side_idx].max_nb_of_rotations; rotation_state++)
                         {
 
                             // when we backtrack, we need to increment the previous piece overall position by 1

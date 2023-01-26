@@ -40,12 +40,5 @@ int main(void)
 /*
 Note on a slowed run :
 
-We could limit the number of rotations of full empty sides (the line pieces that are playable on their)
-because of symmetry reasons, we are testing the same boards twice (and all sub-boards)
 
-@todo -> make the empty side, the last playable side (side_idx = 2)
-and in the solving algorithm, assume that if side_idx == 2 it is an empty side, and limit its rotations
-+ warning in piece_data.h where I talk about custom pieces, because we have a strong assumption on side_idx == 2 now
-
-+ these are the first played piece, and they all present their empty side first, it's not very fun to watch
 */

@@ -119,6 +119,10 @@ typedef struct Side
     int susceptible_loop_generator_missing_connection_tile_idx_array[MAX_NB_OF_DISTINCT_PATH_PER_SIDE];
     int nb_of_susceptible_loop_generator_tiles;
 
+    int max_nb_of_rotations; // if we need to limit this specific this nb of rotations in the search algorithm
+    // default to NB_OF_DIRECTIONS (4), but usefull if the side is symmetric, we can reduce the max_nb_of_rotations to reduce duplicate valid boards
+    // for the real game pieces, Line pieces have a side full of empty tiles, we only need to test them horizontally and vertically for example
+
     // ----------- Live data part -----------------
     //(None until now)
 } Side;

@@ -44,17 +44,7 @@ Piece *get_piece_array()
                 .border_tile_relative_pos_array = {{-1, 0}, {0, -1}, {1, -1}, {2, 0}, {1, 1}, {0, 1}},
                 .outline_tile_relative_pos_array = {{0, 0}, {2, 0}, {2, 1}, {0, 1}, {0, 0}},
                 .nb_of_susceptible_loop_generator_tiles = 0,
-            },
-            {
-                .nb_of_tiles = 2,
-                .nb_of_missing_connection_tiles = 0,
-                .tile_array = {
-                    {.tile_type = empty, .relative_pos = {0, 0}, .nb_of_connections = 0},
-                    {.tile_type = empty, .relative_pos = {1, 0}, .nb_of_connections = 0},
-                },
-                .border_tile_relative_pos_array = {{-1, 0}, {0, -1}, {1, -1}, {2, 0}, {1, 1}, {0, 1}},
-                .outline_tile_relative_pos_array = {{0, 0}, {2, 0}, {2, 1}, {0, 1}, {0, 0}},
-                .nb_of_susceptible_loop_generator_tiles = 0,
+                .max_nb_of_rotations = NB_OF_DIRECTIONS,
             },
             {
                 .nb_of_tiles = 2,
@@ -72,7 +62,21 @@ Piece *get_piece_array()
                 .outline_tile_relative_pos_array = {{0, 0}, {2, 0}, {2, 1}, {0, 1}, {0, 0}},
                 .susceptible_loop_generator_missing_connection_tile_idx_array = {0},
                 .nb_of_susceptible_loop_generator_tiles = 1,
-            }}};
+                .max_nb_of_rotations = NB_OF_DIRECTIONS,
+            },
+            {
+                .nb_of_tiles = 2,
+                .nb_of_missing_connection_tiles = 0,
+                .tile_array = {
+                    {.tile_type = empty, .relative_pos = {0, 0}, .nb_of_connections = 0},
+                    {.tile_type = empty, .relative_pos = {1, 0}, .nb_of_connections = 0},
+                },
+                .border_tile_relative_pos_array = {{-1, 0}, {0, -1}, {1, -1}, {2, 0}, {1, 1}, {0, 1}},
+                .outline_tile_relative_pos_array = {{0, 0}, {2, 0}, {2, 1}, {0, 1}, {0, 0}},
+                .nb_of_susceptible_loop_generator_tiles = 0,
+                .max_nb_of_rotations = 2,
+            },
+        }};
 
     piece_array[LINE2_2] = (Piece){
         .name = "Line2 2",
@@ -94,17 +98,7 @@ Piece *get_piece_array()
                 .border_tile_relative_pos_array = {{-1, 0}, {0, -1}, {1, -1}, {2, 0}, {1, 1}, {0, 1}},
                 .outline_tile_relative_pos_array = {{0, 0}, {2, 0}, {2, 1}, {0, 1}, {0, 0}},
                 .nb_of_susceptible_loop_generator_tiles = 0,
-            },
-            {
-                .nb_of_tiles = 2,
-                .nb_of_missing_connection_tiles = 0,
-                .tile_array = {
-                    {.tile_type = empty, .relative_pos = {0, 0}, .nb_of_connections = 0},
-                    {.tile_type = empty, .relative_pos = {1, 0}, .nb_of_connections = 0},
-                },
-                .border_tile_relative_pos_array = {{-1, 0}, {0, -1}, {1, -1}, {2, 0}, {1, 1}, {0, 1}},
-                .outline_tile_relative_pos_array = {{0, 0}, {2, 0}, {2, 1}, {0, 1}, {0, 0}},
-                .nb_of_susceptible_loop_generator_tiles = 0,
+                .max_nb_of_rotations = NB_OF_DIRECTIONS,
             },
             {
                 .nb_of_tiles = 2,
@@ -121,6 +115,19 @@ Piece *get_piece_array()
                 .outline_tile_relative_pos_array = {{0, 0}, {2, 0}, {2, 1}, {0, 1}, {0, 0}},
                 .susceptible_loop_generator_missing_connection_tile_idx_array = {0},
                 .nb_of_susceptible_loop_generator_tiles = 1,
+                .max_nb_of_rotations = NB_OF_DIRECTIONS,
+            },
+            {
+                .nb_of_tiles = 2,
+                .nb_of_missing_connection_tiles = 0,
+                .tile_array = {
+                    {.tile_type = empty, .relative_pos = {0, 0}, .nb_of_connections = 0},
+                    {.tile_type = empty, .relative_pos = {1, 0}, .nb_of_connections = 0},
+                },
+                .border_tile_relative_pos_array = {{-1, 0}, {0, -1}, {1, -1}, {2, 0}, {1, 1}, {0, 1}},
+                .outline_tile_relative_pos_array = {{0, 0}, {2, 0}, {2, 1}, {0, 1}, {0, 0}},
+                .nb_of_susceptible_loop_generator_tiles = 0,
+                .max_nb_of_rotations = 2,
             },
         },
     };
@@ -145,18 +152,7 @@ Piece *get_piece_array()
                 .border_tile_relative_pos_array = {{-1, 0}, {0, -1}, {1, -1}, {2, -1}, {3, 0}, {2, 1}, {1, 1}, {0, 1}},
                 .outline_tile_relative_pos_array = {{0, 0}, {3, 0}, {3, 1}, {0, 1}, {0, 0}},
                 .nb_of_susceptible_loop_generator_tiles = 0,
-            },
-            {
-                .nb_of_tiles = 3,
-                .nb_of_missing_connection_tiles = 0,
-                .tile_array = {
-                    {.tile_type = empty, .relative_pos = {0, 0}, .nb_of_connections = 0},
-                    {.tile_type = empty, .relative_pos = {1, 0}, .nb_of_connections = 0},
-                    {.tile_type = empty, .relative_pos = {2, 0}, .nb_of_connections = 0},
-                },
-                .border_tile_relative_pos_array = {{-1, 0}, {0, -1}, {1, -1}, {2, -1}, {3, 0}, {2, 1}, {1, 1}, {0, 1}},
-                .outline_tile_relative_pos_array = {{0, 0}, {3, 0}, {3, 1}, {0, 1}, {0, 0}},
-                .nb_of_susceptible_loop_generator_tiles = 0,
+                .max_nb_of_rotations = NB_OF_DIRECTIONS,
             },
             {
                 .nb_of_tiles = 3,
@@ -174,6 +170,20 @@ Piece *get_piece_array()
                 .outline_tile_relative_pos_array = {{0, 0}, {3, 0}, {3, 1}, {0, 1}, {0, 0}},
                 .susceptible_loop_generator_missing_connection_tile_idx_array = {0},
                 .nb_of_susceptible_loop_generator_tiles = 1,
+                .max_nb_of_rotations = NB_OF_DIRECTIONS,
+            },
+            {
+                .nb_of_tiles = 3,
+                .nb_of_missing_connection_tiles = 0,
+                .tile_array = {
+                    {.tile_type = empty, .relative_pos = {0, 0}, .nb_of_connections = 0},
+                    {.tile_type = empty, .relative_pos = {1, 0}, .nb_of_connections = 0},
+                    {.tile_type = empty, .relative_pos = {2, 0}, .nb_of_connections = 0},
+                },
+                .border_tile_relative_pos_array = {{-1, 0}, {0, -1}, {1, -1}, {2, -1}, {3, 0}, {2, 1}, {1, 1}, {0, 1}},
+                .outline_tile_relative_pos_array = {{0, 0}, {3, 0}, {3, 1}, {0, 1}, {0, 0}},
+                .nb_of_susceptible_loop_generator_tiles = 0,
+                .max_nb_of_rotations = 2,
             },
         },
     };
@@ -198,18 +208,7 @@ Piece *get_piece_array()
                 .border_tile_relative_pos_array = {{-1, 0}, {0, -1}, {1, -1}, {2, -1}, {3, 0}, {2, 1}, {1, 1}, {0, 1}},
                 .outline_tile_relative_pos_array = {{0, 0}, {3, 0}, {3, 1}, {0, 1}, {0, 0}},
                 .nb_of_susceptible_loop_generator_tiles = 0,
-            },
-            {
-                .nb_of_tiles = 3,
-                .nb_of_missing_connection_tiles = 0,
-                .tile_array = {
-                    {.tile_type = empty, .relative_pos = {0, 0}, .nb_of_connections = 0},
-                    {.tile_type = empty, .relative_pos = {1, 0}, .nb_of_connections = 0},
-                    {.tile_type = empty, .relative_pos = {2, 0}, .nb_of_connections = 0},
-                },
-                .border_tile_relative_pos_array = {{-1, 0}, {0, -1}, {1, -1}, {2, -1}, {3, 0}, {2, 1}, {1, 1}, {0, 1}},
-                .outline_tile_relative_pos_array = {{0, 0}, {3, 0}, {3, 1}, {0, 1}, {0, 0}},
-                .nb_of_susceptible_loop_generator_tiles = 0,
+                .max_nb_of_rotations = NB_OF_DIRECTIONS,
             },
             {
                 .nb_of_tiles = 3,
@@ -227,6 +226,20 @@ Piece *get_piece_array()
                 .outline_tile_relative_pos_array = {{0, 0}, {3, 0}, {3, 1}, {0, 1}, {0, 0}},
                 .susceptible_loop_generator_missing_connection_tile_idx_array = {0},
                 .nb_of_susceptible_loop_generator_tiles = 1,
+                .max_nb_of_rotations = NB_OF_DIRECTIONS,
+            },
+            {
+                .nb_of_tiles = 3,
+                .nb_of_missing_connection_tiles = 0,
+                .tile_array = {
+                    {.tile_type = empty, .relative_pos = {0, 0}, .nb_of_connections = 0},
+                    {.tile_type = empty, .relative_pos = {1, 0}, .nb_of_connections = 0},
+                    {.tile_type = empty, .relative_pos = {2, 0}, .nb_of_connections = 0},
+                },
+                .border_tile_relative_pos_array = {{-1, 0}, {0, -1}, {1, -1}, {2, -1}, {3, 0}, {2, 1}, {1, 1}, {0, 1}},
+                .outline_tile_relative_pos_array = {{0, 0}, {3, 0}, {3, 1}, {0, 1}, {0, 0}},
+                .nb_of_susceptible_loop_generator_tiles = 0,
+                .max_nb_of_rotations = 2,
             },
         },
     };
@@ -254,6 +267,7 @@ Piece *get_piece_array()
                 .outline_tile_relative_pos_array = {{0, 0}, {1, 0}, {1, 1}, {2, 1}, {2, 2}, {0, 2}, {0, 0}},
                 .susceptible_loop_generator_missing_connection_tile_idx_array = {1},
                 .nb_of_susceptible_loop_generator_tiles = 1,
+                .max_nb_of_rotations = NB_OF_DIRECTIONS,
             },
             {
                 .nb_of_tiles = 3,
@@ -272,6 +286,7 @@ Piece *get_piece_array()
                 .outline_tile_relative_pos_array = {{0, 0}, {1, 0}, {1, 2}, {-1, 2}, {-1, 1}, {0, 1}, {0, 0}},
                 .susceptible_loop_generator_missing_connection_tile_idx_array = {0},
                 .nb_of_susceptible_loop_generator_tiles = 1,
+                .max_nb_of_rotations = NB_OF_DIRECTIONS,
             },
         },
     };
@@ -296,6 +311,7 @@ Piece *get_piece_array()
                 .border_tile_relative_pos_array = {{-1, 0}, {0, -1}, {1, 0}, {2, 1}, {1, 2}, {0, 2}, {-1, 1}},
                 .outline_tile_relative_pos_array = {{0, 0}, {1, 0}, {1, 1}, {2, 1}, {2, 2}, {0, 2}, {0, 0}},
                 .nb_of_susceptible_loop_generator_tiles = 0,
+                .max_nb_of_rotations = NB_OF_DIRECTIONS,
 
             },
             {
@@ -314,6 +330,7 @@ Piece *get_piece_array()
                 .outline_tile_relative_pos_array = {{0, 0}, {1, 0}, {1, 2}, {-1, 2}, {-1, 1}, {0, 1}, {0, 0}},
                 .susceptible_loop_generator_missing_connection_tile_idx_array = {0},
                 .nb_of_susceptible_loop_generator_tiles = 1,
+                .max_nb_of_rotations = NB_OF_DIRECTIONS,
             },
         },
     };
@@ -342,6 +359,7 @@ Piece *get_piece_array()
                 .outline_tile_relative_pos_array = {{0, 0}, {2, 0}, {2, 2}, {0, 2}, {0, 0}},
                 .susceptible_loop_generator_missing_connection_tile_idx_array = {1},
                 .nb_of_susceptible_loop_generator_tiles = 1,
+                .max_nb_of_rotations = NB_OF_DIRECTIONS,
             },
             {
                 .nb_of_tiles = 4,
@@ -360,6 +378,7 @@ Piece *get_piece_array()
                 .outline_tile_relative_pos_array = {{0, 0}, {2, 0}, {2, 2}, {0, 2}, {0, 0}},
                 .susceptible_loop_generator_missing_connection_tile_idx_array = {0},
                 .nb_of_susceptible_loop_generator_tiles = 1,
+                .max_nb_of_rotations = NB_OF_DIRECTIONS,
             },
         },
     };
@@ -387,6 +406,7 @@ Piece *get_piece_array()
                 .outline_tile_relative_pos_array = {{0, 0}, {1, 0}, {1, 2}, {2, 2}, {2, 3}, {0, 3}, {0, 0}},
                 .susceptible_loop_generator_missing_connection_tile_idx_array = {0},
                 .nb_of_susceptible_loop_generator_tiles = 1,
+                .max_nb_of_rotations = NB_OF_DIRECTIONS,
             },
             {
                 .nb_of_tiles = 4,
@@ -405,6 +425,7 @@ Piece *get_piece_array()
                 .outline_tile_relative_pos_array = {{0, 0}, {1, 0}, {1, 3}, {-1, 3}, {-1, 2}, {0, 2}, {0, 0}},
                 .susceptible_loop_generator_missing_connection_tile_idx_array = {0},
                 .nb_of_susceptible_loop_generator_tiles = 1,
+                .max_nb_of_rotations = NB_OF_DIRECTIONS,
             },
         },
     };
@@ -432,6 +453,7 @@ Piece *get_piece_array()
                 .outline_tile_relative_pos_array = {{-1, 0}, {2, 0}, {2, 1}, {1, 1}, {1, 2}, {0, 2}, {0, 1}, {-1, 1}, {-1, 0}},
                 .susceptible_loop_generator_missing_connection_tile_idx_array = {0},
                 .nb_of_susceptible_loop_generator_tiles = 1,
+                .max_nb_of_rotations = NB_OF_DIRECTIONS,
             },
             {
                 .nb_of_tiles = 4,
@@ -452,6 +474,7 @@ Piece *get_piece_array()
                 .outline_tile_relative_pos_array = {{-1, 0}, {2, 0}, {2, 1}, {1, 1}, {1, 2}, {0, 2}, {0, 1}, {-1, 1}, {-1, 0}},
                 .susceptible_loop_generator_missing_connection_tile_idx_array = {0, 1},
                 .nb_of_susceptible_loop_generator_tiles = 2,
+                .max_nb_of_rotations = NB_OF_DIRECTIONS,
             },
         },
     };
@@ -477,6 +500,7 @@ Piece *get_piece_array()
                 .border_tile_relative_pos_array = {{-1, 0}, {0, -1}, {1, -1}, {2, 0}, {1, 1}, {0, 2}, {-1, 2}, {-2, 1}},
                 .outline_tile_relative_pos_array = {{0, 0}, {2, 0}, {2, 1}, {1, 1}, {1, 2}, {-1, 2}, {-1, 1}, {0, 1}, {0, 0}},
                 .nb_of_susceptible_loop_generator_tiles = 0,
+                .max_nb_of_rotations = NB_OF_DIRECTIONS,
             },
             {
                 .nb_of_tiles = 4,
@@ -495,6 +519,7 @@ Piece *get_piece_array()
                 .outline_tile_relative_pos_array = {{-1, 0}, {1, 0}, {1, 1}, {2, 1}, {2, 2}, {0, 2}, {0, 1}, {-1, 1}, {-1, 0}},
                 .susceptible_loop_generator_missing_connection_tile_idx_array = {0},
                 .nb_of_susceptible_loop_generator_tiles = 1,
+                .max_nb_of_rotations = NB_OF_DIRECTIONS,
             },
         },
     };
