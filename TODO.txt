@@ -32,4 +32,6 @@ Make another mode where, instead of launching the solving algorithm, we can play
     (like adding a description of controls on the right of the board display) + buttons to reset level and launch algorithm
     + slowed version of solving algorithm
 
+    or maybe I can have a slider to change the speed in real time ? or like +- buttons, or an input text box for fps ?
+
     + SetWindowIcon

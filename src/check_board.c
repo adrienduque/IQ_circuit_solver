@@ -389,49 +389,147 @@ static bool check_no_dead_ends(Board *board)
 // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-/**
- * @todo new check idea in addition to those in python project :
- * if the double missing connection still exist after its corresponding piece has been played
- * we know for a fact that no other piece can fill it and thus, the board is discarded
- *
- * I already kinda done it in the comments below, it has to be redesign to check only the tiles of the last added piece
- */
+// -------------- Helper functions of "check_double_missing_connections" -----------------------------------------------------------
 
-// static bool check_if_double_missing_connection_is_still_fillable(Board *board, Tile *tile_stack)
-// {
-//     // first identify the type of double missing connection
-//     static Direction connection_direction_array[2];
-//     static int connection_idx;
-//     static bool is_line_shape;
-//     static Tile *temp_tile = NULL;
+static bool is_open_double_missing_connection_tile(Tile *tile_stack)
+{
+    static Tile *temp_tile;
+    static int nb;
 
-//     temp_tile = tile_stack;
-//     connection_idx = 0;
-//     while (temp_tile != UNDEFINED_TILE)
-//     {
-//         if (temp_tile->tile_type = missing_connection)
-//         {
-//             connection_direction_array[connection_idx] = temp_tile->connection_direction_array[0];
-//             connection_idx++;
-//         }
-//         temp_tile = temp_tile->next;
-//     }
+    nb = 0;
+    temp_tile = tile_stack;
+    while (temp_tile != UNDEFINED_TILE)
+    {
+        if (temp_tile->tile_type != missing_connection)
+            return false; // it's already filled
+        else
+            nb++;
 
-//     // Assuming the directions of missing connections are different, do their sum is a bend-shape or a line-shape
-//     // only 2 case where the shape formed by the 2 directions can be a line : (RIGHT:0,LEFT:2) (means horizontal line) and (DOWN:1,UP:3) (means vertical line)
-//     // otherwise it's a bend shape
-//     is_line_shape = (abs((connection_direction_array[0]) - (connection_direction_array[1]))) == 2;
+        temp_tile = temp_tile->next;
+    }
 
-//     // A line-shape double missing connection tile can only exist if line2 2 piece has not been played yet
-//     if (is_line_shape && (board->has_line2_2_been_added))
-//         return false;
+    return (nb == 2);
+}
 
-//     // A bend-shape double missing connection tile can only exist if T-piece has not been played yet
-//     if (!is_line_shape && (board->has_T_piece_been_added))
-//         return false;
+// if the double missing connection still exist after its corresponding piece has been played
+// we know for a fact that no other piece can fill it and thus, the board is discarded
+// returns -1 if it's not a open double missing connection
+// returns 0 if this is the case and can't be filled anymore
+// returns 1 if this is the case but can still can be filled
+static int check_if_double_missing_connection_is_still_fillable(Board *board, Tile *tile_stack)
+{
 
-//     return true;
-// }
+    // the input tile_stack can be in any state
+
+    if (tile_stack == UNDEFINED_TILE)
+        return -1;
+
+    static Direction connection_direction_array[2];
+    static int connection_idx;
+    static bool is_line_shape;
+    static Tile *temp_tile = NULL;
+
+    // first identify the type of double missing connection
+    // by collecting connection directions of each missing connection tile in an array
+    temp_tile = tile_stack;
+    connection_idx = 0;
+    while (temp_tile != UNDEFINED_TILE)
+    {
+        if (temp_tile->tile_type != missing_connection)
+            return -1; // it's already filled
+        else
+        {
+            connection_direction_array[connection_idx] = temp_tile->connection_direction_array[0];
+            connection_idx++;
+        }
+        temp_tile = temp_tile->next;
+    }
+
+    if (connection_idx < 2)
+        return -1; // it's not a double missing connection
+
+    // Assuming the directions of missing connections are different, do their sum is a bend-shape or a line-shape
+    // only 2 case where the shape formed by the 2 directions can be a line : (RIGHT:0,LEFT:2) (means horizontal line) and (DOWN:1,UP:3) (means vertical line)
+    // otherwise it's a bend shape
+    is_line_shape = (abs((connection_direction_array[0]) - (connection_direction_array[1]))) == 2;
+
+    // A line-shape double missing connection tile can only exist if line2 2 piece has not been played yet
+    if (is_line_shape && (board->has_line2_2_been_added))
+        return 0;
+
+    // A bend-shape double missing connection tile can only exist if T-piece has not been played yet
+    if (!is_line_shape && (board->has_T_piece_been_added))
+        return 0;
+
+    return 1;
+}
+
+// -------------- Main function ---------------------------------------------------------------------------------
+
+// the pre-adding checks already invalidate boards that have line2 2 played or T piece played
+// if the last added piece creates an open double missing connection tile, corresponding to the already played piece
+// Here, we want to check the other way, when we create valid double connection tiles by adding piece
+// Are they still existing after the corresponding piece has been played ?
+// if yes -> it means that the piece didn't fulfill the double missing connection, and the board is not valid.
+static bool check_double_missing_connections(Board *board, Piece *piece)
+{
+    static Side *side = NULL;
+    static int tile_idx, return_value, i;
+    static Tile *tile, *tile_stack;
+
+    // we check previously recorded open double missing connections
+    // and record the new missing connection tiles from the added piece, if they are open double missing connection tiles
+    // I'm actually using the classic static keyword behavior this time
+
+    static Vector2_int open_double_missing_connection_pos_array[MAX_NB_OF_DOUBLE_MISSING_CONNECTION_TIlES_ON_BOARD];
+    static int nb_of_open_double_missing_connections = 0, temp_nb;
+
+    // updating previously added double missing connection tiles
+    temp_nb = nb_of_open_double_missing_connections;
+    for (tile_idx = nb_of_open_double_missing_connections - 1; tile_idx >= 0; tile_idx--)
+    {
+        tile_stack = board->tile_matrix[open_double_missing_connection_pos_array[tile_idx].i][open_double_missing_connection_pos_array[tile_idx].j];
+
+        return_value = check_if_double_missing_connection_is_still_fillable(board, tile_stack);
+
+        if (return_value == 0)
+            return false; // an open missing connection can't be filled anymore
+
+        if (return_value == -1)
+            temp_nb--; // we have to remove this tile from the recorded ones, as it has been filled or other, it's not part of the list anymore
+    }
+    nb_of_open_double_missing_connections = temp_nb;
+
+    // recording the new missing connection tiles added by the piece
+    side = piece->side_array + piece->current_side_idx;
+    for (tile_idx = 0; tile_idx < side->nb_of_missing_connection_tiles; tile_idx++)
+    {
+        tile = side->missing_connection_tile_array + tile_idx;
+        tile_stack = board->tile_matrix[tile->absolute_pos.i][tile->absolute_pos.j];
+
+        if (!is_open_double_missing_connection_tile(tile_stack))
+            continue;
+
+        // check if this emplacement is not already in the recorded ones
+        for (i = 0; i < nb_of_open_double_missing_connections; i++)
+        {
+            if (are_pos_equal(&(tile->absolute_pos), &(open_double_missing_connection_pos_array[i])))
+                goto outer_loop_continue;
+        }
+
+        if (nb_of_open_double_missing_connections == MAX_NB_OF_DOUBLE_MISSING_CONNECTION_TIlES_ON_BOARD)
+            return false; // there can't be more than 2 double missing connection on the board at a time, if this is the case, the board is not valid
+
+        // add the current tile_stack to the recorded ones
+        open_double_missing_connection_pos_array[nb_of_open_double_missing_connections].i = tile->absolute_pos.i;
+        open_double_missing_connection_pos_array[nb_of_open_double_missing_connections].j = tile->absolute_pos.j;
+        nb_of_open_double_missing_connections++;
+
+    outer_loop_continue:
+    }
+
+    return true;
+}
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -444,7 +542,7 @@ static bool check_no_dead_ends(Board *board)
 // As soon as one of the check don't pass, function discard all other computation and returns
 // Let the more likely and easy-to-compute checks be in first to cut down more computation
 // Returns int error_code based on the check that didn't pass else 1
-int run_all_checks(Board *board)
+int run_all_checks(Board *board, bool enable_not_worth_checks)
 {
     static Piece *last_added_piece = NULL;
 
@@ -457,6 +555,12 @@ int run_all_checks(Board *board)
     {
         if (!check_no_dead_ends(board))
             return DEAD_END;
+    }
+
+    if (enable_not_worth_checks)
+    {
+        if (!check_double_missing_connections(board, last_added_piece))
+            return DOUBLE_MISSING_CONNECTION_NOT_FILLABLE;
     }
 
     if (!check_no_loops(board, last_added_piece))

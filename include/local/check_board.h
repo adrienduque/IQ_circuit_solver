@@ -10,8 +10,9 @@
 
 #define ISOLATED_EMPTY_TILE -1
 #define DEAD_END -2
-#define LOOP_PATH -3
+#define DOUBLE_MISSING_CONNECTION_NOT_FILLABLE -3
+#define LOOP_PATH -4
 
-int run_all_checks(Board *board);
+int run_all_checks(Board *board, bool enable_not_worth_checks);
 
 #endif

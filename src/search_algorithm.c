@@ -286,11 +286,11 @@ void run_algorithm_with_display(int level_num, int FPS)
     // Functions only needed because we display things
     char level_num_str[4];
     setup_draw(board, level_num, level_num_str);
-    static bool enable_print = false;
+    static bool enable_slow_operations = false;
     if (FPS != 0)
     {
         SetTargetFPS(FPS);
-        enable_print = true;
+        enable_slow_operations = true;
     }
 
     // data placeholders for each combination test
@@ -399,7 +399,7 @@ void run_algorithm_with_display(int level_num, int FPS)
                             // Board pre-adding, adding piece, and post-adding checks
                             if (add_piece_to_board(board, piece_idx, side_idx, base_pos, rotation_state) != 1)
                                 continue;
-                            if (run_all_checks(board) != 1)
+                            if (run_all_checks(board, enable_slow_operations) != 1)
                             {
                                 undo_last_piece_adding(board);
                                 continue;
@@ -408,7 +408,7 @@ void run_algorithm_with_display(int level_num, int FPS)
                             update_piece_all_drawing(piece, false);
                             piece_selected++;
                             valid_board_count++;
-                            if (enable_print)
+                            if (enable_slow_operations)
                                 printf("new valid board found ! %d\n", valid_board_count);
                             draw(board, level_num_str); // draw only when new board found to make everything faster ? -> this is so fast wtf
                             // so there's no point to separate update_drawing and draw functions :/
@@ -588,7 +588,7 @@ void run_algorithm_without_display(int level_num)
                             // Board pre-adding, adding piece, and post-adding checks
                             if (add_piece_to_board(board, piece_idx, side_idx, base_pos, rotation_state) != 1)
                                 continue;
-                            if (run_all_checks(board) != 1)
+                            if (run_all_checks(board, false) != 1)
                             {
                                 undo_last_piece_adding(board);
                                 continue;

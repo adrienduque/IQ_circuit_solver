@@ -230,12 +230,20 @@ void print_check_result(int return_result)
         return;
     }
     printf("2) OK    : No dead end created.\n");
-    if (return_result == LOOP_PATH)
+
+    if (return_result == DOUBLE_MISSING_CONNECTION_NOT_FILLABLE)
     {
-        printf("3) Error : Adding this piece creates a loop path, which is not allowed by game rules.\n");
+        printf("3) Error : Adding this piece induce that a double missing connection tile can't be filled anymore.\n");
         return;
     }
-    printf("3) OK    : No loop path created.\n");
+    printf("3) OK    : No invalid double missing connection created.\n");
+
+    if (return_result == LOOP_PATH)
+    {
+        printf("4) Error : Adding this piece creates a loop path, which is not allowed by game rules.\n");
+        return;
+    }
+    printf("4) OK    : No loop path created.\n");
 
     printf("All checks passed !\n\n");
 }
