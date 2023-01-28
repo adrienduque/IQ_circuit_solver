@@ -1,7 +1,10 @@
-5) Adding other post-adding checks
 
-5.5) Redesigning display.c to update and draw at the same time
-    See comment in "search_algorithm.c" > run_algorithm_with_display
+5)  Maybe have the display of the current priority list next to the board 
+    (the current visualization doesn't show very well the process of switching combinations and piece priority order, specifically for the expert levels)
+    To see every piece at every frame -> call this display only when fps are set (we can maybe link it to the current "run_algorithm_without_display")
+    like checking at the beginning if fps !=0, if this is not the case -> call the "run_algorithm_with_extra_display"
+
+    + distinction between choosen point piece and others in the display next to the board (show the point piece with their point side, and others don't)
 
 6) Polishing project (proofreading comments, readme, release build) 
     -> See other similar projects on github, how do they share their project ?
@@ -35,3 +38,5 @@ Make another mode where, instead of launching the solving algorithm, we can play
     or maybe I can have a slider to change the speed in real time ? or like +- buttons, or an input text box for fps ?
 
     + SetWindowIcon
+
+

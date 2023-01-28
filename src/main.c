@@ -36,9 +36,3 @@ int main(void)
 
     return 0;
 }
-
-/*
-Note on a slowed run :
-
-
-*/

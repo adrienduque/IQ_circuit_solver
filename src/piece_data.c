@@ -20,10 +20,8 @@
 // And there were algorithms to dynamically figure out the rest of the data, as I needed them for board checking
 // I could have made algorithms that run just once and figure init data before the main loop, but manual it is
 
-Piece *get_piece_array()
+void load_piece_array(Piece piece_array[NB_OF_PIECES])
 {
-    Piece *piece_array = malloc(NB_OF_PIECES * sizeof(Piece));
-
     piece_array[LINE2_1] = (Piece){
         .name = "Line2 1",
         .has_point_on_first_side = true,
@@ -523,6 +521,4 @@ Piece *get_piece_array()
             },
         },
     };
-
-    return piece_array;
 }

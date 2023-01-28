@@ -6,8 +6,7 @@
  *
  * @warning pixel display is basically mapped to 2D indexing of tiles by : (px,py) = (i,j) * tile_px_width
  * @see utils.h and utils.c
- * To create a margin between the edge of the display window and the grid drawing, a number of padding tiles is used.
- * The mapping of a tile (i,j) to pixel (px,py), becomes : (px,py) = (i+nb_padding_tile,j+nb_padding_tile) * tile_px_width
+ * And there is an offset to this 2D coordinates to draw the board in the center of the window
  *
  * The same idea of caching is used for drawing data
  * At each different drawing section there is :
@@ -19,12 +18,13 @@
 #include <local/display.h>
 
 // -----------------------------------------------------------------------------------------------------------------------------------------------
-// --------------------------------- Static drawing constants ------------------------------------------------------------------------------------
+// --------------------------------- Drawing constants ------------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------------------------------------------------------------------
 
 // Main global parameters
-static const int tile_px_width = 101;
-static const int nb_padding_tile = 1;
+const int tile_px_width = 101;
+
+static Vector2_int offset_px;
 
 static Color connection_line_color = {212, 175, 55, 255};
 static Color outline_color = {200, 255, 0, 255};
@@ -35,9 +35,6 @@ static const int connection_line_px_thick = grid_line_px_thick;
 // static const int outline_px_thick = tile_px_width / 25;
 static const int outline_px_thick = (int)(tile_px_width * 0.08);
 
-static const int total_px_width = tile_px_width * (BOARD_WIDTH + 2 * nb_padding_tile);
-static const int total_px_height = tile_px_width * (BOARD_HEIGHT + 2 * nb_padding_tile);
-
 static const float bend_circle_radius = (float)(connection_line_px_thick / 2 - 1);
 static const float point_circle_radius = (float)(tile_px_width / 6);
 
@@ -46,25 +43,36 @@ static const float point_circle_radius = (float)(tile_px_width / 6);
 // -----------------------------------------------------------------------------------------------------------------------------------------------
 
 // Function to initialize a raylib window
-void setup_display()
+void setup_display(int window_px_width, int window_px_height)
 {
+    // we have to figure out the offset for the board to display in the center of the screen
+    int half_board_px_height = (int)(BOARD_HEIGHT * tile_px_width / 2);
+    int half_board_px_width = (int)(BOARD_WIDTH * tile_px_width / 2);
+
+    int center_px_x = (int)(window_px_width / 2);
+    int center_px_y = (int)(window_px_height / 2);
+
+    offset_px.i = center_px_x - half_board_px_width;
+    offset_px.j = center_px_y - half_board_px_height;
+
+    // actual initialization of the display
     SetTraceLogLevel(LOG_ERROR);
-    InitWindow(total_px_width, total_px_height, "Raylib Board Visualization");
+    InitWindow(window_px_width, window_px_height, "Raylib Board Visualization");
 }
 
 // Function to initialize a raylib window, can be effectively called once
-void setup_display_once()
+void setup_display_once(int window_px_width, int window_px_height)
 {
 
     static bool is_display_setup = false;
     if (is_display_setup)
         return;
     is_display_setup = true;
-    setup_display();
+    setup_display(window_px_width, window_px_height);
 }
 
 // Function to add on top of raylib library : DrawLineStrip function but with a thickness option
-void DrawLineStripEx(Vector2 *points, int pointCount, float thick, Color color)
+static void DrawLineStripEx(Vector2 *points, int pointCount, float thick, Color color)
 {
     for (int i = 0; i < pointCount - 1; i++)
         DrawLineEx(points[i], points[i + 1], thick, color);
@@ -83,11 +91,11 @@ void draw_grid()
 {
     float pt_x, pt_y, pt1_y, pt2_y, pt1_x, pt2_x;
     Vector2 start_point, end_point;
-    for (int idx = nb_padding_tile; idx <= (BOARD_WIDTH + nb_padding_tile); idx++)
+    for (int idx = 0; idx < BOARD_WIDTH + 1; idx++)
     {
-        pt_x = idx * tile_px_width;
-        pt1_y = nb_padding_tile * tile_px_width;
-        pt2_y = (nb_padding_tile + BOARD_HEIGHT) * tile_px_width;
+        pt_x = (idx * tile_px_width + offset_px.i);
+        pt1_y = offset_px.j;
+        pt2_y = (BOARD_HEIGHT * tile_px_width) + offset_px.j;
         start_point.x = pt_x;
         start_point.y = pt1_y;
         end_point.x = pt_x;
@@ -95,11 +103,11 @@ void draw_grid()
 
         DrawLineEx(start_point, end_point, grid_line_px_thick, GRAY);
     }
-    for (int idx = nb_padding_tile; idx <= (BOARD_HEIGHT + nb_padding_tile); idx++)
+    for (int idx = 0; idx < BOARD_HEIGHT + 1; idx++)
     {
-        pt_y = idx * tile_px_width;
-        pt1_x = nb_padding_tile * tile_px_width;
-        pt2_x = (nb_padding_tile + BOARD_WIDTH) * tile_px_width;
+        pt_y = (idx * tile_px_width) + offset_px.j;
+        pt1_x = offset_px.i;
+        pt2_x = (BOARD_WIDTH * tile_px_width) + offset_px.i;
         start_point.x = pt1_x;
         start_point.y = pt_y;
         end_point.x = pt2_x;
@@ -109,15 +117,16 @@ void draw_grid()
     }
 }
 
-void update_board_grid_drawing(Board *board)
+static void update_board_grid_drawing(Board *board)
 {
     float pt_x, pt_y, pt1_y, pt2_y, pt1_x, pt2_x;
     int current_point_couple_idx = 0;
-    for (int idx = nb_padding_tile; idx <= (BOARD_WIDTH + nb_padding_tile); idx++)
+    for (int idx = 0; idx < BOARD_WIDTH + 1; idx++)
     {
-        pt_x = idx * tile_px_width;
-        pt1_y = nb_padding_tile * tile_px_width;
-        pt2_y = (nb_padding_tile + BOARD_HEIGHT) * tile_px_width;
+        pt_x = (idx * tile_px_width + offset_px.i);
+        pt1_y = offset_px.j;
+        pt2_y = (BOARD_HEIGHT * tile_px_width) + offset_px.j;
+
         board->grid_lines_pt_array[current_point_couple_idx][0].x = pt_x;
         board->grid_lines_pt_array[current_point_couple_idx][0].y = pt1_y;
         board->grid_lines_pt_array[current_point_couple_idx][1].x = pt_x;
@@ -125,11 +134,11 @@ void update_board_grid_drawing(Board *board)
 
         current_point_couple_idx++;
     }
-    for (int idx = nb_padding_tile; idx <= (BOARD_HEIGHT + nb_padding_tile); idx++)
+    for (int idx = 0; idx < BOARD_HEIGHT + 1; idx++)
     {
-        pt_y = idx * tile_px_width;
-        pt1_x = nb_padding_tile * tile_px_width;
-        pt2_x = (nb_padding_tile + BOARD_WIDTH) * tile_px_width;
+        pt_y = (idx * tile_px_width) + offset_px.j;
+        pt1_x = offset_px.i;
+        pt2_x = (BOARD_WIDTH * tile_px_width) + offset_px.i;
 
         board->grid_lines_pt_array[current_point_couple_idx][0].x = pt1_x;
         board->grid_lines_pt_array[current_point_couple_idx][0].y = pt_y;
@@ -140,9 +149,10 @@ void update_board_grid_drawing(Board *board)
     }
 }
 
-void draw_board_grid(Board *board)
+static void draw_board_grid(Board *board)
 {
-    for (int i = 0; i < NB_OF_GRID_LINES; i++)
+    static int i;
+    for (i = 0; i < NB_OF_GRID_LINES; i++)
         DrawLineEx(board->grid_lines_pt_array[i][0], board->grid_lines_pt_array[i][1], grid_line_px_thick, GRAY);
 }
 
@@ -157,16 +167,13 @@ static Vector2_int connections_tip_offset[] = {
     [UP] = {0, -tile_px_width / 2},
 };
 
-void update_tile_drawing(Tile *tile)
+static void update_tile_drawing(Tile *tile)
 {
     static int idx;
     static Direction connection_direction;
 
-    tile->effective_absolute_pos.i = tile->absolute_pos.i + nb_padding_tile;
-    tile->effective_absolute_pos.j = tile->absolute_pos.j + nb_padding_tile;
-
-    tile->top_left_corner_pt.i = tile->effective_absolute_pos.i * tile_px_width;
-    tile->top_left_corner_pt.j = tile->effective_absolute_pos.j * tile_px_width;
+    tile->top_left_corner_pt.i = (tile->absolute_pos.i * tile_px_width) + offset_px.i;
+    tile->top_left_corner_pt.j = (tile->absolute_pos.j * tile_px_width) + offset_px.j;
 
     tile->center_pt.x = tile->top_left_corner_pt.i + tile_px_width / 2;
     tile->center_pt.y = tile->top_left_corner_pt.j + tile_px_width / 2;
@@ -181,7 +188,8 @@ void update_tile_drawing(Tile *tile)
 
 static void draw_tile_color(Tile *tile, Color connection_color)
 {
-    for (int i = 0; i < tile->nb_of_connections; i++)
+    static int i;
+    for (i = 0; i < tile->nb_of_connections; i++)
     {
         DrawLineEx(tile->center_pt, tile->connection_pt_array[i], connection_line_px_thick, connection_color);
     }
@@ -200,7 +208,7 @@ static void draw_tile_color(Tile *tile, Color connection_color)
 
 // shortcut to draw normal tiles with connection color : gold
 // see draw_tile_color
-void draw_tile(Tile *tile)
+static void draw_tile(Tile *tile)
 {
     draw_tile_color(tile, connection_line_color);
 }
@@ -208,13 +216,13 @@ void draw_tile(Tile *tile)
 // shortcut to draw missing connection tiles with connection color : red
 // see draw_tile_color
 // these are separate functions, because I might only use it to debug the data and not use it in the main visualization
-void draw_missing_connection_tile(Tile *tile)
+static void draw_missing_connection_tile(Tile *tile)
 {
     draw_tile_color(tile, RED);
 }
 // --------------------------- Functions to draw border tiles (only in debugging see test_display.c)  --------------------------------------------
 
-void update_piece_border_tiles_drawing(Piece *piece)
+static void update_piece_border_tiles_drawing(Piece *piece)
 {
 
     for (int idx = 0; idx < piece->nb_of_border_tiles; idx++)
@@ -224,8 +232,8 @@ void update_piece_border_tiles_drawing(Piece *piece)
             set_invalid_pos(&(piece->border_tile_effective_absolute_top_left_corner_pt_array[idx]));
             continue;
         }
-        piece->border_tile_effective_absolute_top_left_corner_pt_array[idx].i = (piece->border_tile_absolute_pos_array[idx].i + nb_padding_tile) * tile_px_width;
-        piece->border_tile_effective_absolute_top_left_corner_pt_array[idx].j = (piece->border_tile_absolute_pos_array[idx].j + nb_padding_tile) * tile_px_width;
+        piece->border_tile_effective_absolute_top_left_corner_pt_array[idx].i = (piece->border_tile_absolute_pos_array[idx].i * tile_px_width) + offset_px.i;
+        piece->border_tile_effective_absolute_top_left_corner_pt_array[idx].j = (piece->border_tile_absolute_pos_array[idx].j * tile_px_width) + offset_px.j;
     }
 }
 
@@ -250,7 +258,7 @@ void draw_piece_border_tiles(Piece *piece)
 static Vector2_int outline_edge_correction_values[] = {{0, 0}, {1, 0}, {1, 1}, {0, 1}};
 
 // Function to blit only outline edge points of side at the right emplacement in the board for display
-void update_piece_outline_drawing(Piece *piece)
+static void update_piece_outline_drawing(Piece *piece)
 {
     static Side *side = NULL;
     static Vector2_int temp_pos_before_correction;
@@ -274,12 +282,12 @@ void update_piece_outline_drawing(Piece *piece)
         translate_pos(&(piece->outline_tile_absolute_pos_array[i]), &(outline_edge_correction_values[piece->current_rotation_state]));
 
         // Final data used in draw_piece_outline
-        piece->outline_tile_effective_absolute_top_left_corner_pt_array[i].x = (piece->outline_tile_absolute_pos_array[i].i + nb_padding_tile) * tile_px_width;
-        piece->outline_tile_effective_absolute_top_left_corner_pt_array[i].y = (piece->outline_tile_absolute_pos_array[i].j + nb_padding_tile) * tile_px_width;
+        piece->outline_tile_effective_absolute_top_left_corner_pt_array[i].x = (piece->outline_tile_absolute_pos_array[i].i * tile_px_width) + offset_px.i;
+        piece->outline_tile_effective_absolute_top_left_corner_pt_array[i].y = (piece->outline_tile_absolute_pos_array[i].j * tile_px_width) + offset_px.j;
     }
 }
 
-void draw_piece_outline(Piece *piece)
+static void draw_piece_outline(Piece *piece)
 {
     DrawLineStripEx(piece->outline_tile_effective_absolute_top_left_corner_pt_array, piece->nb_of_outline_tiles, outline_px_thick, outline_color);
 }
@@ -288,21 +296,21 @@ void draw_piece_outline(Piece *piece)
 // ---------------------------------- Convenience functions ------------------------------------------------------
 // ---------------------------------------------------------------------------------------------------------------
 
-void update_tile_array_drawing(Tile *tile_array, int nb_of_tiles)
+static void update_tile_array_drawing(Tile *tile_array, int nb_of_tiles)
 {
     static int i;
     for (i = 0; i < nb_of_tiles; i++)
         update_tile_drawing(tile_array + i);
 }
 
-void draw_tile_array(Tile *tile_array, int nb_of_tiles)
+static void draw_tile_array(Tile *tile_array, int nb_of_tiles)
 {
     static int i;
     for (i = 0; i < nb_of_tiles; i++)
         draw_tile(tile_array + i);
 }
 
-void draw_missing_connection_tile_array(Tile *tile_array, int nb_of_tiles)
+static void draw_missing_connection_tile_array(Tile *tile_array, int nb_of_tiles)
 {
     static int i;
     for (i = 0; i < nb_of_tiles; i++)
@@ -311,21 +319,22 @@ void draw_missing_connection_tile_array(Tile *tile_array, int nb_of_tiles)
 
 // ----------------------
 
-void update_piece_tiles_drawing(Piece *piece)
+static void update_piece_tiles_drawing(Piece *piece, bool show_missing_connection_tiles)
 {
     static Side *side = NULL;
     side = (piece->side_array) + piece->current_side_idx;
 
     update_tile_array_drawing(side->tile_array, side->nb_of_tiles);
-    update_tile_array_drawing(side->missing_connection_tile_array, side->nb_of_missing_connection_tiles);
+    if (show_missing_connection_tiles)
+        update_tile_array_drawing(side->missing_connection_tile_array, side->nb_of_missing_connection_tiles);
 }
 
-void update_board_obligatory_tiles_drawing(Board *board)
+static void update_board_obligatory_tiles_drawing(Board *board)
 {
     update_tile_array_drawing(board->obligatory_tile_array, board->nb_of_obligatory_tiles);
 }
 
-void draw_piece_tiles(Piece *piece, bool show_missing_connection_tiles)
+static void draw_piece_tiles(Piece *piece, bool show_missing_connection_tiles)
 {
     static Side *side = NULL;
     side = (piece->side_array) + piece->current_side_idx;
@@ -337,9 +346,9 @@ void draw_piece_tiles(Piece *piece, bool show_missing_connection_tiles)
 
 // ----------------------
 
-void update_piece_all_drawing(Piece *piece, bool show_border_tiles)
+void update_piece_all_drawing(Piece *piece, bool show_missing_connection_tiles, bool show_border_tiles)
 {
-    update_piece_tiles_drawing(piece);
+    update_piece_tiles_drawing(piece, show_missing_connection_tiles);
     update_piece_outline_drawing(piece);
     if (show_border_tiles)
         update_piece_border_tiles_drawing(piece);
@@ -357,6 +366,15 @@ void draw_piece(Piece *piece, bool show_missing_connection_tiles, bool show_bord
 }
 
 // ----------------------
+
+void update_board_static_drawing(Board *board)
+{
+    update_board_grid_drawing(board);
+    update_board_obligatory_tiles_drawing(board);
+
+    for (int i = 0; i < board->nb_of_added_pieces; i++)
+        update_piece_all_drawing((board->piece_array) + board->added_piece_idx_array[i], false, false);
+}
 
 void draw_board(Board *board, bool show_missing_connection_tiles)
 {
@@ -386,21 +404,19 @@ void draw_level_num(const char *level_num_str)
 // to help me when I'm debugging post-adding check methods
 void draw_pos_text(void)
 {
-    static int corner_offset;
+    static int corner_offset = 10;
 
     static int x;
     static int y;
     static char temp_text[4];
-
-    corner_offset = nb_padding_tile * tile_px_width + 10;
 
     for (int i = 0; i < BOARD_WIDTH; i++)
     {
         for (int j = 0; j < BOARD_HEIGHT; j++)
         {
             sprintf(temp_text, "%d;%d", i, j);
-            x = i * tile_px_width + corner_offset;
-            y = j * tile_px_width + corner_offset;
+            x = i * tile_px_width + offset_px.i + corner_offset;
+            y = j * tile_px_width + offset_px.j + corner_offset;
             DrawText(temp_text, x, y, 20, WHITE);
         }
     }

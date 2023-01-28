@@ -10,11 +10,43 @@
  * that come to mind
  */
 
+/*
+Note on a slowed run : (draft for now)
+
+Researching new board checking methods
+
+// -------------------------------------------------------------------------------
+Explanation of why does it take 50 valid boards to solve level 49 for example :
+it has to go through every start combination
+and the visualization is weird, because starting pieces seems to be like blinking
+this is only because, the algorithm goes through the different combinations very fast (like 1 board per combination)
+and combinations have common pieces, which only have 1 possibility of placement
+
+thus this alogrithm, is not very efficient at solving expert levels, because the information of the level hints is not used properly
+
+I could maybe do another algorithm, only to solve the expert levels
+1) find every possible position for each piece according to level hints
+2) filter out invalid combinations (as soon as 2 pieces are superposed)
+3) the only combination left is the solution, that we can place 1 by 1 for visualization sake
+
+but it's the same operations as the current algorithm, just not shown, it's not worth doing -> rather display the change in combination next to the board, see TODO.txt
+// -------------------------------------------------------------------------------
+
+@todo réfléchir si le setup de board_78_incomplete.png est valide
+est-ce qu'on peut généraliser le fait que 2 connexions vacantes à côté, c'est pas bon ?
+
+-> ça paraît compliqué, mais peut-être en connaissant les inputs / outputs global de nos pièces à l'avance
+genre les considérer que c'est comme des grosses tiles, et elles peuvent placer des connexions vacantes qui ont une position relative fixes les unes aux autres
+et donc si jamais on crée un cluster de connexions vacantes dans la board qui ne ressemble pas à ce qu'on a en banque, on invalide la board?
+(la dernière pièce ajoutée était le L)
+
+je me suis arrêté de regarder les niveaux au ralenti, au 78 du coup
+
+
+*/
+
 #include <local/check_board.h>
 #include <local/astar.h>
-#include <stdio.h> // @todo temp for debugging checking methods
-// all functions features are tested manually through printfs and playing with it in test_display.exe
-
 // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

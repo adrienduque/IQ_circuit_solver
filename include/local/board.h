@@ -30,7 +30,7 @@ typedef struct Board
 
     // ------------------- Board needs pieces to work
 
-    Piece *piece_array;                      // all game pieces informations and their live data cache, see piece_data.h
+    Piece piece_array[NB_OF_PIECES];         // all game pieces informations and their live data cache, see piece_data.h
     int added_piece_idx_array[NB_OF_PIECES]; // array of indexes of game pieces that have been added to the board
     int nb_of_added_pieces;                  // length of matching array
 
@@ -54,7 +54,6 @@ typedef struct Board
 
 // ------------- Board constructor / destructor ----------------------------------------------------------------
 Board *init_board(LevelHints *level_hints);
-void free_board(Board *board);
 
 // ------------- main functions (add and remove pieces from board) ----------------------------------------------
 

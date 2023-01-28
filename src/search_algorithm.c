@@ -247,11 +247,8 @@ static void setup_draw(Board *board, int level_num, char *level_num_str)
 {
     // Functions only needed because we display things
     sprintf(level_num_str, "%d", level_num);
-    setup_display();
-    update_board_grid_drawing(board);
-    update_board_obligatory_tiles_drawing(board);
-    for (int i = 0; i < board->nb_of_added_pieces; i++)
-        update_piece_all_drawing((board->piece_array) + board->added_piece_idx_array[i], false);
+    setup_display((BOARD_WIDTH + 2) * tile_px_width, (BOARD_HEIGHT + 2) * tile_px_width);
+    update_board_static_drawing(board);
 }
 
 static void draw(Board *board, const char *level_num_str)
@@ -405,7 +402,7 @@ void run_algorithm_with_display(int level_num, int FPS)
                                 continue;
                             }
                             // case where we successfully added a piece
-                            update_piece_all_drawing(piece, false);
+                            update_piece_all_drawing(piece, false, false);
                             piece_selected++;
                             valid_board_count++;
                             if (enable_slow_operations)
@@ -459,7 +456,7 @@ end_loop:
 
 quit_algorithm:
     CloseWindow();
-    free_board(board);
+    free(board);
     free(level_hints);
 }
 
@@ -646,6 +643,17 @@ end_loop:
 
 #endif
 
-    free_board(board);
+    free(board);
     free(level_hints);
 }
+
+// -------------------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------------------
+
+//@todo : run_algorithm_with_extra_display

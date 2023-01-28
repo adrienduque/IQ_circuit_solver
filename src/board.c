@@ -53,7 +53,7 @@ Board *init_board(LevelHints *level_hints)
     }
 
     // 3) Get all game pieces informations and their live data cache (loading piece_array)
-    board->piece_array = get_piece_array();
+    load_piece_array(board->piece_array);
 
     // 3.5) pieces position intialization
 
@@ -114,12 +114,6 @@ Board *init_board(LevelHints *level_hints)
     }
 
     return board;
-}
-
-void free_board(Board *board)
-{
-    free(board->piece_array);
-    free(board);
 }
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

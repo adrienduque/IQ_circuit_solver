@@ -54,12 +54,13 @@ char *piece_data_display_test()
 
     */
 
-    Piece *piece_array = get_piece_array();
+    Piece piece_array[NB_OF_PIECES];
+    load_piece_array(piece_array);
 
     int control_keys[] = {KEY_W, KEY_A, KEY_S, KEY_D, KEY_R, KEY_F, KEY_SPACE, KEY_C, KEY_B};
     int nb_of_keys = 9;
 
-    setup_display();
+    setup_display((BOARD_WIDTH + 2) * tile_px_width, (BOARD_HEIGHT + 2) * tile_px_width);
 
     // Initial state displayed and input parameters
     int piece_idx = 0;
@@ -75,7 +76,7 @@ char *piece_data_display_test()
     // initialize piece first state
     blit_piece_main_data(piece, side_idx, base_pos, rotation_state);
     update_piece_border_tiles(piece);
-    update_piece_all_drawing(piece, show_border_tiles);
+    update_piece_all_drawing(piece, show_missing_connection_tiles, show_border_tiles);
 
     printf("Now entering interactive piece display test.\n\n");
     print_piece_pos_infos(piece);
@@ -121,7 +122,7 @@ char *piece_data_display_test()
             // Update all cache live data even the unnecessary ones to simplify debug mode
             blit_piece_main_data(piece, side_idx, base_pos, rotation_state);
             update_piece_border_tiles(piece);
-            update_piece_all_drawing(piece, show_border_tiles);
+            update_piece_all_drawing(piece, show_missing_connection_tiles, show_border_tiles);
 
             system("cls");
             print_piece_pos_infos(piece);
@@ -135,21 +136,8 @@ char *piece_data_display_test()
         EndDrawing();
     }
     CloseWindow();
-    free(piece_array);
 
     return 0;
-}
-
-Board *setup_board_with_level_hints(LevelHints *level_hints, bool show_border_tiles)
-{
-    Board *board = init_board(level_hints);
-    update_board_grid_drawing(board);
-    update_board_obligatory_tiles_drawing(board);
-
-    for (int i = 0; i < board->nb_of_added_pieces; i++)
-        update_piece_all_drawing((board->piece_array) + board->added_piece_idx_array[i], show_border_tiles);
-
-    return board;
 }
 
 bool is_piece_idx_already_played(Board *board, int piece_idx)
@@ -301,7 +289,7 @@ char *board_interactive_display_test()
     system("cls");
     printf("Now entering interactive board display test.\n\n");
 
-    setup_display();
+    setup_display((BOARD_WIDTH + 2) * tile_px_width, (BOARD_HEIGHT + 2) * tile_px_width);
 
     int control_keys[] = {KEY_W, KEY_A, KEY_S, KEY_D, KEY_R, KEY_F, KEY_SPACE, KEY_ENTER, KEY_RIGHT, KEY_LEFT}; // KEY_E is intentionally kept out from this list
     int nb_of_keys = 10;
@@ -315,7 +303,10 @@ char *board_interactive_display_test()
     // main data variables
     int level_num = 85;
     LevelHints *level_hints = get_level_hints(level_num);
-    Board *board = setup_board_with_level_hints(level_hints, show_border_tiles);
+
+    Board *board = init_board(level_hints);
+    update_board_static_drawing(board);
+
     int nb_of_level_pieces = board->nb_of_added_pieces;
 
     // input variables
@@ -338,7 +329,7 @@ char *board_interactive_display_test()
     Piece *piece = (board->piece_array) + piece_idx;
 
     blit_piece_main_data(piece, side_idx, base_pos, rotation_state);
-    update_piece_all_drawing(piece, show_border_tiles);
+    update_piece_all_drawing(piece, show_missing_connection_tiles, show_border_tiles);
     // print_controls();
     print_piece_pos_infos(piece);
 
@@ -407,12 +398,13 @@ char *board_interactive_display_test()
             need_level_reset = false;
             try_adding_piece = false;
             free(level_hints);
-            free_board(board);
+            free(board);
 
             sprintf(level_num_str, "%d", level_num);
 
             level_hints = get_level_hints(level_num);
-            board = setup_board_with_level_hints(level_hints, show_border_tiles);
+            board = init_board(level_hints);
+            update_board_static_drawing(board);
             nb_of_level_pieces = board->nb_of_added_pieces;
 
             // to account for already played pieces (obligatory pieces from level hints)
@@ -444,7 +436,7 @@ char *board_interactive_display_test()
                 if (return_val == 1)
                 {
 
-                    return_val = run_all_checks(board);
+                    return_val = run_all_checks(board, true);
                     print_check_result(return_val);
 
                     if (return_val != 1)
@@ -454,7 +446,7 @@ char *board_interactive_display_test()
                     }
                     else
                     {
-                        update_piece_all_drawing(piece, show_border_tiles);
+                        update_piece_all_drawing(piece, show_missing_connection_tiles, show_border_tiles);
                         // move on to next piece automatically only if adding and checks all passed
                         piece_idx = get_next_piece_idx(board, piece_idx);
                         if (piece_idx == -1)
@@ -473,7 +465,7 @@ char *board_interactive_display_test()
                 try_adding_piece = false;
             }
 
-            update_piece_all_drawing(piece, show_border_tiles);
+            update_piece_all_drawing(piece, show_missing_connection_tiles, show_border_tiles);
         }
         if (IsKeyPressed(KEY_P))
             printf("pause breakpoint.\n");
@@ -489,7 +481,7 @@ char *board_interactive_display_test()
     }
 
     CloseWindow();
-    free_board(board);
+    free(board);
     free(level_hints);
     if (board_complete)
     {

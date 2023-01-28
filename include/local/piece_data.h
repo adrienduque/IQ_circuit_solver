@@ -86,7 +86,6 @@ typedef struct Tile
     struct Tile *next; // start of a stack
 
     // ------ Drawing data
-    Vector2_int effective_absolute_pos;
     Vector2_int top_left_corner_pt;
     Vector2 center_pt;
     Vector2 connection_pt_array[MAX_NB_OF_CONNECTION_PER_TILE];
@@ -162,6 +161,6 @@ typedef struct Piece
 
 } Piece;
 
-Piece *get_piece_array();
+void load_piece_array(Piece piece_array[NB_OF_PIECES]);
 
 #endif

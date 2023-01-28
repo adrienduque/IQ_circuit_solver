@@ -15,7 +15,8 @@ int tests_run = 0;
 char *test_blit_piece_main_data()
 {
 
-    Piece *piece_array = get_piece_array();
+    Piece piece_array[NB_OF_PIECES];
+    load_piece_array(piece_array);
 
     printf("------------ Normal case 1 --------------\n");
     int piece_idx = 0;
@@ -57,7 +58,6 @@ char *test_blit_piece_main_data()
      * Thus writing this test function is not my priority
      */
 
-    free(piece_array);
     return 0;
 }
 
