@@ -9,6 +9,8 @@
  *
  */
 
+#include <stdbool.h>
+
 #include <local/piece_data.h>
 
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -25,6 +27,7 @@ void load_piece_array(Piece piece_array[NB_OF_PIECES])
     piece_array[LINE2_1] = (Piece){
         .name = "Line2 1",
         .has_point_on_first_side = true,
+        .piece_height = 1,
         .nb_of_sides = 3,
         .nb_of_border_tiles = 6,
         .nb_of_outline_tiles = 5,
@@ -79,6 +82,7 @@ void load_piece_array(Piece piece_array[NB_OF_PIECES])
     piece_array[LINE2_2] = (Piece){
         .name = "Line2 2",
         .has_point_on_first_side = true,
+        .piece_height = 1,
         .nb_of_sides = 3,
         .nb_of_border_tiles = 6,
         .nb_of_outline_tiles = 5,
@@ -132,6 +136,7 @@ void load_piece_array(Piece piece_array[NB_OF_PIECES])
     piece_array[LINE3_1] = (Piece){
         .name = "Line3 1",
         .has_point_on_first_side = true,
+        .piece_height = 1,
         .nb_of_sides = 3,
         .nb_of_border_tiles = 8,
         .nb_of_outline_tiles = 5,
@@ -188,6 +193,7 @@ void load_piece_array(Piece piece_array[NB_OF_PIECES])
     piece_array[LINE3_2] = (Piece){
         .name = "Line3 2",
         .has_point_on_first_side = true,
+        .piece_height = 1,
         .nb_of_sides = 3,
         .nb_of_border_tiles = 8,
         .nb_of_outline_tiles = 5,
@@ -244,6 +250,7 @@ void load_piece_array(Piece piece_array[NB_OF_PIECES])
     piece_array[CORNER_1] = (Piece){
         .name = "Corner 1",
         .has_point_on_first_side = true,
+        .piece_height = 2,
         .nb_of_sides = 2,
         .nb_of_border_tiles = 7,
         .nb_of_outline_tiles = 7,
@@ -291,6 +298,7 @@ void load_piece_array(Piece piece_array[NB_OF_PIECES])
     piece_array[CORNER_2] = (Piece){
         .name = "Corner 2",
         .has_point_on_first_side = true,
+        .piece_height = 2,
         .nb_of_sides = 2,
         .nb_of_border_tiles = 7,
         .nb_of_outline_tiles = 7,
@@ -335,6 +343,7 @@ void load_piece_array(Piece piece_array[NB_OF_PIECES])
     piece_array[SQUARE] = (Piece){
         .name = "Square",
         .has_point_on_first_side = true,
+        .piece_height = 2,
         .nb_of_sides = 2,
         .nb_of_border_tiles = 8,
         .nb_of_outline_tiles = 5,
@@ -383,6 +392,7 @@ void load_piece_array(Piece piece_array[NB_OF_PIECES])
     piece_array[L_PIECE] = (Piece){
         .name = "L piece",
         .has_point_on_first_side = false,
+        .piece_height = 3,
         .nb_of_sides = 2,
         .nb_of_border_tiles = 9,
         .nb_of_outline_tiles = 7,
@@ -430,6 +440,7 @@ void load_piece_array(Piece piece_array[NB_OF_PIECES])
     piece_array[T_PIECE] = (Piece){
         .name = "T piece",
         .has_point_on_first_side = false,
+        .piece_height = 2,
         .nb_of_sides = 2,
         .nb_of_border_tiles = 8,
         .nb_of_outline_tiles = 9,
@@ -479,6 +490,7 @@ void load_piece_array(Piece piece_array[NB_OF_PIECES])
     piece_array[Z_PIECE] = (Piece){
         .name = "Z piece",
         .has_point_on_first_side = true,
+        .piece_height = 2,
         .nb_of_sides = 2,
         .nb_of_border_tiles = 8,
         .nb_of_outline_tiles = 9,

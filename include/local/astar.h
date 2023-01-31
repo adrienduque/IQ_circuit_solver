@@ -6,7 +6,7 @@
 #ifndef __ASTAR_H__
 #define __ASTAR_H__
 
-#include <local/utils.h> // Vector2_int
+#include <local/utils.h> // Vector2_int and defines
 #include <local/board.h> // Board
 
 /**

@@ -10,6 +10,9 @@
  * Also includes helper functions for Direction type (which are encoded as int, and mainly used to specify direction of tile connections)
  */
 
+#include <stdbool.h>
+#include <stdlib.h> // abs
+
 #include <local/utils.h>
 
 // ---------------------------------------- Direction functions -------------------------------------------

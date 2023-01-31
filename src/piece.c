@@ -9,6 +9,11 @@
  * Thus these functions are meant to be used in the same order as their declaration
  */
 
+#include <stdlib.h>           // NULL
+#include <local/piece_data.h> // Tile, Side, Piece
+
+#include <local/utils.h> // Vector2_int and helper functions
+
 #include <local/piece.h>
 
 // Function to blit only piece data used for main computation (normal and missing_connection_tile of the current side of a piece)

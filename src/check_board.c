@@ -44,9 +44,18 @@ je me suis arrêté de regarder les niveaux au ralenti, au 78 du coup
 
 
 */
+#include <limits.h> // INT_MAX
+#include <stdlib.h> // abs, NULL
+#include <stdbool.h>
+
+#include <local/utils.h>      // Vector2_int, Direction, helper functions and defines
+#include <local/astar.h>      //
+#include <local/level_data.h> // MAX_NB_OF_OPEN_POINT_TILES_PER_LEVEL
+#include <local/piece_data.h> // Tile, Side, Piece and defines
+#include <local/board.h>      // Board, extract_normal_tile_at_pos, and defines
+#include <local/piece.h>      // update_piece_border_tiles
 
 #include <local/check_board.h>
-#include <local/astar.h>
 // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

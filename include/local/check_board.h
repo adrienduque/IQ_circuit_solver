@@ -6,7 +6,9 @@
 #ifndef __CHECK_BOARD_H__
 #define __CHECK_BOARD_H__
 
-#include <local/board.h>
+#include <stdbool.h>
+
+#include <local/board.h> // Board
 
 #define ISOLATED_EMPTY_TILE -1
 #define DEAD_END -2

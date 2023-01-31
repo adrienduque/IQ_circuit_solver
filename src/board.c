@@ -9,6 +9,13 @@
  *
  * It will be used by the main search algorithm, that will automatically add and remove pieces from a board according to what we are trying to solve.
  */
+#include <stdlib.h> // malloc and free, NULL, abs
+#include <stdbool.h>
+
+#include <local/utils.h>      // Vector2_int, Direction, helper functions and defines
+#include <local/piece_data.h> // Tile, Side, Piece, load_piece_array, and defines
+#include <local/level_data.h> // LevelHints, PieceAddInfos
+#include <local/piece.h>      // defines
 
 #include <local/board.h>
 
@@ -29,6 +36,10 @@ static void set_all_board_pieces_pos_to_zero(Board *board)
         piece->current_side_idx = 0;
         piece->current_base_pos = (Vector2_int){0, 0};
         piece->current_rotation_state = 0;
+
+        piece->previous_side_idx = 0;
+        piece->previous_base_pos = (Vector2_int){0, 0};
+        piece->previous_rotation_state = 0;
     }
 }
 

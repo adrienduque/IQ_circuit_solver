@@ -6,8 +6,8 @@
 #ifndef __LEVEL_DATA_H__
 #define __LEVEL_DATA_H__
 
-#include <local/utils.h>
-#include <local/piece_data.h>
+#include <local/utils.h>      // Vector2_int and defines
+#include <local/piece_data.h> // Tile and defines
 
 #define MAX_NB_OF_OPEN_POINT_TILES_PER_LEVEL 6
 

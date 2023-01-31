@@ -15,28 +15,67 @@
  *
  */
 
+#include <stdbool.h>
+#include <stdio.h>  // sprintf
+#include <stdlib.h> // NULL
+
+#include <raylib/raylib.h> // Color, primary drawing functions, and defines
+
+#include <local/utils.h>      // Vector2_int, Directoin, helper functions, and defines
+#include <local/piece_data.h> // Tile, Side, Piece, and defines
+#include <local/piece.h>      // blit_piece_main_data
+#include <local/board.h>      // Board, and defines
+
 #include <local/display.h>
 
 // -----------------------------------------------------------------------------------------------------------------------------------------------
 // --------------------------------- Drawing constants ------------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------------------------------------------------------------------
 
-// Main global parameters
-const int tile_px_width = 101;
-
-static Vector2_int offset_px;
-
+//---- Main global constant parameters
+Vector2_int offset_px;
+static int offset_y_level_num;
 static Color connection_line_color = {212, 175, 55, 255};
 static Color outline_color = {200, 255, 0, 255};
 
+const int tile_px_width = 101;
+static const int mini_tile_px_width = 33;
+
 // Driven parameters
 static const int grid_line_px_thick = tile_px_width / 10;
-static const int connection_line_px_thick = grid_line_px_thick;
-// static const int outline_px_thick = tile_px_width / 25;
+static const int connection_line_px_thick = tile_px_width / 10;
 static const int outline_px_thick = (int)(tile_px_width * 0.08);
-
 static const float bend_circle_radius = (float)(connection_line_px_thick / 2 - 1);
 static const float point_circle_radius = (float)(tile_px_width / 6);
+// values to add from center x,y, to get the other point of the line (tip) to draw the connection in the right direction
+// see update_tile_drawing when it treats connection lines
+static Vector2_int connections_tip_offset[] = {
+    [RIGHT] = {tile_px_width / 2, 0},
+    [DOWN] = {0, tile_px_width / 2},
+    [LEFT] = {-tile_px_width / 2, 0},
+    [UP] = {0, -tile_px_width / 2},
+};
+
+static const int mini_connection_line_px_thick = mini_tile_px_width / 10;
+static const int mini_outline_px_thick = (int)(mini_tile_px_width * 0.08);
+static const float mini_bend_circle_radius = (float)(mini_connection_line_px_thick / 2 - 1);
+static const float mini_point_circle_radius = (float)(mini_tile_px_width / 6);
+static Vector2_int mini_connections_tip_offset[] = {
+    [RIGHT] = {mini_tile_px_width / 2, 0},
+    [DOWN] = {0, mini_tile_px_width / 2},
+    [LEFT] = {-mini_tile_px_width / 2, 0},
+    [UP] = {0, -mini_tile_px_width / 2},
+};
+
+//---- parameter used in functions
+static int current_tile_px_width;
+
+static int current_connection_line_px_thick;
+static int current_outline_px_thick;
+static float current_bend_circle_radius;
+static float current_point_circle_radius;
+
+static Vector2_int *current_connections_tip_offset;
 
 // -----------------------------------------------------------------------------------------------------------------------------------------------
 // --------------------------------- Manually extending raylib -----------------------------------------------------------------------------------
@@ -45,15 +84,22 @@ static const float point_circle_radius = (float)(tile_px_width / 6);
 // Function to initialize a raylib window
 void setup_display(int window_px_width, int window_px_height)
 {
-    // we have to figure out the offset for the board to display in the center of the screen
-    int half_board_px_height = (int)(BOARD_HEIGHT * tile_px_width / 2);
-    int half_board_px_width = (int)(BOARD_WIDTH * tile_px_width / 2);
+    // global variables setup
+    current_tile_px_width = tile_px_width;
+    current_connection_line_px_thick = connection_line_px_thick;
+    current_outline_px_thick = outline_px_thick;
+    current_bend_circle_radius = bend_circle_radius;
+    current_point_circle_radius = point_circle_radius;
+    current_connections_tip_offset = connections_tip_offset;
 
-    int center_px_x = (int)(window_px_width / 2);
+    // we have to figure out the offset for the board to display in the center of the screen height
+    int half_board_px_height = (int)(BOARD_HEIGHT * tile_px_width / 2);
     int center_px_y = (int)(window_px_height / 2);
 
-    offset_px.i = center_px_x - half_board_px_width;
+    offset_px.i = 2 * tile_px_width;
     offset_px.j = center_px_y - half_board_px_height;
+
+    offset_y_level_num = offset_px.j - 60;
 
     // actual initialization of the display
     SetTraceLogLevel(LOG_ERROR);
@@ -158,31 +204,22 @@ static void draw_board_grid(Board *board)
 
 // --------------------------- Functions to draw normal and missing_connection tiles  ------------------------------------------------------------
 
-// values to add from center x,y, to get the other point of the line (tip) to draw the connection in the right direction
-// see update_tile_drawing when it treats connection lines
-static Vector2_int connections_tip_offset[] = {
-    [RIGHT] = {tile_px_width / 2, 0},
-    [DOWN] = {0, tile_px_width / 2},
-    [LEFT] = {-tile_px_width / 2, 0},
-    [UP] = {0, -tile_px_width / 2},
-};
-
 static void update_tile_drawing(Tile *tile)
 {
     static int idx;
     static Direction connection_direction;
 
-    tile->top_left_corner_pt.i = (tile->absolute_pos.i * tile_px_width) + offset_px.i;
-    tile->top_left_corner_pt.j = (tile->absolute_pos.j * tile_px_width) + offset_px.j;
+    tile->top_left_corner_pt.i = (tile->absolute_pos.i * current_tile_px_width) + offset_px.i;
+    tile->top_left_corner_pt.j = (tile->absolute_pos.j * current_tile_px_width) + offset_px.j;
 
-    tile->center_pt.x = tile->top_left_corner_pt.i + tile_px_width / 2;
-    tile->center_pt.y = tile->top_left_corner_pt.j + tile_px_width / 2;
+    tile->center_pt.x = tile->top_left_corner_pt.i + current_tile_px_width / 2;
+    tile->center_pt.y = tile->top_left_corner_pt.j + current_tile_px_width / 2;
 
     for (idx = 0; idx < tile->nb_of_connections; idx++)
     {
         connection_direction = tile->connection_direction_array[idx];
-        tile->connection_pt_array[idx].x = tile->center_pt.x + connections_tip_offset[connection_direction].i;
-        tile->connection_pt_array[idx].y = tile->center_pt.y + connections_tip_offset[connection_direction].j;
+        tile->connection_pt_array[idx].x = tile->center_pt.x + current_connections_tip_offset[connection_direction].i;
+        tile->connection_pt_array[idx].y = tile->center_pt.y + current_connections_tip_offset[connection_direction].j;
     }
 }
 
@@ -191,19 +228,19 @@ static void draw_tile_color(Tile *tile, Color connection_color)
     static int i;
     for (i = 0; i < tile->nb_of_connections; i++)
     {
-        DrawLineEx(tile->center_pt, tile->connection_pt_array[i], connection_line_px_thick, connection_color);
+        DrawLineEx(tile->center_pt, tile->connection_pt_array[i], current_connection_line_px_thick, connection_color);
     }
 
     if (tile->tile_type == bend)
     {
-        DrawCircle((int)tile->center_pt.x, (int)tile->center_pt.y, bend_circle_radius, connection_color);
+        DrawCircle((int)tile->center_pt.x, (int)tile->center_pt.y, current_bend_circle_radius, connection_color);
     }
     else if (tile->tile_type == point)
     {
-        DrawCircle((int)tile->center_pt.x, (int)tile->center_pt.y, point_circle_radius, connection_color);
+        DrawCircle((int)tile->center_pt.x, (int)tile->center_pt.y, current_point_circle_radius, connection_color);
     }
 
-    DrawRectangleLines(tile->top_left_corner_pt.i, tile->top_left_corner_pt.j, tile_px_width, tile_px_width, WHITE);
+    DrawRectangleLines(tile->top_left_corner_pt.i, tile->top_left_corner_pt.j, current_tile_px_width, current_tile_px_width, WHITE);
 }
 
 // shortcut to draw normal tiles with connection color : gold
@@ -232,8 +269,8 @@ static void update_piece_border_tiles_drawing(Piece *piece)
             set_invalid_pos(&(piece->border_tile_effective_absolute_top_left_corner_pt_array[idx]));
             continue;
         }
-        piece->border_tile_effective_absolute_top_left_corner_pt_array[idx].i = (piece->border_tile_absolute_pos_array[idx].i * tile_px_width) + offset_px.i;
-        piece->border_tile_effective_absolute_top_left_corner_pt_array[idx].j = (piece->border_tile_absolute_pos_array[idx].j * tile_px_width) + offset_px.j;
+        piece->border_tile_effective_absolute_top_left_corner_pt_array[idx].i = (piece->border_tile_absolute_pos_array[idx].i * current_tile_px_width) + offset_px.i;
+        piece->border_tile_effective_absolute_top_left_corner_pt_array[idx].j = (piece->border_tile_absolute_pos_array[idx].j * current_tile_px_width) + offset_px.j;
     }
 }
 
@@ -246,10 +283,10 @@ void draw_piece_border_tiles(Piece *piece)
             continue;
         rec.x = (float)(piece->border_tile_effective_absolute_top_left_corner_pt_array[idx].i);
         rec.y = (float)(piece->border_tile_effective_absolute_top_left_corner_pt_array[idx].j);
-        rec.width = (float)tile_px_width;
-        rec.height = (float)tile_px_width;
+        rec.width = (float)current_tile_px_width;
+        rec.height = (float)current_tile_px_width;
 
-        DrawRectangleLinesEx(rec, (float)outline_px_thick, SKYBLUE);
+        DrawRectangleLinesEx(rec, (float)current_outline_px_thick, SKYBLUE);
     }
 }
 
@@ -282,14 +319,14 @@ static void update_piece_outline_drawing(Piece *piece)
         translate_pos(&(piece->outline_tile_absolute_pos_array[i]), &(outline_edge_correction_values[piece->current_rotation_state]));
 
         // Final data used in draw_piece_outline
-        piece->outline_tile_effective_absolute_top_left_corner_pt_array[i].x = (piece->outline_tile_absolute_pos_array[i].i * tile_px_width) + offset_px.i;
-        piece->outline_tile_effective_absolute_top_left_corner_pt_array[i].y = (piece->outline_tile_absolute_pos_array[i].j * tile_px_width) + offset_px.j;
+        piece->outline_tile_effective_absolute_top_left_corner_pt_array[i].x = (piece->outline_tile_absolute_pos_array[i].i * current_tile_px_width) + offset_px.i;
+        piece->outline_tile_effective_absolute_top_left_corner_pt_array[i].y = (piece->outline_tile_absolute_pos_array[i].j * current_tile_px_width) + offset_px.j;
     }
 }
 
 static void draw_piece_outline(Piece *piece)
 {
-    DrawLineStripEx(piece->outline_tile_effective_absolute_top_left_corner_pt_array, piece->nb_of_outline_tiles, outline_px_thick, outline_color);
+    DrawLineStripEx(piece->outline_tile_effective_absolute_top_left_corner_pt_array, piece->nb_of_outline_tiles, current_outline_px_thick, outline_color);
 }
 
 // ---------------------------------------------------------------------------------------------------------------
@@ -395,10 +432,8 @@ void draw_board(Board *board, bool show_missing_connection_tiles)
 
 void draw_level_num(const char *level_num_str)
 {
-    DrawText(level_num_str, 10, 10, 50, ORANGE);
+    DrawText(level_num_str, offset_px.i, offset_y_level_num, 50, ORANGE);
 }
-
-// ------------------------------------------------ Debug functions
 
 // function used to draw all tile poses on the window
 // to help me when I'm debugging post-adding check methods
@@ -420,4 +455,54 @@ void draw_pos_text(void)
             DrawText(temp_text, x, y, 20, WHITE);
         }
     }
+}
+
+// Function to draw the current piece priority array
+// This is mainly to visualize when search algorithms switch between different combinations
+// The idea is to have a column of piece thumbnails next to the board display
+// And fill it from the bottom up with the current priority array
+// The first pieces in the priority list are at the top, and they are taken out 1 by 1 to be played on the board
+void draw_piece_priority_array(Board *board, int piece_idx_priority_array[NB_OF_PIECES], int piece_selected, int nb_of_playable_pieces, bool playable_side_per_piece_idx_mask[NB_OF_PIECES][MAX_NB_OF_SIDE_PER_PIECE])
+{
+    static int i;
+    static Piece *piece;
+    static Vector2_int base_pos = (Vector2_int){-4, 0}; // base offset to the left of the board display
+    static int side_idx = 0, rotation_state = 0, piece_idx;
+
+    // Mini piece display setup, (global constants swap)
+    current_tile_px_width = mini_tile_px_width;
+    current_connection_line_px_thick = mini_connection_line_px_thick;
+    current_outline_px_thick = mini_outline_px_thick;
+    current_bend_circle_radius = mini_bend_circle_radius;
+    current_point_circle_radius = mini_point_circle_radius;
+    current_connections_tip_offset = mini_connections_tip_offset;
+
+    // base height of the column (bottom of the column)
+    base_pos.j = 19;
+
+    // fill it from the bottom up
+    for (i = nb_of_playable_pieces - 1; i >= piece_selected; i--)
+    {
+        piece_idx = piece_idx_priority_array[i];
+        piece = (board->piece_array) + piece_idx;
+
+        side_idx = 0;
+        if (!playable_side_per_piece_idx_mask[piece_idx][side_idx])
+            side_idx = 1;
+
+        base_pos.j -= piece->piece_height;
+        blit_piece_main_data(piece, side_idx, base_pos, rotation_state);
+        base_pos.j--; // let a space of 1 mini-tile between 2 pieces
+
+        update_piece_all_drawing(piece, false, false);
+        draw_piece(piece, false, false);
+    }
+
+    // Restore normal drawing constants
+    current_tile_px_width = tile_px_width;
+    current_connection_line_px_thick = connection_line_px_thick;
+    current_outline_px_thick = outline_px_thick;
+    current_bend_circle_radius = bend_circle_radius;
+    current_point_circle_radius = point_circle_radius;
+    current_connections_tip_offset = connections_tip_offset;
 }

@@ -1,5 +1,6 @@
 #include <local/search_algorithm.h>
 #include <stdio.h>
+#include <stdlib.h> // system
 
 int main(void)
 {
@@ -17,8 +18,10 @@ int main(void)
     }
 
     //    I feel like 10 fps is a good delay between each frame to see what's the algorithm doing
-    run_algorithm_with_display(level_num, 10);
+    // run_algorithm_with_display(level_num, 10);
     // run_algorithm_without_display(level_num);
+
+    run_algorithm_with_extra_display(level_num, 10);
 
     printf("\n");
 
@@ -36,3 +39,14 @@ int main(void)
 
     return 0;
 }
+
+/**
+ * @todo
+ *
+ * Maybe have a D configuration where we change the order of the pieces in the default priority list once again (but same idea as B configuration)
+ * and priorize bigger pieces, that actually have a point on their first side to reduce again the number of valid boards
+ *
+ * i.e : move square from default index 6 to 8, the other pieces stay in the same order
+ *
+ *
+ */

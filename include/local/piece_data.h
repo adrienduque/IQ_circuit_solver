@@ -10,8 +10,10 @@
 
 #include <stdbool.h>
 #include <stdlib.h>
+
 #include <raylib/raylib.h> //Vector2
-#include <local/utils.h>
+
+#include <local/utils.h> //Vector2_int, Direction
 
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 //-------------------------------------------------------- Struct declarations to organize game pieces data -----------------------------------------------------------
@@ -139,6 +141,7 @@ typedef struct Piece
     // ----------- Definition of a piece ----------
     const char *name;
     bool has_point_on_first_side;
+    int piece_height;                          // vertical space taken by the piece in its default orientation (in number of tiles), useful to draw_piece_priority_array
     int nb_of_sides;                           // length of matching array
     int nb_of_border_tiles;                    // length of matching array
     int nb_of_outline_tiles;                   // length of matching array
@@ -150,6 +153,12 @@ typedef struct Piece
     int current_side_idx;
     Vector2_int current_base_pos;
     int current_rotation_state;
+
+    // ------ Savestate of the previous global position of the piece
+    // (see in "run_algorithm_with_extra_display", it now has to be distinguish from current_xxx members, as these will change because of "draw_piece_priority_array")
+    int previous_side_idx;
+    Vector2_int previous_base_pos;
+    int previous_rotation_state;
 
     // ------ Cached blit results
     Vector2_int border_tile_absolute_pos_array[MAX_NB_OF_BORDER_TILE_PER_SIDE];

@@ -85,8 +85,21 @@
  *
  */
 
+#include <time.h> // clock_t, clock, and CLOCKS_PER_SEC
+#include <stdbool.h>
+#include <stdio.h>  // printf, sprintf
+#include <stdlib.h> // free
+
+#include <raylib/raylib.h> // WindowShouldClose, CloseWindow, BeginDrawing, EndDrawing, ClearBackground, DrawFPS, SetTargetFPS
+
+#include <local/utils.h>       // Vector2_int, generate_next_combination and defines
+#include <local/piece_data.h>  // Tile, Side, Piece and defines
+#include <local/level_data.h>  // LevelHints, and defines
+#include <local/board.h>       // Board, helper functions and defines
+#include <local/check_board.h> // run_all_checks
+#include <local/display.h>     // tile_px_width, and other drawing functions
+
 #include <local/search_algorithm.h>
-#include <time.h>
 
 // ----------------- Main algorithm data pre-processing ----------------------------------------------------------------------------
 
@@ -99,7 +112,7 @@
 typedef struct StartCombinations
 {
 
-    int combination_array[MAX_NB_OF_COMBINATIONS][MAX_NB_OF_OPEN_POINTS];
+    int combination_array[MAX_NB_OF_COMBINATIONS][MAX_NB_OF_OPEN_POINT_TILES_PER_LEVEL];
     int nb_of_combinations;
 
 } StartCombinations;
@@ -248,6 +261,7 @@ static void setup_draw(Board *board, int level_num, char *level_num_str)
     // Functions only needed because we display things
     sprintf(level_num_str, "%d", level_num);
     setup_display((BOARD_WIDTH + 2) * tile_px_width, (BOARD_HEIGHT + 2) * tile_px_width);
+    offset_px.i = 1 * tile_px_width; // padding to the left of the board to the left edge of the window
     update_board_static_drawing(board);
 }
 
@@ -284,11 +298,11 @@ void run_algorithm_with_display(int level_num, int FPS)
     char level_num_str[4];
     setup_draw(board, level_num, level_num_str);
     static bool enable_slow_operations = false;
+
+    // when set to 0, it's in fact unlimited FPS
+    SetTargetFPS(FPS);
     if (FPS != 0)
-    {
-        SetTargetFPS(FPS);
         enable_slow_operations = true;
-    }
 
     // data placeholders for each combination test
     int piece_idx_priority_array[NB_OF_PIECES];
@@ -655,5 +669,202 @@ end_loop:
 // -------------------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------------------
+static void setup_extra_draw(Board *board, int level_num, char *level_num_str)
+{
+    // Functions only needed because we display things
+    sprintf(level_num_str, "%d", level_num);
+    setup_display((BOARD_WIDTH + 9) * tile_px_width, (BOARD_HEIGHT + 5) * tile_px_width);
+    update_board_static_drawing(board);
+}
 
-//@todo : run_algorithm_with_extra_display
+static void extra_draw(Board *board, const char *level_num_str, int piece_idx_priority_array[NB_OF_PIECES], int piece_selected, int nb_of_playable_pieces, bool playable_side_per_piece_idx_mask[NB_OF_PIECES][MAX_NB_OF_SIDE_PER_PIECE])
+{
+    BeginDrawing();
+    ClearBackground(BLACK);
+    draw_board(board, false);
+    draw_piece_priority_array(board, piece_idx_priority_array, piece_selected, nb_of_playable_pieces, playable_side_per_piece_idx_mask);
+    draw_level_num(level_num_str);
+    EndDrawing();
+}
+
+void run_algorithm_with_extra_display(int level_num, int FPS)
+{
+
+    // Main data variables init
+    LevelHints *level_hints = get_level_hints(level_num);
+    Board *board = init_board(level_hints);
+
+    // Preprocessed constants of current setup
+    StartCombinations start_combinations = determine_start_combinations(board);
+
+    // Functions only needed because we display things
+    char level_num_str[4];
+    setup_extra_draw(board, level_num, level_num_str);
+
+    static bool enable_slow_operations = false;
+
+    // when set to 0, it's in fact unlimited FPS
+    SetTargetFPS(FPS);
+    if (FPS != 0)
+        enable_slow_operations = true;
+
+    // data placeholders for each combination test
+    int piece_idx_priority_array[NB_OF_PIECES];
+    int nb_of_playable_pieces;
+    bool playable_side_per_piece_idx_mask[NB_OF_PIECES][MAX_NB_OF_SIDE_PER_PIECE];
+
+    // variable to explore current piece_idx_priority_array
+    // basically the depth at which the algorithm currently is, in the search tree
+    int piece_selected;
+
+    // "add_piece_to_board" input parameters
+    int piece_idx;
+    int side_idx;
+    Vector2_int base_pos;
+    int rotation_state;
+
+    // variable to count valid boards and mesure logic performance, see this file description
+    int valid_board_count = 0;
+
+    // timing the algorithm (loop only part)
+    clock_t begin, end;
+    double time_spent;
+    begin = clock();
+
+    // convenience placeholder variables used in the loop
+    Piece *piece;
+    bool backtrack_iteration = false;
+    bool solved = false;
+
+    // Updating and drawing loop for algorithm visualization
+    for (int combination_idx = 0; combination_idx < start_combinations.nb_of_combinations; combination_idx++)
+    {
+        // the algorithm needs to know which order to add the pieces to the board following the current combination informations
+
+        // and also which piece sides it can play, as a combination is the current set of chosen point piece, they only can play their side with a point
+        // other pieces are forced to play their sides without a point (as we can't add point tiles that don't belong to level hints, it is written in gamerules)
+        // the algorithm can work without this last informations, but it is meant to skip obviously useless iterations
+        load_combination_data(board, &start_combinations, combination_idx, piece_idx_priority_array, &nb_of_playable_pieces, playable_side_per_piece_idx_mask);
+
+        // Setup the exploration of the current combination
+        piece_selected = 0;
+        backtrack_iteration = false;
+
+        extra_draw(board, level_num_str, piece_idx_priority_array, piece_selected, nb_of_playable_pieces, playable_side_per_piece_idx_mask);
+
+        // Loop to explore the current combination
+        // The backtracking part is made by decrementing "piece_selected"
+        while (true)
+        {
+
+        next_piece:
+
+            // --- Edges cases when piece_selected step out of valid "piece_idx_priority_array" indexes, in both directions
+            if (piece_selected < 0)
+                // case where the first piece used all its position possibilities, which means there are no solution with current combination
+                break;
+
+            else if (piece_selected == nb_of_playable_pieces)
+            {
+                // case where the successfully added the last piece to the board
+                solved = true;
+                goto end_loop;
+            }
+            // ---
+
+            // if we are currently backtracking, the piece needs to be removed
+            // before being re-added
+            if (backtrack_iteration)
+                undo_last_piece_adding(board);
+
+            // Part where the algorithm try all current piece position possibilities
+            // Starting from its previous position
+
+            // setup
+            piece_idx = piece_idx_priority_array[piece_selected];
+            piece = (board->piece_array) + piece_idx;
+
+            // loop
+            for (side_idx = piece->previous_side_idx; side_idx < piece->nb_of_sides; side_idx++)
+            {
+                // only play forced sides (prievously determined by "load_combination_data")
+                if (!playable_side_per_piece_idx_mask[piece_idx][side_idx])
+                    continue;
+
+                for (base_pos.i = piece->previous_base_pos.i; base_pos.i < BOARD_WIDTH; (base_pos.i)++)
+                {
+                    for (base_pos.j = piece->previous_base_pos.j; base_pos.j < BOARD_HEIGHT; (base_pos.j)++)
+                    {
+                        // don't even consider adding the piece at this position if there's already a normal tile on the board
+                        if (is_position_already_occupied(board, &base_pos))
+                            continue;
+
+                        for (rotation_state = piece->previous_rotation_state; rotation_state < piece->side_array[side_idx].max_nb_of_rotations; rotation_state++)
+                        {
+                            if (WindowShouldClose())
+                                goto quit_algorithm;
+
+                            // when we backtrack, we need to increment the previous piece overall position by 1
+                            // (if not, the piece will be added where it was just removed)
+                            // we do it, by skipping 1 iteration in the innermost loop
+                            if (backtrack_iteration)
+                            {
+                                backtrack_iteration = false;
+                                continue;
+                            }
+
+                            // Board pre-adding, adding piece, and post-adding checks
+                            if (add_piece_to_board(board, piece_idx, side_idx, base_pos, rotation_state) != 1)
+                                continue;
+                            if (run_all_checks(board, enable_slow_operations) != 1)
+                            {
+                                undo_last_piece_adding(board);
+                                continue;
+                            }
+                            // case where we successfully added a piece
+                            update_piece_all_drawing(piece, false, false);
+                            piece->previous_side_idx = piece->current_side_idx;
+                            piece->previous_base_pos = piece->current_base_pos;
+                            piece->previous_rotation_state = piece->current_rotation_state;
+                            piece_selected++;
+                            valid_board_count++;
+                            if (enable_slow_operations)
+                                printf("new valid board found ! %d\n", valid_board_count);
+                            extra_draw(board, level_num_str, piece_idx_priority_array, piece_selected, nb_of_playable_pieces, playable_side_per_piece_idx_mask);
+
+                            goto next_piece;
+                        }
+                        piece->previous_rotation_state = 0;
+                    }
+                    piece->previous_base_pos.j = 0;
+                }
+                piece->previous_base_pos.i = 0;
+            }
+            piece->previous_side_idx = 0;
+            // the current piece has gone through all its possible positions
+            // we need to backtrack (try to move the previous piece)
+            piece_selected--;
+            backtrack_iteration = true;
+        }
+    }
+
+end_loop:
+    end = clock();
+    time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+
+    if (solved)
+        printf("Solution found !\n");
+    else
+        printf("No solution found...\n");
+    printf("Time : %.3f seconds\n", time_spent);
+    printf("Number of valid boards : %d\n", valid_board_count);
+
+    // display last board state until user close the window
+    while (!WindowShouldClose())
+        extra_draw(board, level_num_str, piece_idx_priority_array, piece_selected, nb_of_playable_pieces, playable_side_per_piece_idx_mask);
+
+quit_algorithm:
+    CloseWindow();
+    free(board);
+    free(level_hints);
+}

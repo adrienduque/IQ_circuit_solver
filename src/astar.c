@@ -9,6 +9,13 @@
  * It is needed in check_board.c > check_no_dead_ends
  */
 
+#include <stdlib.h> //malloc and free, NULL
+#include <limits.h> // INT_MAX
+
+#include <local/utils.h>      // Vector2_int, Direction, manhattan_dist, other helper functions, defines
+#include <local/board.h>      // Board, extract_normal_tile_at_pos, UNDEFINED_TILE
+#include <local/piece_data.h> // Tile
+
 #include <local/astar.h>
 
 typedef struct OpenSetElement

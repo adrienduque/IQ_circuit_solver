@@ -6,7 +6,8 @@
 #ifndef __PIECE_H__
 #define __PIECE_H__
 
-#include <local/piece_data.h>
+#include <local/utils.h>      // Vector2_int, helper functions
+#include <local/piece_data.h> // Piece
 
 /**
  * @note Macros meant only to be used in "blit_piece_main_data" and "can_piece_be_added_to_board" functions

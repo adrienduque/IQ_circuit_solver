@@ -18,6 +18,11 @@
  * (the new open_obligatory_point_tile_idx_array contains indexes of tile in the obligatory_tile_array, that are point tiles (but only the "true" point tiles, not the extra points explained above))
  */
 
+#include <stdlib.h> // malloc
+
+#include <local/utils.h>      //direction defines
+#include <local/piece_data.h> //Tile
+
 #include <local/level_data.h>
 
 // Function to load level hints from the level number

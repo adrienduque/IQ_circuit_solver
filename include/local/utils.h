@@ -8,7 +8,6 @@
 #define __UTILS_H__
 
 #include <stdbool.h>
-#include <stdlib.h>
 // --------------------------- Real game related constants -------------------
 
 #define BOARD_WIDTH 8

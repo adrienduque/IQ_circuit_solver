@@ -5,10 +5,12 @@
  *
  */
 
+#include <local/utils.h> // Vector2_int, helper functions and defines
+
 #include <local/piece.h>
 #include <minunit.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <stdio.h>  // printf, getchar
+#include <stdlib.h> // system
 
 int tests_run = 0;
 

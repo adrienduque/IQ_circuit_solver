@@ -6,12 +6,18 @@
  * This is not really a proper "unit testing" file where tests are automated with assertions
  */
 
-#include <local/piece.h>
-#include <local/check_board.h>
+#include <local/utils.h>       // Vector2_int, helper functions and defines
+#include <local/piece_data.h>  // Tile, Side, Piece, load_piece_array, and defines
+#include <local/piece.h>       // blit_piece_main_data, update_piece_border_tiles
+#include <local/board.h>       // Board, helper functions and defines
+#include <local/check_board.h> // run_all_checks and defines
+#include <local/level_data.h>  // LevelHints
 #include <local/display.h>
 #include <minunit.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <raylib/raylib.h>
+#include <stdbool.h>
+#include <stdio.h>  // printf, getchar, sprintf
+#include <stdlib.h> // system, free
 
 int tests_run = 0;
 
@@ -61,6 +67,7 @@ char *piece_data_display_test()
     int nb_of_keys = 9;
 
     setup_display((BOARD_WIDTH + 2) * tile_px_width, (BOARD_HEIGHT + 2) * tile_px_width);
+    offset_px.i = 1 * tile_px_width; // padding to the left of the board to the left edge of the window
 
     // Initial state displayed and input parameters
     int piece_idx = 0;
@@ -290,6 +297,7 @@ char *board_interactive_display_test()
     printf("Now entering interactive board display test.\n\n");
 
     setup_display((BOARD_WIDTH + 2) * tile_px_width, (BOARD_HEIGHT + 2) * tile_px_width);
+    offset_px.i = 1 * tile_px_width; // padding to the left of the board to the left edge of the window
 
     int control_keys[] = {KEY_W, KEY_A, KEY_S, KEY_D, KEY_R, KEY_F, KEY_SPACE, KEY_ENTER, KEY_RIGHT, KEY_LEFT}; // KEY_E is intentionally kept out from this list
     int nb_of_keys = 10;

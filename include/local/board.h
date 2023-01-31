@@ -6,12 +6,12 @@
 #ifndef __BOARD_H__
 #define __BOARD_H__
 
-#include <stdlib.h>
-#include <math.h>
-#include <local/utils.h>
-#include <local/piece_data.h>
-#include <local/piece.h>
-#include <local/level_data.h>
+#include <stdbool.h>
+#include <stdlib.h> // NULL
+
+#include <local/utils.h>      // defines
+#include <local/piece_data.h> // Tile, Piece, and defines
+#include <local/level_data.h> // LevelHints, and defines
 
 #define MAX_NB_OF_MISSING_CONNECTION_TIlES_ON_BOARD 25
 #define MAX_NB_OF_DOUBLE_MISSING_CONNECTION_TIlES_ON_BOARD 2

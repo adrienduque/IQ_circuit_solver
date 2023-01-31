@@ -5,8 +5,8 @@
 
 #include <local/utils.h>
 #include <minunit.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <stdio.h>  // printf, getchar
+#include <stdlib.h> // system
 
 int tests_run = 0;
 
