@@ -19,12 +19,15 @@
 #include <stdio.h>  // sprintf
 #include <stdlib.h> // NULL
 
+#define RAYGUI_IMPLEMENTATION
+#include <raylib/raygui.h>
 #include <raylib/raylib.h> // Color, primary drawing functions, and defines
 
-#include <local/utils.h>      // Vector2_int, Directoin, helper functions, and defines
-#include <local/piece_data.h> // Tile, Side, Piece, and defines
-#include <local/piece.h>      // blit_piece_main_data
-#include <local/board.h>      // Board, and defines
+#include <local/utils.h>       // Vector2_int, Directoin, helper functions, and defines
+#include <local/piece_data.h>  // Tile, Side, Piece, and defines
+#include <local/piece.h>       // blit_piece_main_data
+#include <local/board.h>       // Board, and defines
+#include <local/check_board.h> // defines
 
 #include <local/display.h>
 
@@ -38,8 +41,10 @@ static int offset_y_level_num;
 static Color connection_line_color = {212, 175, 55, 255};
 static Color outline_color = {200, 255, 0, 255};
 
+const int gui_icon_scale = 3;
+
 const int tile_px_width = 101;
-static const int mini_tile_px_width = 33;
+static const int mini_tile_px_width = 31;
 
 // Driven parameters
 static const int grid_line_px_thick = tile_px_width / 10;
@@ -96,14 +101,50 @@ void setup_display(int window_px_width, int window_px_height)
     int half_board_px_height = (int)(BOARD_HEIGHT * tile_px_width / 2);
     int center_px_y = (int)(window_px_height / 2);
 
-    offset_px.i = 2 * tile_px_width;
+    offset_px.i = 3 * tile_px_width;
     offset_px.j = center_px_y - half_board_px_height;
 
     offset_y_level_num = offset_px.j - 60;
 
     // actual initialization of the display
+    SetConfigFlags(FLAG_WINDOW_ALWAYS_RUN | FLAG_WINDOW_TOPMOST);
     SetTraceLogLevel(LOG_ERROR);
+
     InitWindow(window_px_width, window_px_height, "Raylib Board Visualization");
+    SetExitKey(KEY_NULL);
+
+    // Gui Initialisation
+    GuiSetIconScale(gui_icon_scale);
+
+    GuiSetStyle(DEFAULT, BORDER_COLOR_NORMAL, 0x838383ff);
+    GuiSetStyle(DEFAULT, BASE_COLOR_NORMAL, 0x000000ff);
+    GuiSetStyle(DEFAULT, TEXT_COLOR_NORMAL, 0x686868ff);
+
+    GuiSetStyle(DEFAULT, BORDER_COLOR_FOCUSED, 0xffa100ff);
+    GuiSetStyle(DEFAULT, BASE_COLOR_FOCUSED, 0x000000ff);
+    GuiSetStyle(DEFAULT, TEXT_COLOR_FOCUSED, 0xffa100ff);
+
+    GuiSetStyle(DEFAULT, BORDER_COLOR_PRESSED, 0xd48602ff);
+    GuiSetStyle(DEFAULT, BASE_COLOR_PRESSED, 0x000000ff);
+    GuiSetStyle(DEFAULT, TEXT_COLOR_PRESSED, 0xd48602ff);
+
+    GuiSetStyle(DEFAULT, TEXT_SIZE, 20);
+
+#ifdef USE_SECOND_SCREEN
+    // Quality of life for debugging
+    // Hack for my particular setup :
+    // main screen : laptop 1080p (but scaled to 125% (default Windows parameter))
+    // Second screen : to the left, 1080p, but scaled to 100% in Windows parameter
+
+    // SetWindowMonitor(1); -> goes to my second screen, but fullscreen is mandatory with this function
+
+    // hack go to my second screen to the left, without going fullscreen
+    SetWindowPosition(-1920 + 50, 50);
+
+    // the difference in scaling between the 2 screen mess up the window size, this is to restore it
+    SetWindowSize(window_px_width, window_px_height);
+
+#endif
 }
 
 // Function to initialize a raylib window, can be effectively called once
@@ -430,8 +471,16 @@ void draw_board(Board *board, bool show_missing_connection_tiles)
     }
 }
 
-void draw_level_num(const char *level_num_str)
+void draw_level_num(int level_num)
 {
+    static char level_num_str[4];
+    static int previous_level_num = 0;
+
+    if (level_num != previous_level_num)
+    {
+        sprintf(level_num_str, "%d", level_num);
+        previous_level_num = level_num;
+    }
     DrawText(level_num_str, offset_px.i, offset_y_level_num, 50, ORANGE);
 }
 
@@ -462,12 +511,39 @@ void draw_pos_text(void)
 // The idea is to have a column of piece thumbnails next to the board display
 // And fill it from the bottom up with the current priority array
 // The first pieces in the priority list are at the top, and they are taken out 1 by 1 to be played on the board
+// It now draws 2 columns of piece thumbnails, the left one is simply a display of the piece priority order
+// the right one, is the same, but the pieces are taken out of the column when they are played on the board as it is said in the description
 void draw_piece_priority_array(Board *board, int piece_idx_priority_array[NB_OF_PIECES], int piece_selected, int nb_of_playable_pieces, bool playable_side_per_piece_idx_mask[NB_OF_PIECES][MAX_NB_OF_SIDE_PER_PIECE])
 {
     static int i;
     static Piece *piece;
     static Vector2_int base_pos = (Vector2_int){-4, 0}; // base offset to the left of the board display
     static int side_idx = 0, rotation_state = 0, piece_idx;
+
+    static Vector2_int priority_array_legend_pos;
+    static Vector2_int remaining_pieces_legend_pos;
+
+    // Local extra set of pieces to have 2
+    static Piece local_piece_array[NB_OF_PIECES] = {0};
+    static Vector2_int local_base_pos = (Vector2_int){-8, 0};
+    static bool is_first_call = true;
+    static bool local_piece_array_need_update = false;
+    if (is_first_call)
+    {
+        is_first_call = false;
+
+        priority_array_legend_pos = (Vector2_int){offset_px.i - mini_tile_px_width * 9, offset_px.j + mini_tile_px_width * 19 + 10};
+        remaining_pieces_legend_pos = (Vector2_int){offset_px.i - mini_tile_px_width * 5 + 10, offset_px.j + mini_tile_px_width * 19 + 10};
+
+        load_piece_array(local_piece_array);
+        local_piece_array_need_update = true;
+    }
+    else
+        local_piece_array_need_update = (piece_selected == 0 || piece_selected == 1);
+
+    // need to be reset at each call
+    base_pos.j = 19;
+    local_base_pos.j = 19;
 
     // Mini piece display setup, (global constants swap)
     current_tile_px_width = mini_tile_px_width;
@@ -477,23 +553,36 @@ void draw_piece_priority_array(Board *board, int piece_idx_priority_array[NB_OF_
     current_point_circle_radius = mini_point_circle_radius;
     current_connections_tip_offset = mini_connections_tip_offset;
 
-    // base height of the column (bottom of the column)
-    base_pos.j = 19;
-
     // fill it from the bottom up
-    for (i = nb_of_playable_pieces - 1; i >= piece_selected; i--)
+    for (i = nb_of_playable_pieces - 1; i >= 0; i--)
     {
         piece_idx = piece_idx_priority_array[i];
-        piece = (board->piece_array) + piece_idx;
 
+        // To show the choosen point pieces with their point side
+        // And avoiding showing point side of other pieces
         side_idx = 0;
         if (!playable_side_per_piece_idx_mask[piece_idx][side_idx])
             side_idx = 1;
 
+        // Piece priority array display
+        piece = local_piece_array + piece_idx;
+        if (local_piece_array_need_update)
+        {
+            local_base_pos.j -= piece->piece_height;
+            blit_piece_main_data(piece, side_idx, local_base_pos, rotation_state);
+            local_base_pos.j--;
+            update_piece_all_drawing(piece, false, false);
+        }
+        draw_piece(piece, false, false);
+
+        // Remaining pieces display
+        if (i < piece_selected)
+            continue;
+        piece = (board->piece_array) + piece_idx;
+
         base_pos.j -= piece->piece_height;
         blit_piece_main_data(piece, side_idx, base_pos, rotation_state);
         base_pos.j--; // let a space of 1 mini-tile between 2 pieces
-
         update_piece_all_drawing(piece, false, false);
         draw_piece(piece, false, false);
     }
@@ -505,4 +594,175 @@ void draw_piece_priority_array(Board *board, int piece_idx_priority_array[NB_OF_
     current_bend_circle_radius = bend_circle_radius;
     current_point_circle_radius = point_circle_radius;
     current_connections_tip_offset = connections_tip_offset;
+
+    // Drawing legends
+    DrawText("Piece order", priority_array_legend_pos.i, priority_array_legend_pos.j, 20, RAYWHITE);
+    DrawText("Remaining", remaining_pieces_legend_pos.i, remaining_pieces_legend_pos.j, 20, RAYWHITE);
+}
+
+void draw_game_controls(void)
+{
+    static int line;
+    // static int offset_x = 380;
+    static int offset_x = 1150;
+    static int legend_offset_x = 220;
+    static int offset_y = 150;
+    static int font_size = 20;
+    static int line_extra_spacing = 2;
+
+    line = 0;
+
+    DrawText("Controls :", offset_x, offset_y, font_size, RAYWHITE);
+    line += 2;
+    DrawText("\t- ZQSD (or WASD)", offset_x, offset_y + line * (font_size + line_extra_spacing), font_size, RAYWHITE);
+    DrawText(": Move piece accross the board", offset_x + legend_offset_x, offset_y + line * (font_size + line_extra_spacing), font_size, RAYWHITE);
+    line++;
+    DrawText("\t- F", offset_x, offset_y + line * (font_size + line_extra_spacing), font_size, RAYWHITE);
+    DrawText(": Change piece's side", offset_x + legend_offset_x, offset_y + line * (font_size + line_extra_spacing), font_size, RAYWHITE);
+    line++;
+    DrawText("\t- R", offset_x, offset_y + line * (font_size + line_extra_spacing), font_size, RAYWHITE);
+    DrawText(": Rotate piece clockwise", offset_x + legend_offset_x, offset_y + line * (font_size + line_extra_spacing), font_size, RAYWHITE);
+    line++;
+    DrawText("\t- C", offset_x, offset_y + line * (font_size + line_extra_spacing), font_size, RAYWHITE);
+    DrawText(": Change selected piece", offset_x + legend_offset_x, offset_y + line * (font_size + line_extra_spacing), font_size, RAYWHITE);
+    line += 2;
+    DrawText("\t- SPACE", offset_x, offset_y + line * (font_size + line_extra_spacing), font_size, RAYWHITE);
+    DrawText(": Add piece to board", offset_x + legend_offset_x, offset_y + line * (font_size + line_extra_spacing), font_size, RAYWHITE);
+    line++;
+    DrawText("\t- E", offset_x, offset_y + line * (font_size + line_extra_spacing), font_size, RAYWHITE);
+    DrawText(": Undo last piece adding", offset_x + legend_offset_x, offset_y + line * (font_size + line_extra_spacing), font_size, RAYWHITE);
+    line += 2;
+    DrawText("\t- ESCAPE", offset_x, offset_y + line * (font_size + line_extra_spacing), font_size, RAYWHITE);
+    DrawText(": Go back to level selection", offset_x + legend_offset_x, offset_y + line * (font_size + line_extra_spacing), font_size, RAYWHITE);
+}
+
+int draw_game_mode_choice(void)
+{
+    static int active = 1;
+    static int spacing = 32;
+    static Rectangle bounds = (Rectangle){1200, 460, 199, 40};
+
+    DrawText("Mode :", 1150, 460 - spacing, 20, RAYWHITE);
+
+    active = GuiToggleGroup(bounds, "FREE;ASSISTED", active);
+
+    return active;
+}
+
+void draw_separator(void)
+{
+    DrawText("---------------- Solver Parameters ----------------", 1150, 560, 20, RAYWHITE);
+}
+
+int draw_FPS_choice(void)
+{
+    static int active = 2;
+    static int spacing = 32;
+    static Rectangle bounds = (Rectangle){1200, 630, 65, 40};
+
+    DrawText("FPS :", 1150, 630 - spacing, 20, RAYWHITE);
+
+    active = GuiToggleGroup(bounds, "0;1;10;30;60;INF", active);
+
+    if (active == 0)
+        DrawText("Press SPACE to go to next frame", 1200, 630 + 40 + 5, 20, ORANGE);
+
+    return active;
+}
+
+bool draw_launch_button(void)
+{
+
+    static Rectangle bounds = (Rectangle){1200, 730, 400, 40};
+    return GuiButton(bounds, "Launch solver !");
+}
+
+// Function to draw the result hint after adding a piece to the board in assisted mode
+//  make status + 10 if the error code come from "run_all_checks" instead of "add_piece_to_board"
+void draw_board_validation(int status)
+{
+
+    static int x = 330, y = 700, font_size = 20;
+    static Color col = RAYWHITE;
+
+    switch (status)
+    {
+    case 0:
+
+        DrawText("Board validation : Waiting for user to add a piece", x, y, font_size, col);
+        break;
+
+    case 1:
+        DrawText("Board validation : Successfully added piece", x, y, font_size, col);
+        break;
+
+    case OUT_OF_BOUNDS:
+        DrawText("Board validation : Error ! One or more tiles|connections are out of bounds", x, y, font_size, col);
+        break;
+    case SUPERPOSED_TILES:
+        DrawText("Board validation : Error ! One or more tiles are superposed", x, y, font_size, col);
+        break;
+    case TILE_NOT_MATCHING_MISSING_CONNECTIONS:
+        DrawText("Board validation : Error ! Connections are not right", x, y, font_size, col);
+        break;
+    case TILE_NOT_MATCHING_LEVEL_HINTS:
+        DrawText("Board validation : Error ! One or more tiles don't match level hints", x, y, font_size, col);
+        break;
+    case TRIPLE_MISSING_CONNECTION_TILE:
+        DrawText("Board validation : Error ! A position is expecting 3 connections (not allowed)", x, y, font_size, col);
+        break;
+    case INVALID_DOUBLE_MISSING_CONNECTION:
+        DrawText("Board validation : Error ! A position is expecting 2 connections and can't", x, y, font_size, col);
+        DrawText("be filled with remaining pieces", x, y + font_size + 1, font_size, col);
+        break;
+    case 10 + ISOLATED_EMPTY_TILE:
+        DrawText("Board validation : Error ! One or more positions are isolated", x, y, font_size, col);
+        break;
+    case 10 + DEAD_END:
+        DrawText("Board validation : Error ! There is a connection path dead end", x, y, font_size, col);
+        break;
+    case 10 + DOUBLE_MISSING_CONNECTION_NOT_FILLABLE:
+        DrawText("Board validation : Error ! A position is expecting 2 connections and can't", x, y, font_size, col);
+        DrawText("be filled with remaining pieces", x, y + font_size + 1, font_size, col);
+        break;
+    case 10 + LOOP_PATH:
+        DrawText("Board validation : Error ! There is a connection path loop (not allowed)", x, y, font_size, col);
+        break;
+
+    // special cases to display undo operation logs
+    case UNDO_SUCCESS:
+        DrawText("Board undo       : Successfully removed piece", x, y, font_size, col);
+        break;
+    case UNDO_ERROR:
+        DrawText("Board undo       : Error ! There is no piece to remove", x, y, font_size, col);
+        DrawText("(Or these are part of level hints)", x, y + font_size + 1, font_size, col);
+        break;
+
+    // special case : board completed
+    case BOARD_COMPLETED:
+        DrawText("Board completed !", x, y, font_size, col);
+        break;
+
+    case ALL_PIECE_PLAYED:
+        DrawText("All pieces have been played !", x, y, font_size, col);
+        break;
+
+    default:
+        break;
+    }
+}
+
+void draw_solver_result(bool successful_ending, double total_time, int valid_board_count)
+{
+    static int x = 330, y = 700, font_size = 20;
+    static Color col = RAYWHITE;
+
+    static char sub_string[20];
+
+    if (successful_ending)
+        sprintf(sub_string, "Complete !");
+    else
+        sprintf(sub_string, "No solution !");
+
+    DrawText(TextFormat("%s | Time : %.4fs | Valid board count : %d", sub_string, (float)total_time, valid_board_count), x, y, font_size, col);
 }

@@ -1,13 +1,9 @@
-
-5)  Maybe have the display of the current priority list next to the board 
-    (the current visualization doesn't show very well the process of switching combinations and piece priority order, specifically for the expert levels)
-    To see every piece at every frame -> call this display only when fps are set (we can maybe link it to the current "run_algorithm_without_display")
-    like checking at the beginning if fps !=0, if this is not the case -> call the "run_algorithm_with_extra_display"
-
-    + distinction between choosen point piece and others in the display next to the board (show the point piece with their point side, and others don't)
-
 6) Polishing project (proofreading comments, readme, release build) 
     -> See other similar projects on github, how do they share their project ?
+    do I try to include all the necessary .dll files with the final release or do I tell in the readme to install mingw dev tools to have the corresponding .dlls ?
+
+    this is something to ask reddit / search through stackoverflow
+
 
     make the readme based on the search_algorithm.c description, with visuals (game visual + tree visual)
 
@@ -15,28 +11,7 @@ Is there another standard to specify which versions of libraries are in the proj
     + take notes on OneNote if I find the answer
 
     -> Raylib 4.2
-------------------------------- doubtful TODO --------------------------------------------
 
-Check more how raylib works, by loading examples and games in clone_raylib folder
-    + maybe there's a more advance way of managing frames instead of BeginDrawing and EndDrawing, that would allow this program to have more fps ?
-    like strip everything useless to our use case, that these functions are doing
-    (ctrl+shift+f in the folder, search functions names that endrawing replace for example and see if there's stand alone examples)
+Nailed it
 
-Make a menu with 2D graphics instead of choosing level in the command line, in short, do everything to avoid having a command line interface in the final build
-    Like pages that contains levels, buttons to go to next page, each level button is a thumbnail with the level num on top
-
-    -> furthermore it's more doable with raylib now
     + is there an option to not launch a console when executing release app ?
-
-Make another mode where, instead of launching the solving algorithm, we can play the game with the help of my pre-adding and post-adding piece functions
-    Like in test_display.c
-
-    Or maybe, it's the only game mode when we launch the app, and there's a button to launch the solving algorithm live
-    (like adding a description of controls on the right of the board display) + buttons to reset level and launch algorithm
-    + slowed version of solving algorithm
-
-    or maybe I can have a slider to change the speed in real time ? or like +- buttons, or an input text box for fps ?
-
-    + SetWindowIcon
-
-

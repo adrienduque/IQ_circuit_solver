@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-g -Wall -Wextra
+CFLAGS=-g -Wall -Wextra -DUSE_SECOND_SCREEN
 SRC=src
 OBJ=obj
 TEST=tests

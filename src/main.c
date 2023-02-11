@@ -1,29 +1,132 @@
-#include <local/search_algorithm.h>
+/**
+ * @file main.c
+ *
+ * Contains the main function, starting point of the whole program
+ *
+ * main.c has mainly become a screen manager, see raylig game template and examples
+ */
+
 #include <stdio.h>
 #include <stdlib.h> // system
+
+#include <raylib/raylib.h>  // general helper functions of raylib
+#include <raylib/screens.h> // custom main helper functions see a raylib game template
+
+#include <local/search_algorithm.h> // run_algorithm_*** functions
+#include <local/display.h>          // setup_display
+#include <local/utils.h>            // defines
+
+static void TransitionToScreen(int screen);
+static void DrawTransition();
+
+static GameScreen currentScreen = LOGO;
+static bool onTransition = false;
+bool close_window_requested = false;
 
 int main(void)
 {
 #ifndef AUTOMATED_RUNS
-    int level_num;
 
-    printf("Welcome to Spaghetti solver.\n\n");
-    printf("Enter the level number you want to solve (49 to 120 included) : ");
-    scanf("%3d", &level_num);
-    while (level_num < 49 || level_num > 120)
+    setup_display((BOARD_WIDTH + 9) * tile_px_width, (BOARD_HEIGHT + 5) * tile_px_width);
+
+    SetWindowTitle("Spaghetti Solver");
+    Image icon = LoadImage("assets/icon.png");
+    ImageFormat(&icon, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+    SetWindowIcon(icon);
+    UnloadImage(icon);
+
+    SetTargetFPS(60);
+
+    InitLogoScreen();
+    InitLevelSelectScreen();
+
+    while (!WindowShouldClose() && !close_window_requested)
     {
-        system("cls");
-        printf("Enter the level number you want to solve (49 to 120 included) : ");
-        scanf("%3d", &level_num);
+        //----------------------------------------------------------------------------------
+        // Update
+        //----------------------------------------------------------------------------------
+
+        switch (currentScreen)
+        {
+        case LOGO:
+            UpdateLogoScreen();
+            if (FinishLogoScreen())
+                TransitionToScreen(LEVEL_SELECT);
+            break;
+
+        case LEVEL_SELECT:
+            UpdateLevelSelectScreen();
+            if (FinishLevelSelectScreen())
+            {
+                TransitionToScreen(GAME);
+                InitGameScreen();
+            }
+            break;
+
+        case GAME:
+            UpdateGameScreen();
+            if (FinishGameScreen() == -1)
+                // Go back to previous screen
+                TransitionToScreen(LEVEL_SELECT);
+
+            else if (FinishGameScreen() == 1)
+            {
+                TransitionToScreen(SOLVER);
+                InitSolverScreen();
+            }
+            break;
+
+        case SOLVER:
+            UpdateSolverScreen();
+            if (FinishSolverScreen())
+                TransitionToScreen(LEVEL_SELECT);
+
+            break;
+
+        default:
+            break;
+        }
+
+        //----------------------------------------------------------------------------------
+        // Draw
+        //----------------------------------------------------------------------------------
+
+        // in order to call the update function before its first corresponding draw call, we need to "waste" 1 transition frame
+        if (onTransition)
+        {
+            BeginDrawing();
+            DrawTransition();
+            onTransition = false;
+            EndDrawing();
+            continue;
+        }
+
+        switch (currentScreen)
+        {
+
+        case LOGO:
+            DrawLogoScreen();
+            break;
+        case LEVEL_SELECT:
+            DrawLevelSelectScreen();
+            break;
+        case GAME:
+            DrawGameScreen();
+            break;
+        case SOLVER:
+            DrawSolverScreen();
+            break;
+        default:
+            break;
+        }
     }
 
-    //    I feel like 10 fps is a good delay between each frame to see what's the algorithm doing
-    // run_algorithm_with_display(level_num, 10);
-    // run_algorithm_without_display(level_num);
+    UnloadLogoScreen();
+    UnloadLevelSelectScreen();
+    UnloadGameScreen();
+    UnloadSolverScreen();
 
-    run_algorithm_with_extra_display(level_num, 10);
-
-    printf("\n");
+    CloseWindow();
 
 #else
 
@@ -40,13 +143,46 @@ int main(void)
     return 0;
 }
 
-/**
- * @todo
- *
- * Maybe have a D configuration where we change the order of the pieces in the default priority list once again (but same idea as B configuration)
- * and priorize bigger pieces, that actually have a point on their first side to reduce again the number of valid boards
- *
- * i.e : move square from default index 6 to 8, the other pieces stay in the same order
- *
- *
- */
+//-------------------------------------------------------------------------
+// Helper functions : transition screen
+//-------------------------------------------------------------------------
+
+// Request transition to next screen
+static void TransitionToScreen(int screen)
+{
+    onTransition = true;
+    currentScreen = screen;
+}
+
+static void DrawTransition()
+{
+    DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), BLACK);
+}
+
+//-------------------------------------------------------------------------
+//-------------------------------------------------------------------------
+//-------------------------------------------------------------------------
+
+void previous_main(void)
+{
+
+    int level_num;
+
+    printf("Welcome to Spaghetti solver.\n\n");
+    printf("Enter the level number you want to solve (49 to 120 included) : ");
+    scanf("%3d", &level_num);
+    while (level_num < 49 || level_num > 120)
+    {
+        system("cls");
+        printf("Enter the level number you want to solve (49 to 120 included) : ");
+        scanf("%3d", &level_num);
+    }
+
+    //    I feel like 10 fps is a good delay between each frame to see what's the algorithm doing
+    // run_algorithm_with_display(level_num, 10);
+    // run_algorithm_without_display(level_num);
+
+    run_algorithm_with_extra_display(level_num, 0);
+
+    printf("\n");
+}

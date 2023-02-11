@@ -156,9 +156,9 @@ typedef struct Piece
 
     // ------ Savestate of the previous global position of the piece
     // (see in "run_algorithm_with_extra_display", it now has to be distinguish from current_xxx members, as these will change because of "draw_piece_priority_array")
-    int previous_side_idx;
-    Vector2_int previous_base_pos;
-    int previous_rotation_state;
+    int test_side_idx;
+    Vector2_int test_base_pos;
+    int test_rotation_state;
 
     // ------ Cached blit results
     Vector2_int border_tile_absolute_pos_array[MAX_NB_OF_BORDER_TILE_PER_SIDE];

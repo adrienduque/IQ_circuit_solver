@@ -21,6 +21,9 @@
 
 int tests_run = 0;
 
+bool close_window_requested; // as test files are designed to replace main.c, they have to have its global variable definitions or else linking error : "undefined reference to ..."
+// because I didn't want to exclude certain modules when compiling particular test files
+
 // function used in piece_data_display_test()
 static void print_piece_pos_infos(Piece *piece)
 {
@@ -324,7 +327,6 @@ char *board_interactive_display_test()
     Vector2_int base_pos = {0, 0};
 
     // state of the game variables
-    char level_num_str[4];
     bool display_tile_pos = false;
     bool try_adding_piece = false;
     bool need_level_reset = false;
@@ -332,7 +334,6 @@ char *board_interactive_display_test()
     int return_val;
 
     // initialize piece first state and first level
-    sprintf(level_num_str, "%d", level_num);
     piece_idx = get_next_piece_idx(board, piece_idx); // to account for already played pieces (obligatory pieces from level hints)
     Piece *piece = (board->piece_array) + piece_idx;
 
@@ -408,8 +409,6 @@ char *board_interactive_display_test()
             free(level_hints);
             free(board);
 
-            sprintf(level_num_str, "%d", level_num);
-
             level_hints = get_level_hints(level_num);
             board = init_board(level_hints);
             update_board_static_drawing(board);
@@ -482,7 +481,7 @@ char *board_interactive_display_test()
         ClearBackground(BLACK);
         draw_board(board, show_missing_connection_tiles);
         draw_piece(piece, show_missing_connection_tiles, show_border_tiles);
-        draw_level_num(level_num_str);
+        draw_level_num(level_num);
         if (display_tile_pos)
             draw_pos_text();
         EndDrawing();

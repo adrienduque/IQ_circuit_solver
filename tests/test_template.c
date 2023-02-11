@@ -3,12 +3,15 @@
  * Description template of test files
  */
 
+#include <stdbool.h>
 #include <local/template.h>
 #include <minunit.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 int tests_run = 0;
+
+bool close_window_requested;
 
 char *test_print_helloworld()
 {

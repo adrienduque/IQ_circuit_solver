@@ -2,7 +2,7 @@
 
 (draft)
 
-    https://www.smartgamesandpuzzles.com/
+    https://www.smartgamesandpuzzles.com/ -> https://www.smartgamesandpuzzles.com/iq-circuit.html
 
     https://www.smartgames.eu/uk/our-games
 

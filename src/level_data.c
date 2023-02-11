@@ -21,7 +21,7 @@
 #include <stdlib.h> // malloc
 
 #include <local/utils.h>      //direction defines
-#include <local/piece_data.h> //Tile
+#include <local/piece_data.h> //Tile, defines
 
 #include <local/level_data.h>
 
@@ -1051,10 +1051,10 @@ LevelHints *get_level_hints(int level_num)
         level_hints->nb_of_open_obligatory_point_tiles = 2;
         break;
     case 73:
-        level_hints->obligatory_piece_array[0] = (PieceAddInfos){0, 0, {4, 0}, 0};
-        level_hints->obligatory_piece_array[1] = (PieceAddInfos){5, 0, {3, 1}, 2};
-        level_hints->obligatory_piece_array[2] = (PieceAddInfos){9, 0, {3, 2}, 1};
-        level_hints->obligatory_piece_array[3] = (PieceAddInfos){2, 0, {4, 3}, 0};
+        level_hints->obligatory_piece_array[0] = (PieceAddInfos){LINE2_1, 0, {4, 0}, 0};
+        level_hints->obligatory_piece_array[1] = (PieceAddInfos){CORNER_2, 0, {3, 1}, 2};
+        level_hints->obligatory_piece_array[2] = (PieceAddInfos){Z_PIECE, 0, {3, 2}, 1};
+        level_hints->obligatory_piece_array[3] = (PieceAddInfos){LINE3_1, 0, {4, 3}, 0};
         level_hints->nb_of_obligatory_pieces = 4;
 
         level_hints->obligatory_tile_array[0] = (Tile){.tile_type = point, .absolute_pos = {4, 0}, .nb_of_connections = 0};
@@ -1066,10 +1066,10 @@ LevelHints *get_level_hints(int level_num)
         level_hints->nb_of_open_obligatory_point_tiles = 0;
         break;
     case 74:
-        level_hints->obligatory_piece_array[0] = (PieceAddInfos){2, 0, {4, 0}, 2};
-        level_hints->obligatory_piece_array[1] = (PieceAddInfos){6, 0, {0, 3}, 3};
-        level_hints->obligatory_piece_array[2] = (PieceAddInfos){1, 0, {3, 3}, 2};
-        level_hints->obligatory_piece_array[3] = (PieceAddInfos){4, 0, {5, 2}, 0};
+        level_hints->obligatory_piece_array[0] = (PieceAddInfos){LINE3_1, 0, {4, 0}, 2};
+        level_hints->obligatory_piece_array[1] = (PieceAddInfos){SQUARE, 0, {0, 3}, 3};
+        level_hints->obligatory_piece_array[2] = (PieceAddInfos){LINE2_2, 0, {3, 3}, 2};
+        level_hints->obligatory_piece_array[3] = (PieceAddInfos){CORNER_1, 0, {5, 2}, 0};
         level_hints->nb_of_obligatory_pieces = 4;
 
         level_hints->obligatory_tile_array[0] = (Tile){.tile_type = point, .absolute_pos = {4, 0}, .nb_of_connections = 0};
@@ -1081,10 +1081,10 @@ LevelHints *get_level_hints(int level_num)
         level_hints->nb_of_open_obligatory_point_tiles = 0;
         break;
     case 75:
-        level_hints->obligatory_piece_array[0] = (PieceAddInfos){2, 0, {3, 3}, 2};
-        level_hints->obligatory_piece_array[1] = (PieceAddInfos){5, 0, {6, 0}, 1};
-        level_hints->obligatory_piece_array[2] = (PieceAddInfos){0, 0, {7, 3}, 2};
-        level_hints->obligatory_piece_array[3] = (PieceAddInfos){1, 0, {6, 1}, 1};
+        level_hints->obligatory_piece_array[0] = (PieceAddInfos){LINE3_1, 0, {3, 3}, 2};
+        level_hints->obligatory_piece_array[1] = (PieceAddInfos){CORNER_2, 0, {6, 0}, 1};
+        level_hints->obligatory_piece_array[2] = (PieceAddInfos){LINE2_1, 0, {7, 3}, 2};
+        level_hints->obligatory_piece_array[3] = (PieceAddInfos){LINE2_2, 0, {6, 1}, 1};
         level_hints->nb_of_obligatory_pieces = 4;
 
         level_hints->obligatory_tile_array[0] = (Tile){.tile_type = point, .absolute_pos = {3, 3}, .nb_of_connections = 0};
@@ -1096,10 +1096,10 @@ LevelHints *get_level_hints(int level_num)
         level_hints->nb_of_open_obligatory_point_tiles = 0;
         break;
     case 76:
-        level_hints->obligatory_piece_array[0] = (PieceAddInfos){2, 0, {0, 0}, 1};
-        level_hints->obligatory_piece_array[1] = (PieceAddInfos){1, 0, {7, 0}, 2};
-        level_hints->obligatory_piece_array[2] = (PieceAddInfos){0, 0, {6, 2}, 1};
-        level_hints->obligatory_piece_array[3] = (PieceAddInfos){3, 0, {7, 3}, 3};
+        level_hints->obligatory_piece_array[0] = (PieceAddInfos){LINE3_1, 0, {0, 0}, 1};
+        level_hints->obligatory_piece_array[1] = (PieceAddInfos){LINE2_2, 0, {7, 0}, 2};
+        level_hints->obligatory_piece_array[2] = (PieceAddInfos){LINE2_1, 0, {6, 2}, 1};
+        level_hints->obligatory_piece_array[3] = (PieceAddInfos){LINE3_2, 0, {7, 3}, 3};
         level_hints->nb_of_obligatory_pieces = 4;
 
         level_hints->obligatory_tile_array[0] = (Tile){.tile_type = point, .absolute_pos = {0, 0}, .nb_of_connections = 0};
@@ -1111,8 +1111,8 @@ LevelHints *get_level_hints(int level_num)
         level_hints->nb_of_open_obligatory_point_tiles = 0;
         break;
     case 77:
-        level_hints->obligatory_piece_array[0] = (PieceAddInfos){3, 0, {5, 0}, 1};
-        level_hints->obligatory_piece_array[1] = (PieceAddInfos){9, 0, {2, 1}, 0};
+        level_hints->obligatory_piece_array[0] = (PieceAddInfos){LINE3_2, 0, {5, 0}, 1};
+        level_hints->obligatory_piece_array[1] = (PieceAddInfos){Z_PIECE, 0, {2, 1}, 0};
         level_hints->nb_of_obligatory_pieces = 2;
 
         level_hints->obligatory_tile_array[0] = (Tile){.tile_type = point, .absolute_pos = {5, 1}, .nb_of_connections = 0};
@@ -1122,8 +1122,8 @@ LevelHints *get_level_hints(int level_num)
         level_hints->nb_of_open_obligatory_point_tiles = 0;
         break;
     case 78:
-        level_hints->obligatory_piece_array[0] = (PieceAddInfos){5, 0, {1, 0}, 1};
-        level_hints->obligatory_piece_array[1] = (PieceAddInfos){4, 0, {5, 1}, 2};
+        level_hints->obligatory_piece_array[0] = (PieceAddInfos){CORNER_2, 0, {1, 0}, 1};
+        level_hints->obligatory_piece_array[1] = (PieceAddInfos){CORNER_1, 0, {5, 1}, 2};
         level_hints->nb_of_obligatory_pieces = 2;
 
         level_hints->obligatory_tile_array[0] = (Tile){.tile_type = point, .absolute_pos = {1, 0}, .nb_of_connections = 0};
@@ -1133,9 +1133,9 @@ LevelHints *get_level_hints(int level_num)
         level_hints->nb_of_open_obligatory_point_tiles = 0;
         break;
     case 79:
-        level_hints->obligatory_piece_array[0] = (PieceAddInfos){0, 0, {0, 1}, 3};
-        level_hints->obligatory_piece_array[1] = (PieceAddInfos){5, 0, {0, 2}, 0};
-        level_hints->obligatory_piece_array[2] = (PieceAddInfos){3, 0, {5, 3}, 0};
+        level_hints->obligatory_piece_array[0] = (PieceAddInfos){LINE2_1, 0, {0, 1}, 3};
+        level_hints->obligatory_piece_array[1] = (PieceAddInfos){CORNER_2, 0, {0, 2}, 0};
+        level_hints->obligatory_piece_array[2] = (PieceAddInfos){LINE3_2, 0, {5, 3}, 0};
         level_hints->nb_of_obligatory_pieces = 3;
 
         level_hints->obligatory_tile_array[0] = (Tile){.tile_type = point, .absolute_pos = {6, 2}, .nb_of_connections = 0};
@@ -1153,9 +1153,9 @@ LevelHints *get_level_hints(int level_num)
         level_hints->nb_of_open_obligatory_point_tiles = 3;
         break;
     case 80:
-        level_hints->obligatory_piece_array[0] = (PieceAddInfos){2, 0, {4, 0}, 2};
-        level_hints->obligatory_piece_array[1] = (PieceAddInfos){1, 0, {0, 3}, 3};
-        level_hints->obligatory_piece_array[2] = (PieceAddInfos){4, 0, {5, 2}, 0};
+        level_hints->obligatory_piece_array[0] = (PieceAddInfos){LINE3_1, 0, {4, 0}, 2};
+        level_hints->obligatory_piece_array[1] = (PieceAddInfos){LINE2_2, 0, {0, 3}, 3};
+        level_hints->obligatory_piece_array[2] = (PieceAddInfos){CORNER_1, 0, {5, 2}, 0};
         level_hints->nb_of_obligatory_pieces = 3;
 
         level_hints->obligatory_tile_array[0] = (Tile){.tile_type = point, .absolute_pos = {6, 0}, .nb_of_connections = 0};
@@ -1173,8 +1173,8 @@ LevelHints *get_level_hints(int level_num)
         level_hints->nb_of_open_obligatory_point_tiles = 3;
         break;
     case 81:
-        level_hints->obligatory_piece_array[0] = (PieceAddInfos){5, 0, {1, 0}, 1};
-        level_hints->obligatory_piece_array[1] = (PieceAddInfos){6, 0, {0, 3}, 3};
+        level_hints->obligatory_piece_array[0] = (PieceAddInfos){CORNER_2, 0, {1, 0}, 1};
+        level_hints->obligatory_piece_array[1] = (PieceAddInfos){SQUARE, 0, {0, 3}, 3};
         level_hints->nb_of_obligatory_pieces = 2;
 
         level_hints->obligatory_tile_array[0] = (Tile){.tile_type = point, .absolute_pos = {4, 3}, .nb_of_connections = 0};
@@ -1189,9 +1189,9 @@ LevelHints *get_level_hints(int level_num)
         level_hints->nb_of_open_obligatory_point_tiles = 2;
         break;
     case 82:
-        level_hints->obligatory_piece_array[0] = (PieceAddInfos){1, 0, {3, 0}, 2};
-        level_hints->obligatory_piece_array[1] = (PieceAddInfos){2, 0, {7, 0}, 2};
-        level_hints->obligatory_piece_array[2] = (PieceAddInfos){3, 0, {3, 3}, 0};
+        level_hints->obligatory_piece_array[0] = (PieceAddInfos){LINE2_2, 0, {3, 0}, 2};
+        level_hints->obligatory_piece_array[1] = (PieceAddInfos){LINE3_1, 0, {7, 0}, 2};
+        level_hints->obligatory_piece_array[2] = (PieceAddInfos){LINE3_2, 0, {3, 3}, 0};
         level_hints->nb_of_obligatory_pieces = 3;
 
         level_hints->obligatory_tile_array[0] = (Tile){.tile_type = point, .absolute_pos = {1, 2}, .nb_of_connections = 0};
@@ -1205,8 +1205,8 @@ LevelHints *get_level_hints(int level_num)
         level_hints->nb_of_open_obligatory_point_tiles = 1;
         break;
     case 83:
-        level_hints->obligatory_piece_array[0] = (PieceAddInfos){4, 0, {2, 1}, 2};
-        level_hints->obligatory_piece_array[1] = (PieceAddInfos){6, 0, {6, 0}, 1};
+        level_hints->obligatory_piece_array[0] = (PieceAddInfos){CORNER_1, 0, {2, 1}, 2};
+        level_hints->obligatory_piece_array[1] = (PieceAddInfos){SQUARE, 0, {6, 0}, 1};
         level_hints->nb_of_obligatory_pieces = 2;
 
         level_hints->obligatory_tile_array[0] = (Tile){.tile_type = point, .absolute_pos = {7, 3}, .nb_of_connections = 0};
@@ -1221,9 +1221,9 @@ LevelHints *get_level_hints(int level_num)
         level_hints->nb_of_open_obligatory_point_tiles = 2;
         break;
     case 84:
-        level_hints->obligatory_piece_array[0] = (PieceAddInfos){0, 0, {0, 0}, 0};
-        level_hints->obligatory_piece_array[1] = (PieceAddInfos){3, 0, {0, 1}, 1};
-        level_hints->obligatory_piece_array[2] = (PieceAddInfos){1, 0, {5, 3}, 0};
+        level_hints->obligatory_piece_array[0] = (PieceAddInfos){LINE2_1, 0, {0, 0}, 0};
+        level_hints->obligatory_piece_array[1] = (PieceAddInfos){LINE3_2, 0, {0, 1}, 1};
+        level_hints->obligatory_piece_array[2] = (PieceAddInfos){LINE2_2, 0, {5, 3}, 0};
         level_hints->nb_of_obligatory_pieces = 3;
 
         level_hints->obligatory_tile_array[0] = (Tile){.tile_type = point, .absolute_pos = {1, 2}, .nb_of_connections = 0};
@@ -1241,8 +1241,8 @@ LevelHints *get_level_hints(int level_num)
         level_hints->nb_of_open_obligatory_point_tiles = 3;
         break;
     case 85:
-        level_hints->obligatory_piece_array[0] = (PieceAddInfos){4, 0, {1, 1}, 0};
-        level_hints->obligatory_piece_array[1] = (PieceAddInfos){5, 0, {6, 3}, 3};
+        level_hints->obligatory_piece_array[0] = (PieceAddInfos){CORNER_1, 0, {1, 1}, 0};
+        level_hints->obligatory_piece_array[1] = (PieceAddInfos){CORNER_2, 0, {6, 3}, 3};
         level_hints->nb_of_obligatory_pieces = 2;
 
         level_hints->obligatory_tile_array[0] = (Tile){.tile_type = point, .absolute_pos = {3, 0}, .nb_of_connections = 0};
@@ -1257,8 +1257,8 @@ LevelHints *get_level_hints(int level_num)
         level_hints->nb_of_open_obligatory_point_tiles = 2;
         break;
     case 86:
-        level_hints->obligatory_piece_array[0] = (PieceAddInfos){2, 0, {0, 0}, 1};
-        level_hints->obligatory_piece_array[1] = (PieceAddInfos){1, 0, {4, 0}, 1};
+        level_hints->obligatory_piece_array[0] = (PieceAddInfos){LINE3_1, 0, {0, 0}, 1};
+        level_hints->obligatory_piece_array[1] = (PieceAddInfos){LINE2_2, 0, {4, 0}, 1};
         level_hints->nb_of_obligatory_pieces = 2;
 
         level_hints->obligatory_tile_array[0] = (Tile){.tile_type = point, .absolute_pos = {6, 1}, .nb_of_connections = 0};
@@ -1273,8 +1273,8 @@ LevelHints *get_level_hints(int level_num)
         level_hints->nb_of_open_obligatory_point_tiles = 2;
         break;
     case 87:
-        level_hints->obligatory_piece_array[0] = (PieceAddInfos){6, 0, {7, 0}, 1};
-        level_hints->obligatory_piece_array[1] = (PieceAddInfos){5, 0, {6, 3}, 3};
+        level_hints->obligatory_piece_array[0] = (PieceAddInfos){SQUARE, 0, {7, 0}, 1};
+        level_hints->obligatory_piece_array[1] = (PieceAddInfos){CORNER_2, 0, {6, 3}, 3};
         level_hints->nb_of_obligatory_pieces = 2;
 
         level_hints->obligatory_tile_array[0] = (Tile){.tile_type = point, .absolute_pos = {1, 2}, .nb_of_connections = 0};
@@ -1289,8 +1289,8 @@ LevelHints *get_level_hints(int level_num)
         level_hints->nb_of_open_obligatory_point_tiles = 2;
         break;
     case 88:
-        level_hints->obligatory_piece_array[0] = (PieceAddInfos){5, 0, {1, 0}, 1};
-        level_hints->obligatory_piece_array[1] = (PieceAddInfos){6, 0, {3, 3}, 3};
+        level_hints->obligatory_piece_array[0] = (PieceAddInfos){CORNER_2, 0, {1, 0}, 1};
+        level_hints->obligatory_piece_array[1] = (PieceAddInfos){SQUARE, 0, {3, 3}, 3};
         level_hints->nb_of_obligatory_pieces = 2;
 
         level_hints->obligatory_tile_array[0] = (Tile){.tile_type = point, .absolute_pos = {1, 0}, .nb_of_connections = 0};
@@ -1300,8 +1300,8 @@ LevelHints *get_level_hints(int level_num)
         level_hints->nb_of_open_obligatory_point_tiles = 0;
         break;
     case 89:
-        level_hints->obligatory_piece_array[0] = (PieceAddInfos){5, 0, {1, 0}, 1};
-        level_hints->obligatory_piece_array[1] = (PieceAddInfos){4, 0, {4, 0}, 0};
+        level_hints->obligatory_piece_array[0] = (PieceAddInfos){CORNER_2, 0, {1, 0}, 1};
+        level_hints->obligatory_piece_array[1] = (PieceAddInfos){CORNER_1, 0, {4, 0}, 0};
         level_hints->nb_of_obligatory_pieces = 2;
 
         level_hints->obligatory_tile_array[0] = (Tile){.tile_type = point, .absolute_pos = {1, 0}, .nb_of_connections = 0};
@@ -1311,8 +1311,8 @@ LevelHints *get_level_hints(int level_num)
         level_hints->nb_of_open_obligatory_point_tiles = 0;
         break;
     case 90:
-        level_hints->obligatory_piece_array[0] = (PieceAddInfos){1, 0, {3, 1}, 2};
-        level_hints->obligatory_piece_array[1] = (PieceAddInfos){2, 0, {2, 0}, 0};
+        level_hints->obligatory_piece_array[0] = (PieceAddInfos){LINE2_2, 0, {3, 1}, 2};
+        level_hints->obligatory_piece_array[1] = (PieceAddInfos){LINE3_1, 0, {2, 0}, 0};
         level_hints->nb_of_obligatory_pieces = 2;
 
         level_hints->obligatory_tile_array[0] = (Tile){.tile_type = point, .absolute_pos = {3, 1}, .nb_of_connections = 0};
@@ -1322,8 +1322,8 @@ LevelHints *get_level_hints(int level_num)
         level_hints->nb_of_open_obligatory_point_tiles = 0;
         break;
     case 91:
-        level_hints->obligatory_piece_array[0] = (PieceAddInfos){2, 0, {0, 0}, 1};
-        level_hints->obligatory_piece_array[1] = (PieceAddInfos){3, 0, {3, 3}, 0};
+        level_hints->obligatory_piece_array[0] = (PieceAddInfos){LINE3_1, 0, {0, 0}, 1};
+        level_hints->obligatory_piece_array[1] = (PieceAddInfos){LINE3_2, 0, {3, 3}, 0};
         level_hints->nb_of_obligatory_pieces = 2;
 
         level_hints->obligatory_tile_array[0] = (Tile){.tile_type = point, .absolute_pos = {0, 0}, .nb_of_connections = 0};
@@ -1333,7 +1333,7 @@ LevelHints *get_level_hints(int level_num)
         level_hints->nb_of_open_obligatory_point_tiles = 0;
         break;
     case 92:
-        level_hints->obligatory_piece_array[0] = (PieceAddInfos){9, 0, {7, 2}, 1};
+        level_hints->obligatory_piece_array[0] = (PieceAddInfos){Z_PIECE, 0, {7, 2}, 1};
         level_hints->nb_of_obligatory_pieces = 1;
 
         level_hints->obligatory_tile_array[0] = (Tile){.tile_type = point, .absolute_pos = {7, 1}, .nb_of_connections = 0};
@@ -1349,7 +1349,7 @@ LevelHints *get_level_hints(int level_num)
         level_hints->nb_of_open_obligatory_point_tiles = 3;
         break;
     case 93:
-        level_hints->obligatory_piece_array[0] = (PieceAddInfos){0, 0, {1, 2}, 1};
+        level_hints->obligatory_piece_array[0] = (PieceAddInfos){LINE2_1, 0, {1, 2}, 1};
         level_hints->nb_of_obligatory_pieces = 1;
 
         level_hints->obligatory_tile_array[0] = (Tile){.tile_type = point, .absolute_pos = {7, 3}, .nb_of_connections = 0};
@@ -1365,7 +1365,7 @@ LevelHints *get_level_hints(int level_num)
         level_hints->nb_of_open_obligatory_point_tiles = 3;
         break;
     case 94:
-        level_hints->obligatory_piece_array[0] = (PieceAddInfos){2, 0, {3, 3}, 2};
+        level_hints->obligatory_piece_array[0] = (PieceAddInfos){LINE3_1, 0, {3, 3}, 2};
         level_hints->nb_of_obligatory_pieces = 1;
 
         level_hints->obligatory_tile_array[0] = (Tile){.tile_type = point, .absolute_pos = {1, 0}, .nb_of_connections = 0};
@@ -1381,7 +1381,7 @@ LevelHints *get_level_hints(int level_num)
         level_hints->nb_of_open_obligatory_point_tiles = 3;
         break;
     case 95:
-        level_hints->obligatory_piece_array[0] = (PieceAddInfos){2, 0, {0, 0}, 1};
+        level_hints->obligatory_piece_array[0] = (PieceAddInfos){LINE3_1, 0, {0, 0}, 1};
         level_hints->nb_of_obligatory_pieces = 1;
 
         level_hints->obligatory_tile_array[0] = (Tile){.tile_type = point, .absolute_pos = {5, 0}, .nb_of_connections = 0};
@@ -1397,7 +1397,7 @@ LevelHints *get_level_hints(int level_num)
         level_hints->nb_of_open_obligatory_point_tiles = 3;
         break;
     case 96:
-        level_hints->obligatory_piece_array[0] = (PieceAddInfos){1, 0, {0, 0}, 0};
+        level_hints->obligatory_piece_array[0] = (PieceAddInfos){LINE2_2, 0, {0, 0}, 0};
         level_hints->nb_of_obligatory_pieces = 1;
 
         level_hints->obligatory_tile_array[0] = (Tile){.tile_type = point, .absolute_pos = {1, 2}, .nb_of_connections = 0};
