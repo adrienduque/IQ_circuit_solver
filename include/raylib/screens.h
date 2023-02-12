@@ -46,6 +46,7 @@ typedef enum GameScreen
 //----------------------------------------------------------------------------------
 extern int level_num_selected;
 extern bool close_window_requested;
+extern char assets_folder_relative_path[30];
 
 //----------------------------------------------------------------------------------
 // Logo Screen Functions Declaration see screen_logo.c

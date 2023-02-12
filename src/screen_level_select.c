@@ -41,19 +41,15 @@ void InitLevelSelectScreen(void)
 {
     static Image image_logo;
 
-    image_logo = LoadImage("assets/IQ_circuit_official_logo.png");
+    image_logo = LoadImage(TextFormat("%s/IQ_circuit_official_logo.png", assets_folder_relative_path));
     ImageResize(&image_logo, (int)(image_logo.width / 4), (int)(image_logo.height / 4));
     texture_logo = LoadTextureFromImage(image_logo);
     UnloadImage(image_logo);
     hitbox_logo = (Rectangle){GetScreenWidth() - 30 - texture_logo.width, 30, texture_logo.width, texture_logo.height};
     is_mouse_over_logo = false;
 
-    static char file_name[30];
     for (int i = 0; i < NB_OF_LEVELS; i++)
-    {
-        sprintf(file_name, "assets/level_frames/%d.png", i + START_LEVEL);
-        level_texture_array[i] = LoadTexture(file_name);
-    }
+        level_texture_array[i] = LoadTexture(TextFormat("%s/level_frames/%d.png", assets_folder_relative_path, i + START_LEVEL));
 
     texture_px_width = level_texture_array[0].width;
     texture_px_height = level_texture_array[0].height;

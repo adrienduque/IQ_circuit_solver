@@ -4,6 +4,9 @@
 
     this is something to ask reddit / search through stackoverflow
 
+    It only depens on libwinpthread-1.dll, I tested it on another windows computer, so I copied it wherever there is binaries
+
+    To make sure it is, I'll make a virtual windows machine and try to run it by pulling files from github
 
     make the readme based on the search_algorithm.c description, with visuals (game visual + tree visual)
 

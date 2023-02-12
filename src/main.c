@@ -18,19 +18,24 @@
 
 static void TransitionToScreen(int screen);
 static void DrawTransition();
+void find_asset_folder_relative_path(void);
 
 static GameScreen currentScreen = LOGO;
 static bool onTransition = false;
 bool close_window_requested = false;
+
+char assets_folder_relative_path[30];
 
 int main(void)
 {
 #ifndef AUTOMATED_RUNS
 
     setup_display((BOARD_WIDTH + 9) * tile_px_width, (BOARD_HEIGHT + 5) * tile_px_width);
-
     SetWindowTitle("Spaghetti Solver");
-    Image icon = LoadImage("assets/icon.png");
+
+    find_asset_folder_relative_path();
+
+    Image icon = LoadImage(TextFormat("%s/icon.png", assets_folder_relative_path));
     ImageFormat(&icon, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
     SetWindowIcon(icon);
     UnloadImage(icon);
@@ -157,6 +162,29 @@ static void TransitionToScreen(int screen)
 static void DrawTransition()
 {
     DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), BLACK);
+}
+
+//-------------------------------------------------------------------------
+// Helper functions : find assets folder relative path
+//-------------------------------------------------------------------------
+
+// As the executables can be run from different common folder locations
+// I prefer finding the assets folder dynamically
+void find_asset_folder_relative_path(void)
+{
+    static const char *path_to_test[] = {"assets", "../assets", "../../assets"};
+    int idx = -1;
+    Image icon;
+
+    do
+    {
+        idx++;
+        icon = LoadImage(TextFormat("%s/icon.png", path_to_test[idx]));
+
+    } while (icon.data == NULL);
+
+    sprintf(assets_folder_relative_path, path_to_test[idx]);
+    UnloadImage(icon);
 }
 
 //-------------------------------------------------------------------------
