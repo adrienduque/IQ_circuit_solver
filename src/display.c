@@ -658,11 +658,11 @@ int draw_FPS_choice(void)
 {
     static int active = 2;
     static int spacing = 32;
-    static Rectangle bounds = (Rectangle){1200, 630, 65, 40};
+    static Rectangle bounds = (Rectangle){1200, 630, 55, 40};
 
     DrawText("FPS :", 1150, 630 - spacing, 20, RAYWHITE);
 
-    active = GuiToggleGroup(bounds, "0;1;10;30;60;INF", active);
+    active = GuiToggleGroup(bounds, "0;1;3;10;30;60;INF", active);
 
     if (active == 0)
         DrawText("Press SPACE to go to next frame", 1200, 630 + 40 + 5, 20, ORANGE);

@@ -7,10 +7,6 @@
  * see search_algorithm.c description for an explanation of the algorithm, and later README.md for detailled explanation @todo
  */
 
-/**
- * @todo let's make a 5 fps option or even fewer idk
- */
-
 #include <stdbool.h>
 #include <stdlib.h> // NULL
 
@@ -318,18 +314,22 @@ static void set_target_fps(void)
         break;
 
     case 2:
-        target_fps = 10;
+        target_fps = 3;
         break;
 
     case 3:
-        target_fps = 30;
+        target_fps = 10;
         break;
 
     case 4:
-        target_fps = 60;
+        target_fps = 30;
         break;
 
     case 5:
+        target_fps = 60;
+        break;
+
+    case 6:
         target_fps = 0;
         enable_slow_checks = false;
         break;
