@@ -12,6 +12,9 @@
 
 #include <stdbool.h>
 #include <stdlib.h> // abs
+#include <stdio.h>  // sprintf
+
+#include <raylib/raylib.h> // Image
 
 #include <local/utils.h>
 
@@ -188,4 +191,26 @@ int generate_next_combination(const int *input_int_array, int input_array_length
     for (i = 0; i < r; i++)
         next_combination_placeholder[i] = input_int_array[comb[i]];
     return 1;
+}
+
+// -----------------------------------------------------------------------------------------
+
+char assets_folder_relative_path[30];
+// As the executables can be run from different common folder locations
+// I prefer finding the assets folder dynamically
+void find_asset_folder_relative_path(void)
+{
+    static const char *path_to_test[] = {"assets", "../assets", "../../assets"};
+    int idx = -1;
+    Image icon;
+
+    do
+    {
+        idx++;
+        icon = LoadImage(TextFormat("%s/icon.png", path_to_test[idx]));
+
+    } while (icon.data == NULL);
+
+    sprintf(assets_folder_relative_path, path_to_test[idx]);
+    UnloadImage(icon);
 }

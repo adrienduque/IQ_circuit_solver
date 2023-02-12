@@ -21,9 +21,6 @@
 
 int tests_run = 0;
 
-bool close_window_requested; // as test files are designed to replace main.c, they have to have its global variable definitions or else linking error : "undefined reference to ..."
-// because I didn't want to exclude certain modules when compiling particular test files
-
 // function used in piece_data_display_test()
 static void print_piece_pos_infos(Piece *piece)
 {

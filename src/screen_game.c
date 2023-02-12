@@ -16,7 +16,7 @@
 #include <local/piece.h>
 #include <local/check_board.h>
 #include <local/display.h>
-#include <local/utils.h>
+#include <local/utils.h> // assets_folder_relative_path
 
 typedef enum GameMode
 {
@@ -218,7 +218,6 @@ void UpdateGameScreen(void)
 
 void DrawGameScreen(void)
 {
-    BeginDrawing();
     ClearBackground(BLACK);
 
     draw_board(board, false);
@@ -235,8 +234,6 @@ void DrawGameScreen(void)
     draw_separator();
     draw_FPS_choice();
     draw_board_validation(error_status);
-
-    EndDrawing();
 }
 
 void UnloadGameScreen(void)

@@ -14,8 +14,6 @@
 
 int tests_run = 0;
 
-bool close_window_requested;
-
 char *test_blit_piece_main_data()
 {
 

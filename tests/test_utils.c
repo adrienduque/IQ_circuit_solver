@@ -10,8 +10,6 @@
 
 int tests_run = 0;
 
-bool close_window_requested;
-
 char *test_rotate_pos()
 {
     Vector2_int test_input = {1, 2};

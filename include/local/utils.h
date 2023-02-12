@@ -73,4 +73,8 @@ int manhattan_dist(const Vector2_int *pos1, const Vector2_int *pos2);
 // --------------------------- Math needed for main search algorithm --------------------------
 int generate_next_combination(const int *input_int_array, int input_array_length, int *next_combination_placeholder, int r);
 
+// -------------------------------
+extern char assets_folder_relative_path[30];
+void find_asset_folder_relative_path(void);
+
 #endif

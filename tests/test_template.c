@@ -11,8 +11,6 @@
 
 int tests_run = 0;
 
-bool close_window_requested;
-
 char *test_print_helloworld()
 {
     mu_assert("should return 0", print_helloworld() == 0);

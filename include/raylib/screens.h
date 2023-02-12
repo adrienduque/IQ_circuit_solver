@@ -30,6 +30,8 @@
 
 // #define TILE_VIEWER_MODE
 
+#define DEFAULT_FPS 60
+
 //----------------------------------------------------------------------------------
 // Types and Structures Definition
 //----------------------------------------------------------------------------------
@@ -45,8 +47,6 @@ typedef enum GameScreen
 // Global Variables Declaration (shared by several modules)
 //----------------------------------------------------------------------------------
 extern int level_num_selected;
-extern bool close_window_requested;
-extern char assets_folder_relative_path[30];
 
 //----------------------------------------------------------------------------------
 // Logo Screen Functions Declaration see screen_logo.c

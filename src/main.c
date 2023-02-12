@@ -14,7 +14,7 @@
 
 #include <local/search_algorithm.h> // run_algorithm_*** functions
 #include <local/display.h>          // setup_display
-#include <local/utils.h>            // defines
+#include <local/utils.h>            // find_asset_folder_relative_path and defines
 
 static void TransitionToScreen(int screen);
 static void DrawTransition();
@@ -22,9 +22,6 @@ void find_asset_folder_relative_path(void);
 
 static GameScreen currentScreen = LOGO;
 static bool onTransition = false;
-bool close_window_requested = false;
-
-char assets_folder_relative_path[30];
 
 int main(void)
 {
@@ -40,12 +37,12 @@ int main(void)
     SetWindowIcon(icon);
     UnloadImage(icon);
 
-    SetTargetFPS(60);
+    SetTargetFPS(DEFAULT_FPS);
 
     InitLogoScreen();
     InitLevelSelectScreen();
 
-    while (!WindowShouldClose() && !close_window_requested)
+    while (!WindowShouldClose())
     {
         //----------------------------------------------------------------------------------
         // Update
@@ -95,11 +92,11 @@ int main(void)
         //----------------------------------------------------------------------------------
         // Draw
         //----------------------------------------------------------------------------------
+        BeginDrawing();
 
         // in order to call the update function before its first corresponding draw call, we need to "waste" 1 transition frame
         if (onTransition)
         {
-            BeginDrawing();
             DrawTransition();
             onTransition = false;
             EndDrawing();
@@ -124,6 +121,7 @@ int main(void)
         default:
             break;
         }
+        EndDrawing();
     }
 
     UnloadLogoScreen();
@@ -162,29 +160,6 @@ static void TransitionToScreen(int screen)
 static void DrawTransition()
 {
     DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), BLACK);
-}
-
-//-------------------------------------------------------------------------
-// Helper functions : find assets folder relative path
-//-------------------------------------------------------------------------
-
-// As the executables can be run from different common folder locations
-// I prefer finding the assets folder dynamically
-void find_asset_folder_relative_path(void)
-{
-    static const char *path_to_test[] = {"assets", "../assets", "../../assets"};
-    int idx = -1;
-    Image icon;
-
-    do
-    {
-        idx++;
-        icon = LoadImage(TextFormat("%s/icon.png", path_to_test[idx]));
-
-    } while (icon.data == NULL);
-
-    sprintf(assets_folder_relative_path, path_to_test[idx]);
-    UnloadImage(icon);
 }
 
 //-------------------------------------------------------------------------

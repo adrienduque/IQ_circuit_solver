@@ -7,6 +7,10 @@
  * see search_algorithm.c description for an explanation of the algorithm, and later README.md for detailled explanation @todo
  */
 
+/**
+ * @todo let's make a 5 fps option or even fewer idk
+ */
+
 #include <stdbool.h>
 #include <stdlib.h> // NULL
 
@@ -30,9 +34,8 @@ static void setup_previous_piece(void);
 static void setup_next_piece(void);
 
 // custom frame management helper functions
-static void stabilize_FPS(void);
 static void set_target_fps(void);
-static bool UpdateInputEvents(void);
+static void update_inputs(void);
 
 // main processed data memory
 static Board *board;
@@ -57,12 +60,13 @@ static int piece_idx;        // current piece index ( := piece_priority_array[pi
 static Piece *current_piece; // current piece pointer
 
 static bool is_backtrack_iteration;    // to flag update iteration where we want to replace the previous piece
-static bool draw_this_frame;           // to only draw frames when a new valid board is found
 static bool enable_slow_checks;        // see check_board.c > run_all_checks function (disabled only if the FPS is unlimited)
 static bool manual_frame_unwind_mode;  // to flag if the user has to manually go through frames (by pressing spacebar)
 static bool successful_ending, ending; // to flag algorithm ending and result
 
 // Variables for custom frame and input management
+// lower fps are now emulated (update cycles are skipped when necessary)
+static int frame_count, frame_update_frequency;
 static double previous_time;
 static int fps_choice, target_fps;
 
@@ -87,8 +91,7 @@ void InitSolverScreen(void)
     ending = false;
     successful_ending = false;
 
-    fps_choice = draw_FPS_choice();
-    set_target_fps();
+    frame_count = -1;
 
     start_time = GetTime();
     previous_time = start_time;
@@ -99,10 +102,25 @@ void InitSolverScreen(void)
 
 void UpdateSolverScreen(void)
 {
-    // note : Polling Inputs is done in the same time as the program is waiting for fps stabilization
+    frame_count++;
+    update_inputs();
 
     if (finishScreen)
         return;
+
+    if (manual_frame_unwind_mode && !IsKeyPressed(KEY_SPACE))
+        return;
+
+    // don't update the frame at a given frequency to emulate slow down of the visualization
+    if (frame_count % frame_update_frequency != 0)
+        return;
+    frame_count = 0;
+
+// With the newest update, whenever this update function returns, a new frame is drawn
+// to prevent useless / unwanted draw, some return calls became gotos
+// also see the last line of this update function
+// (a new frame is found in a lot shorter period of time than the time needed between each frames (at a decent DEFAULT_FPS))
+algo_beginning:
 
     if (ending)
         // we don't have to update anything more
@@ -112,7 +130,7 @@ void UpdateSolverScreen(void)
     {
         // end of play possibilities for this combination, try to get next one
         setup_next_combination();
-        return;
+        return; // draw the frame if a new combination is being tested
     }
     else if (piece_selected >= nb_of_playable_pieces)
     {
@@ -191,11 +209,9 @@ void UpdateSolverScreen(void)
 
                     update_piece_all_drawing(current_piece, false, false);
                     valid_board_count++;
-                    draw_this_frame = true;
-
                     // get next piece to play
                     setup_next_piece();
-                    return;
+                    return; // draw every frame that a new board is found
                 }
                 current_piece->test_rotation_state = 0;
                 (current_piece->test_base_pos.j)++;
@@ -209,49 +225,26 @@ void UpdateSolverScreen(void)
     // end of play possibilities for this piece, try to go to previous one (actual "backtrack")
     current_piece->test_side_idx = 0;
     setup_previous_piece();
+    goto algo_beginning;
 }
 
 void DrawSolverScreen(void)
 {
-    if (draw_this_frame || ending)
-    {
-        draw_this_frame = false;
 
-        BeginDrawing();
-        ClearBackground(BLACK);
+    ClearBackground(BLACK);
 
-        draw_board(board, false);
+    draw_board(board, false);
 
-        // UI
-        draw_piece_priority_array(board, piece_priority_array, piece_selected, nb_of_playable_pieces, playable_side_per_piece_idx_mask);
-        draw_level_num(level_num_selected);
-        draw_game_controls();
-        draw_game_mode_choice();
-        draw_separator();
-        draw_FPS_choice();
+    // UI
+    draw_piece_priority_array(board, piece_priority_array, piece_selected, nb_of_playable_pieces, playable_side_per_piece_idx_mask);
+    draw_level_num(level_num_selected);
+    draw_game_controls();
+    draw_game_mode_choice();
+    draw_separator();
 
-        // ending message
-        if (ending)
-            draw_solver_result(successful_ending, total_time, valid_board_count);
-
-        // Custom frame and inputs managing
-        // See EndDrawing implementation in raylib source code
-        // This is mainly an emulation of it, but with the twist that PollInputEvents is called more than 1 time per frame
-        // When we are running low framerates, to make the window still responsive
-        rlDrawRenderBatchActive();
-        SwapScreenBuffer();
-        if (manual_frame_unwind_mode)
-        {
-            do
-            {
-                if (UpdateInputEvents())
-                    break;
-                WaitTime((float)0.005);
-            } while (!IsKeyPressed(KEY_SPACE));
-        }
-        else
-            stabilize_FPS();
-    }
+    // ending message
+    if (ending)
+        draw_solver_result(successful_ending, total_time, valid_board_count);
 }
 void UnloadSolverScreen(void)
 {
@@ -280,7 +273,6 @@ static void setup_next_combination(void)
     is_backtrack_iteration = false;
     piece_selected = -1;
     setup_next_piece();
-    draw_this_frame = true; // to see change in combination even without any played piece
 }
 
 static void setup_previous_piece(void)
@@ -306,34 +298,8 @@ static void setup_next_piece(void)
     current_piece = (board->piece_array) + piece_idx;
 }
 // --------------------------------------------------------------------------------------------------------------
-// More helper functions about custom fps support and Polling Input Events
+// More helper functions about custom fps for algorithm's visualization and updating input events
 // --------------------------------------------------------------------------------------------------------------
-
-static void stabilize_FPS(void)
-{
-
-    static double current_time, time_since_previous_frame, wait_time;
-
-    current_time = GetTime();
-    time_since_previous_frame = current_time - previous_time;
-
-    if (target_fps > 0) // We want a fixed frame rate
-    {
-        wait_time = (1.0f / (float)target_fps) - time_since_previous_frame;
-        while (GetTime() - current_time < wait_time)
-        {
-            if (UpdateInputEvents())
-                break;
-            WaitTime((float)0.005);
-        }
-        current_time = GetTime();
-    }
-    else
-    {
-        UpdateInputEvents();
-    }
-    previous_time = current_time;
-}
 
 static void set_target_fps(void)
 {
@@ -343,7 +309,7 @@ static void set_target_fps(void)
     {
 
     case 0:
-        target_fps = 0;
+        target_fps = DEFAULT_FPS;
         manual_frame_unwind_mode = true;
         break;
 
@@ -373,33 +339,35 @@ static void set_target_fps(void)
     }
 }
 
-// returns a bool whether or not there is new inputs that we care about
-static bool UpdateInputEvents(void)
+static void update_inputs(void)
 {
-
-    static int previous_fps_choice = 2;
-
-    PollInputEvents();
-
-    if (WindowShouldClose())
-    {
-        close_window_requested = true;
-        return true;
-    }
+    static int previous_fps_choice = -1;
 
     if (IsKeyPressed(KEY_ESCAPE))
     {
         finishScreen = 1;
-        return true;
+        return;
     }
 
     fps_choice = draw_FPS_choice();
-    if (fps_choice != previous_fps_choice)
+    if (fps_choice == previous_fps_choice)
+        return;
+
+    set_target_fps();
+
+    if (target_fps == 0)
     {
-        set_target_fps();
-        previous_fps_choice = fps_choice;
-        return true;
+        SetTargetFPS(0);
+        frame_update_frequency = 1; // update at every frame
+    }
+    else
+    {
+        SetTargetFPS(DEFAULT_FPS);
+        frame_update_frequency = (int)(DEFAULT_FPS / target_fps);
+        // example with DEFAULT_FPS = 60 | target_fps = 10
+        // we want to update 1 frame out of 6
+        // thus allow updating when frame_count % 6 == 0
     }
 
-    return false;
+    previous_fps_choice = fps_choice;
 }

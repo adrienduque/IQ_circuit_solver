@@ -25,7 +25,6 @@
 
 /**
  * @note Changes from initial file to speed up the logo screen -> the 2 SetTargetFPS calls
- * + BeginDrawing() and EndDrawing() are called in modules now, to make screen_solver.c, which has a custom EnnDrawing function, compatible with main loop
  */
 
 #include <raylib/raylib.h>
@@ -58,7 +57,7 @@ static float alpha = 1.0f; // Useful for fading
 // Logo Screen Initialization logic
 void InitLogoScreen(void)
 {
-    SetTargetFPS(120);
+    SetTargetFPS(DEFAULT_FPS * 2);
     finishScreen = 0;
     framesCounter = 0;
     lettersCount = 0;
@@ -126,7 +125,7 @@ void UpdateLogoScreen(void)
                 {
                     alpha = 0.0f;
                     finishScreen = 1; // Jump to next screen
-                    SetTargetFPS(60);
+                    SetTargetFPS(DEFAULT_FPS);
                 }
             }
         }
@@ -136,7 +135,6 @@ void UpdateLogoScreen(void)
 // Logo Screen Draw logic
 void DrawLogoScreen(void)
 {
-    BeginDrawing();
     ClearBackground(RAYWHITE);
     if (state == 0) // Draw blinking top-left square corner
     {
@@ -171,7 +169,6 @@ void DrawLogoScreen(void)
         if (framesCounter > 20)
             DrawText("powered by", logoPositionX, logoPositionY - 27, 20, Fade(DARKGRAY, alpha));
     }
-    EndDrawing();
 }
 
 // Logo Screen Unload logic

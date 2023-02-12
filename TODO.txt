@@ -1,20 +1,12 @@
 6) Polishing project (proofreading comments, readme, release build) 
-    -> See other similar projects on github, how do they share their project ?
-    do I try to include all the necessary .dll files with the final release or do I tell in the readme to install mingw dev tools to have the corresponding .dlls ?
-
-    this is something to ask reddit / search through stackoverflow
-
-    It only depens on libwinpthread-1.dll, I tested it on another windows computer, so I copied it wherever there is binaries
-
-    To make sure it is, I'll make a virtual windows machine and try to run it by pulling files from github
 
     make the readme based on the search_algorithm.c description, with visuals (game visual + tree visual)
+    + before that, how the code is meant to be used (they can run showcase binaries on a windows 64-bit machine)
+    if they are on another os, raylib 4.2 is needed, my code might be compatible between os, they just have to adapt the makefile, as I didn't feel like doing fancy things, but didn't tested it
+    + example screenshot of each screen
 
 Is there another standard to specify which versions of libraries are in the project dependency list ?, I can think of "requirements.txt" in python, with pip, is there an equivalent in C dev ?
     + take notes on OneNote if I find the answer
 
     -> Raylib 4.2
 
-Nailed it
-
-    + is there an option to not launch a console when executing release app ?

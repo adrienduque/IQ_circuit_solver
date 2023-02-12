@@ -10,6 +10,7 @@
 #include <raylib/raygui.h>
 
 #include <local/display.h> // gui_icon_scale
+#include <local/utils.h>   // assets_folder_relative_path
 
 #include <raylib/screens.h>
 
@@ -129,7 +130,6 @@ void DrawLevelSelectScreen(void)
     static Color col;
     static char *presentation_string = "Choose a level to solve !";
 
-    BeginDrawing();
     ClearBackground(BLACK);
 
     DrawText(presentation_string, (int)(GetScreenWidth() / 2 - MeasureText(presentation_string, font_size) / 2), constant_offset_y, font_size, RAYWHITE);
@@ -156,8 +156,6 @@ void DrawLevelSelectScreen(void)
     DrawTexture(texture_logo, hitbox_logo.x, hitbox_logo.y, is_mouse_over_logo ? ORANGE : WHITE);
     DrawRectangleRoundedLines(hitbox_logo, 0.1, 15, 2, is_mouse_over_logo ? ORANGE : WHITE);
     DrawText("from Raf Peeters", hitbox_logo.x - 2, hitbox_logo.y + hitbox_logo.height + 5, 10, is_mouse_over_logo ? GOLD : RAYWHITE);
-
-    EndDrawing();
 }
 
 void UnloadLevelSelectScreen(void)
