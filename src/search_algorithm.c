@@ -664,7 +664,7 @@ static void extra_draw(Board *board, int level_num, int piece_idx_priority_array
     BeginDrawing();
     ClearBackground(BLACK);
     draw_board(board, false);
-    draw_piece_priority_array(board, piece_idx_priority_array, piece_selected, nb_of_playable_pieces, playable_side_per_piece_idx_mask);
+    draw_piece_priority_array(piece_idx_priority_array, piece_selected, nb_of_playable_pieces, playable_side_per_piece_idx_mask);
     draw_level_num(level_num);
     EndDrawing();
 }
@@ -766,21 +766,21 @@ void run_algorithm_with_extra_display(int level_num, int FPS)
             piece = (board->piece_array) + piece_idx;
 
             // loop
-            for (side_idx = piece->test_side_idx; side_idx < piece->nb_of_sides; side_idx++)
+            for (side_idx = piece->current_side_idx; side_idx < piece->nb_of_sides; side_idx++)
             {
                 // only play forced sides (prievously determined by "load_combination_data")
                 if (!playable_side_per_piece_idx_mask[piece_idx][side_idx])
                     continue;
 
-                for (base_pos.i = piece->test_base_pos.i; base_pos.i < BOARD_WIDTH; (base_pos.i)++)
+                for (base_pos.i = piece->current_base_pos.i; base_pos.i < BOARD_WIDTH; (base_pos.i)++)
                 {
-                    for (base_pos.j = piece->test_base_pos.j; base_pos.j < BOARD_HEIGHT; (base_pos.j)++)
+                    for (base_pos.j = piece->current_base_pos.j; base_pos.j < BOARD_HEIGHT; (base_pos.j)++)
                     {
                         // don't even consider adding the piece at this position if there's already a normal tile on the board
                         if (is_position_already_occupied(board, &base_pos))
                             continue;
 
-                        for (rotation_state = piece->test_rotation_state; rotation_state < piece->side_array[side_idx].max_nb_of_rotations; rotation_state++)
+                        for (rotation_state = piece->current_rotation_state; rotation_state < piece->side_array[side_idx].max_nb_of_rotations; rotation_state++)
                         {
                             if (WindowShouldClose())
                                 goto quit_algorithm;
@@ -804,9 +804,9 @@ void run_algorithm_with_extra_display(int level_num, int FPS)
                             }
                             // case where we successfully added a piece
                             update_piece_all_drawing(piece, false, false);
-                            piece->test_side_idx = piece->current_side_idx;
-                            piece->test_base_pos = piece->current_base_pos;
-                            piece->test_rotation_state = piece->current_rotation_state;
+                            piece->current_side_idx = piece->current_side_idx;
+                            piece->current_base_pos = piece->current_base_pos;
+                            piece->current_rotation_state = piece->current_rotation_state;
                             piece_selected++;
                             valid_board_count++;
                             if (enable_slow_operations)
@@ -815,13 +815,13 @@ void run_algorithm_with_extra_display(int level_num, int FPS)
 
                             goto next_piece;
                         }
-                        piece->test_rotation_state = 0;
+                        piece->current_rotation_state = 0;
                     }
-                    piece->test_base_pos.j = 0;
+                    piece->current_base_pos.j = 0;
                 }
-                piece->test_base_pos.i = 0;
+                piece->current_base_pos.i = 0;
             }
-            piece->test_side_idx = 0;
+            piece->current_side_idx = 0;
             // the current piece has gone through all its possible positions
             // we need to backtrack (try to move the previous piece)
             piece_selected--;

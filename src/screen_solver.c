@@ -149,28 +149,28 @@ algo_beginning:
     //      and only when the limit happens, reset the state of the position variable
     // It has the effect to work kind of like a python generator
 
-    while (current_piece->test_side_idx < current_piece->nb_of_sides)
+    while (current_piece->current_side_idx < current_piece->nb_of_sides)
     {
         // skip the current side if the side was set to be not playable in this combination
-        if (!playable_side_per_piece_idx_mask[piece_idx][current_piece->test_side_idx])
+        if (!playable_side_per_piece_idx_mask[piece_idx][current_piece->current_side_idx])
         {
-            (current_piece->test_side_idx)++;
+            (current_piece->current_side_idx)++;
             continue;
         }
 
-        while (current_piece->test_base_pos.i < BOARD_WIDTH)
+        while (current_piece->current_base_pos.i < BOARD_WIDTH)
         {
-            while (current_piece->test_base_pos.j < BOARD_HEIGHT)
+            while (current_piece->current_base_pos.j < BOARD_HEIGHT)
             {
                 // skip the current position (i,j) if it is already filled with a normal tile on the board
                 // even before trying to add the piece
-                if (is_position_already_occupied(board, &(current_piece->test_base_pos)))
+                if (is_position_already_occupied(board, &(current_piece->current_base_pos)))
                 {
-                    (current_piece->test_base_pos.j)++;
+                    (current_piece->current_base_pos.j)++;
                     continue;
                 }
 
-                while (current_piece->test_rotation_state < current_piece->side_array[current_piece->test_side_idx].max_nb_of_rotations)
+                while (current_piece->current_rotation_state < current_piece->side_array[current_piece->current_side_idx].max_nb_of_rotations)
                 {
                     // to not test the exact same position of the piece, when we are backtracking
                     // increment the global position by 1
@@ -178,16 +178,16 @@ algo_beginning:
                     if (is_backtrack_iteration)
                     {
                         is_backtrack_iteration = false;
-                        (current_piece->test_rotation_state)++;
+                        (current_piece->current_rotation_state)++;
                         continue;
                     }
 
                     // main tests here
 
                     // pre-adding checks
-                    if (add_piece_to_board(board, piece_idx, current_piece->test_side_idx, current_piece->test_base_pos, current_piece->test_rotation_state) != 1)
+                    if (add_piece_to_board(board, piece_idx, current_piece->current_side_idx, current_piece->current_base_pos, current_piece->current_rotation_state) != 1)
                     {
-                        (current_piece->test_rotation_state)++;
+                        (current_piece->current_rotation_state)++;
                         continue;
                     }
 
@@ -196,7 +196,7 @@ algo_beginning:
                     {
                         // remove the piece if the post-adding checks didn't pass
                         undo_last_piece_adding(board);
-                        (current_piece->test_rotation_state)++;
+                        (current_piece->current_rotation_state)++;
                         continue;
                     }
 
@@ -209,17 +209,17 @@ algo_beginning:
                     setup_next_piece();
                     return; // draw every frame that a new board is found
                 }
-                current_piece->test_rotation_state = 0;
-                (current_piece->test_base_pos.j)++;
+                current_piece->current_rotation_state = 0;
+                (current_piece->current_base_pos.j)++;
             }
-            current_piece->test_base_pos.j = 0;
-            (current_piece->test_base_pos.i)++;
+            current_piece->current_base_pos.j = 0;
+            (current_piece->current_base_pos.i)++;
         }
-        current_piece->test_base_pos.i = 0;
-        (current_piece->test_side_idx)++;
+        current_piece->current_base_pos.i = 0;
+        (current_piece->current_side_idx)++;
     }
     // end of play possibilities for this piece, try to go to previous one (actual "backtrack")
-    current_piece->test_side_idx = 0;
+    current_piece->current_side_idx = 0;
     setup_previous_piece();
     goto algo_beginning;
 }
@@ -232,7 +232,7 @@ void DrawSolverScreen(void)
     draw_board(board, false);
 
     // UI
-    draw_piece_priority_array(board, piece_priority_array, piece_selected, nb_of_playable_pieces, playable_side_per_piece_idx_mask);
+    draw_piece_priority_array(piece_priority_array, piece_selected, nb_of_playable_pieces, playable_side_per_piece_idx_mask);
     draw_level_num(level_num_selected);
     draw_game_controls();
     draw_game_mode_choice();

@@ -36,10 +36,6 @@ static void set_all_board_pieces_pos_to_zero(Board *board)
         piece->current_side_idx = 0;
         piece->current_base_pos = (Vector2_int){0, 0};
         piece->current_rotation_state = 0;
-
-        piece->test_side_idx = 0;
-        piece->test_base_pos = (Vector2_int){0, 0};
-        piece->test_rotation_state = 0;
     }
 }
 

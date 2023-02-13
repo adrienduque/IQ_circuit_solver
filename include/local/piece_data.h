@@ -143,8 +143,8 @@ typedef struct Piece
     bool has_point_on_first_side;
     int piece_height;                          // vertical space taken by the piece in its default orientation (in number of tiles), useful to draw_piece_priority_array
     int nb_of_sides;                           // length of matching array
-    int nb_of_border_tiles;                    // length of matching array
-    int nb_of_outline_tiles;                   // length of matching array
+    int nb_of_border_tiles;                    // length of matching array (which is common between sides)
+    int nb_of_outline_tiles;                   // length of matching array (which is common between sides)
     Side side_array[MAX_NB_OF_SIDE_PER_PIECE]; // array of sides : main data of the piece
 
     // ----------- Live data part -----------------
@@ -153,12 +153,6 @@ typedef struct Piece
     int current_side_idx;
     Vector2_int current_base_pos;
     int current_rotation_state;
-
-    // ------ Savestate of the previous global position of the piece
-    // (see in "run_algorithm_with_extra_display", it now has to be distinguish from current_xxx members, as these will change because of "draw_piece_priority_array")
-    int test_side_idx;
-    Vector2_int test_base_pos;
-    int test_rotation_state;
 
     // ------ Cached blit results
     Vector2_int border_tile_absolute_pos_array[MAX_NB_OF_BORDER_TILE_PER_SIDE];

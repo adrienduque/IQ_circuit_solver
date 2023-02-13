@@ -506,44 +506,52 @@ void draw_pos_text(void)
     }
 }
 
-// Function to draw the current piece priority array
+// Function to draw the current piece priority array, aslo with the remaining pieces to play
 // This is mainly to visualize when search algorithms switch between different combinations
 // The idea is to have a column of piece thumbnails next to the board display
-// And fill it from the bottom up with the current priority array
-// The first pieces in the priority list are at the top, and they are taken out 1 by 1 to be played on the board
-// It now draws 2 columns of piece thumbnails, the left one is simply a display of the piece priority order
-// the right one, is the same, but the pieces are taken out of the column when they are played on the board as it is said in the description
-void draw_piece_priority_array(Board *board, int piece_idx_priority_array[NB_OF_PIECES], int piece_selected, int nb_of_playable_pieces, bool playable_side_per_piece_idx_mask[NB_OF_PIECES][MAX_NB_OF_SIDE_PER_PIECE])
+// And fill it from the bottom up with the current priority array, and the other one with the remaining pieces to play
+// The first pieces in the priority list are at the top, and they are taken out 1 by 1 of the remaining list to be played on the board
+void draw_piece_priority_array(int piece_idx_priority_array[NB_OF_PIECES], int piece_selected, int nb_of_playable_pieces, bool playable_side_per_piece_idx_mask[NB_OF_PIECES][MAX_NB_OF_SIDE_PER_PIECE])
 {
+    static Piece piece_priority_array[NB_OF_PIECES] = {0};
+    static Piece piece_remaining_array[NB_OF_PIECES] = {0};
+
+    // to position the legend display to the bottom of the columns
+    static Vector2_int priority_legend_pos;
+    static Vector2_int remaining_legend_pos;
+
+    static Vector2_int priority_base_pos = (Vector2_int){-8, 0};  // leftmost column is the display of priority array
+    static Vector2_int remaining_base_pos = (Vector2_int){-4, 0}; // remaining pieces of the priority array are displayed to the left of the board in a column
+
+    static const int rotation_state = 0;
+    static int side_idx = 0;
+
+    // temp variables for iteration
     static int i;
     static Piece *piece;
-    static Vector2_int base_pos = (Vector2_int){-4, 0}; // base offset to the left of the board display
-    static int side_idx = 0, rotation_state = 0, piece_idx;
+    static int piece_idx;
 
-    static Vector2_int priority_array_legend_pos;
-    static Vector2_int remaining_pieces_legend_pos;
-
-    // Local extra set of pieces to have 2
-    static Piece local_piece_array[NB_OF_PIECES] = {0};
-    static Vector2_int local_base_pos = (Vector2_int){-8, 0};
     static bool is_first_call = true;
-    static bool local_piece_array_need_update = false;
+    static bool need_update = false;
+
     if (is_first_call)
     {
         is_first_call = false;
 
-        priority_array_legend_pos = (Vector2_int){offset_px.i - mini_tile_px_width * 9, offset_px.j + mini_tile_px_width * 19 + 10};
-        remaining_pieces_legend_pos = (Vector2_int){offset_px.i - mini_tile_px_width * 5 + 10, offset_px.j + mini_tile_px_width * 19 + 10};
+        priority_legend_pos = (Vector2_int){offset_px.i - mini_tile_px_width * 9, offset_px.j + mini_tile_px_width * 19 + 10};
+        remaining_legend_pos = (Vector2_int){offset_px.i - mini_tile_px_width * 5 + 10, offset_px.j + mini_tile_px_width * 19 + 10};
 
-        load_piece_array(local_piece_array);
-        local_piece_array_need_update = true;
+        load_piece_array(piece_priority_array);
+        load_piece_array(piece_remaining_array);
+        need_update = true;
     }
+
     else
-        local_piece_array_need_update = (piece_selected == 0 || piece_selected == 1);
+        need_update = (piece_selected == 0 || piece_selected == 1);
 
     // need to be reset at each call
-    base_pos.j = 19;
-    local_base_pos.j = 19;
+    remaining_base_pos.j = 19;
+    priority_base_pos.j = 19;
 
     // Mini piece display setup, (global constants swap)
     current_tile_px_width = mini_tile_px_width;
@@ -553,7 +561,7 @@ void draw_piece_priority_array(Board *board, int piece_idx_priority_array[NB_OF_
     current_point_circle_radius = mini_point_circle_radius;
     current_connections_tip_offset = mini_connections_tip_offset;
 
-    // fill it from the bottom up
+    // fill columns from the bottom up
     for (i = nb_of_playable_pieces - 1; i >= 0; i--)
     {
         piece_idx = piece_idx_priority_array[i];
@@ -565,25 +573,29 @@ void draw_piece_priority_array(Board *board, int piece_idx_priority_array[NB_OF_
             side_idx = 1;
 
         // Piece priority array display
-        piece = local_piece_array + piece_idx;
-        if (local_piece_array_need_update)
+
+        piece = piece_priority_array + piece_idx;
+        if (need_update)
         {
-            local_base_pos.j -= piece->piece_height;
-            blit_piece_main_data(piece, side_idx, local_base_pos, rotation_state);
-            local_base_pos.j--;
+            priority_base_pos.j -= piece->piece_height;
+            blit_piece_main_data(piece, side_idx, priority_base_pos, rotation_state);
+            priority_base_pos.j--; // let a space of 1 mini-tile between 2 pieces
             update_piece_all_drawing(piece, false, false);
         }
         draw_piece(piece, false, false);
 
         // Remaining pieces display
+
         if (i < piece_selected)
             continue;
-        piece = (board->piece_array) + piece_idx;
-
-        base_pos.j -= piece->piece_height;
-        blit_piece_main_data(piece, side_idx, base_pos, rotation_state);
-        base_pos.j--; // let a space of 1 mini-tile between 2 pieces
-        update_piece_all_drawing(piece, false, false);
+        piece = (piece_remaining_array) + piece_idx;
+        if (need_update)
+        {
+            remaining_base_pos.j -= piece->piece_height;
+            blit_piece_main_data(piece, side_idx, remaining_base_pos, rotation_state);
+            remaining_base_pos.j--; // let a space of 1 mini-tile between 2 pieces
+            update_piece_all_drawing(piece, false, false);
+        }
         draw_piece(piece, false, false);
     }
 
@@ -596,8 +608,8 @@ void draw_piece_priority_array(Board *board, int piece_idx_priority_array[NB_OF_
     current_connections_tip_offset = connections_tip_offset;
 
     // Drawing legends
-    DrawText("Piece order", priority_array_legend_pos.i, priority_array_legend_pos.j, 20, RAYWHITE);
-    DrawText("Remaining", remaining_pieces_legend_pos.i, remaining_pieces_legend_pos.j, 20, RAYWHITE);
+    DrawText("Piece order", priority_legend_pos.i, priority_legend_pos.j, 20, RAYWHITE);
+    DrawText("Remaining", remaining_legend_pos.i, remaining_legend_pos.j, 20, RAYWHITE);
 }
 
 void draw_game_controls(void)

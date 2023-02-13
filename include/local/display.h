@@ -39,7 +39,7 @@ void draw_level_num(int level_num);
 
 void draw_pos_text(void);
 
-void draw_piece_priority_array(Board *board, int piece_idx_priority_array[NB_OF_PIECES], int piece_selected, int nb_of_playable_pieces, bool playable_side_per_piece_idx_mask[NB_OF_PIECES][MAX_NB_OF_SIDE_PER_PIECE]);
+void draw_piece_priority_array(int piece_idx_priority_array[NB_OF_PIECES], int piece_selected, int nb_of_playable_pieces, bool playable_side_per_piece_idx_mask[NB_OF_PIECES][MAX_NB_OF_SIDE_PER_PIECE]);
 
 void draw_game_controls(void);
 int draw_game_mode_choice(void);
