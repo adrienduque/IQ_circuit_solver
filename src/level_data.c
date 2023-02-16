@@ -9,9 +9,9 @@
  * Master levels (from 73 to 96  included) : board has pre-added pieces and obligatory open point tiles (point tiles that missing, but we know their numbers and positions)
  * Wizard levels (from 97 to 120 included) : board only has obligatory open point tiles
  *
- * see board.c > "init_board" function where most of the data is used
+ * see board.c > "init_board" function where most of the level data is used
  *
- * (Data comes from my python project where I programmed a level builder, which outputs the code for corresponding level hints (+ a python script to transfer data to this project))
+ * (Data comes from my python project where I programmed a level builder, which outputs the code for corresponding level hints (+ a python script to transfer data to this C project))
  *
  * (In the data we can see extra obligatory point tiles, where the pre-added pieces should go)
  * (To understand why, see board.c > "is_tile_matching_level_hints")

@@ -13,7 +13,7 @@
 #include <local/piece_data.h> // defines
 #include <local/level_data.h> // defines
 
-#define MAX_NB_OF_COMBINATIONS 70 // There is 8 pieces that have a point, and a maximum "nCr" is obtained with 4 open points per level (nb_of_combination(set=8,subset=4) = 70)
+#define MAX_NB_OF_COMBINATIONS 70 // There is 8 pieces that have a point, and a maximum "nCr" is obtained with 4 open points per level (nb_of_combinations(set=8,subset=4) = 70)
 
 /**
  * @struct StartCombinations
@@ -34,6 +34,8 @@ void load_combination_data(Board *board, StartCombinations *start_combinations, 
 bool is_position_already_occupied(Board *board, Vector2_int *base_pos);
 
 // -----------------------------------------------------------------------------
+
+// previously used functions before the added screens.h and screen_***.c files (see main.c and raylib game templates)
 
 void run_algorithm_with_display(int level_num, int FPS);
 void run_algorithm_without_display(int level_num);

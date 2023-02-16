@@ -3,41 +3,16 @@
  *
  * File where we will have a succession checking methods to determine if the current state of a board is worthy to be continued on
  * Or if we know that this state doesn't have any change of leading to a complete board
+ *
+ * see "run_all_checks" function
  */
 
-/**
- * @todo when all the checks are implemented, observe a run of the algorithm very slowly and see if there are more ideas of checks to add
- * that come to mind
- */
-
-/*
-Note on a slowed run : (draft for now)
-
-Researching new board checking methods
-
-// -------------------------------------------------------------------------------
-
-@todo réfléchir si le setup de board_78_incomplete.png est valide
-est-ce qu'on peut généraliser le fait que 2 connexions vacantes à côté, c'est pas bon ?
-
--> ça paraît compliqué, mais peut-être en connaissant les inputs / outputs global de nos pièces à l'avance
-genre les considérer que c'est comme des grosses tiles, et elles peuvent placer des connexions vacantes qui ont une position relative fixes les unes aux autres
-et donc si jamais on crée un cluster de connexions vacantes dans la board qui ne ressemble pas à ce qu'on a en banque, on invalide la board?
-(la dernière pièce ajoutée était le L)
-
-je me suis arrêté de regarder les niveaux au ralenti, au 78 du coup
-
-// ------------------------------------------------------------------
-
-pas de missing connection possible sur un point imposé de level si on a pas le corner 1 qui joue son point
-
-*/
 #include <limits.h> // INT_MAX
 #include <stdlib.h> // abs, NULL
 #include <stdbool.h>
 
 #include <local/utils.h>      // Vector2_int, Direction, helper functions and defines
-#include <local/astar.h>      //
+#include <local/astar.h>      // see "check_no_dead_ends"
 #include <local/level_data.h> // MAX_NB_OF_OPEN_POINT_TILES_PER_LEVEL
 #include <local/piece_data.h> // Tile, Side, Piece and defines
 #include <local/board.h>      // Board, extract_normal_tile_at_pos, and defines
@@ -50,11 +25,11 @@ pas de missing connection possible sur un point imposé de level si on a pas le 
 
 // -------------- Helper functions of "check_isoleted_tiles_around_piece" ---------------------------------------
 
-static bool is_tile_pos_isolated(Board *board, const Vector2_int *pos)
+static bool is_tile_pos_isolated(Board *board, Vector2_int *pos)
 {
     static Direction dir;
     static Vector2_int temp_pos;
-    // it must have at least an empty neighbour (empty in terms of normal tiles only: missing connection tiles doesn't count as "filled" here)
+    // it must have at least another empty neighbour (empty in terms of normal tiles only: missing connection tiles doesn't count as "filled" here)
     for (dir = RIGHT; dir < NB_OF_DIRECTIONS; dir++)
     {
         temp_pos.i = pos->i;
@@ -65,7 +40,7 @@ static bool is_tile_pos_isolated(Board *board, const Vector2_int *pos)
 
         // is there another empty tile at this neighbour location ?
         if (extract_normal_tile_at_pos(board, &temp_pos) == UNDEFINED_TILE)
-            return false; // case where the answer is yes
+            return false; // case where the answer is yes -> the tile is not isolated
     }
 
     return true;
@@ -113,7 +88,7 @@ static bool check_isolated_tiles_around_piece(Board *board, Piece *piece)
 // Returns the board tile stack pointer, of the location where it stopped following the path
 static Tile *follow_path(Board *board, Tile *missing_connection_tile)
 {
-    // warning : the input missing connnection might already been filled on the board but it doesn't matter
+    // warning : the input missing connnection might already been filled on the board but it doesn't matter here
     static Tile *current_tile_stack = UNDEFINED_TILE;
     static Tile *normal_tile = UNDEFINED_TILE;
     static Vector2_int current_pos, start_pos;
@@ -123,9 +98,9 @@ static Tile *follow_path(Board *board, Tile *missing_connection_tile)
     current_tile_stack = UNDEFINED_TILE;
     start_pos = missing_connection_tile->absolute_pos;
 
+    // Initialisation of iterative variables
     next_direction = missing_connection_tile->connection_direction_array[0];
-
-    current_pos = missing_connection_tile->absolute_pos;
+    current_pos = start_pos;
 
     while (true)
     {
@@ -133,12 +108,12 @@ static Tile *follow_path(Board *board, Tile *missing_connection_tile)
         current_tile_stack = board->tile_matrix[current_pos.i][current_pos.j];
 
         if (are_pos_equal(&start_pos, &current_pos))
-            // case where : we followed a loop path
+            // case where we followed a loop path
             // or what will become a loop, if we are currently on a double missing connection tile
             // in both cases, stop following the path
             break;
 
-        // is there a normal tile at this location ?
+        // is there a normal tile at this location to even continue following a path ?
         normal_tile = extract_normal_tile_from_stack(current_tile_stack);
 
         if (normal_tile == UNDEFINED_TILE)
@@ -146,6 +121,7 @@ static Tile *follow_path(Board *board, Tile *missing_connection_tile)
             // case where the path ends, the current_pos is on a missing connection tile (or double missing), that is not filled
             // stop following the path
             break;
+
         // answer : yes
         // general case where the next tile in the path is a normal tile
         // we have to follow its connection directions without going backwards
@@ -175,15 +151,15 @@ static Tile *follow_path(Board *board, Tile *missing_connection_tile)
 // Therefore, a board that contains a loop is not valid
 static bool check_no_loops(Board *board, Piece *piece)
 {
-    // There are some rare cases where a future loop will not be identified by this algorithm
+    // (There are some rare cases where a future loop will not be identified by this implementation
     // Where with the current played pieces, there is an incomplete loop path (1 tile hole in the path) (we know it's not ok, because the only possibility to complete the path is to complete a loop)
     // If the last piece added to this incomplete loop path is not directly in contact with the hole in the loop
-    // or if it is in direct contact, its not the right missing connection choosen in "susceptible_loop_generator_missing_connection_tile_idx_array" (see piece_data.h), the missing connection where is the hole is ignored
+    // or if it is in direct contact, its not the right missing connection choosen in "susceptible_loop_generator_missing_connection_tile_idx_array" (see piece_data.h), the missing connection where is the hole is ignored)
 
     // at least it detects complete loops 100% of the time
 
     static Side *side;
-    static int tile_idx;
+    static int tile_selected, tile_idx;
     static Tile *tile;
     static Tile *result_tile_stack;
 
@@ -191,9 +167,10 @@ static bool check_no_loops(Board *board, Piece *piece)
 
     // follow the paths starting from each susceptible missing connection tile of the played piece
     // if the starting and ending point of the same path, are at the same position on the board, it's a loop
-    for (tile_idx = 0; tile_idx < side->nb_of_susceptible_loop_generator_tiles; tile_idx++)
+    for (tile_selected = 0; tile_selected < side->nb_of_susceptible_loop_generator_tiles; tile_selected++)
     {
-        tile = (side->missing_connection_tile_array) + (side->susceptible_loop_generator_missing_connection_tile_idx_array[tile_idx]);
+        tile_idx = (side->susceptible_loop_generator_missing_connection_tile_idx_array[tile_selected]);
+        tile = (side->missing_connection_tile_array) + tile_idx;
         result_tile_stack = follow_path(board, tile);
 
         if (are_pos_equal(&(tile->absolute_pos), &(result_tile_stack->absolute_pos)))
@@ -231,8 +208,8 @@ static int get_number_of_missing_connection_in_stack(Tile *tile_stack)
 }
 
 // Function to get the nearest target tile from the starting tile
-// also discard not_allowed_target_tile if not UNDEFINED_TILE (alias for NULL)
-// returns an int index of missing_connection_to_check_array (which is the list of potential target tiles)
+// also discard "not_allowed_target_tile" if not UNDEFINED_TILE (alias for NULL)
+// returns an int index of "missing_connection_to_check_array" (which is the list of potential target tiles)
 // returns -1 if there is no nearest valid target tile
 static int get_nearest_target_tile_idx(Tile *start_tile, Tile *missing_connection_to_check_array[NB_OF_PIECES * MAX_NB_OF_MISSING_CONNECTION_PER_SIDE], int nb_of_missing_connections_to_check, Tile *not_allowed_target_tile)
 {
@@ -246,8 +223,10 @@ static int get_nearest_target_tile_idx(Tile *start_tile, Tile *missing_connectio
     {
         tile = missing_connection_to_check_array[idx];
         if (are_pos_equal(&(start_tile->absolute_pos), &(tile->absolute_pos)))
+            // don't pick the actual start tile
             continue;
         if (not_allowed_target_tile != UNDEFINED_TILE && are_pos_equal(&(not_allowed_target_tile->absolute_pos), &(tile->absolute_pos)))
+            // don't pick the flagged "not_allowed_target_tile"
             continue;
 
         dist = manhattan_dist(&(start_tile->absolute_pos), &(tile->absolute_pos));
@@ -309,7 +288,7 @@ static bool check_no_dead_ends(Board *board)
     // 1) Picking the starting tiles to check
 
     // append the open points of the level hints
-    //(before the actual missing connection tiles to start by them in 2))
+    //(before the actual missing connection tiles to start by them in step 2))
     // (because the pathfinding starting from these tiles is more likely to end up on a missing connection tile, thus mark it as already checked, and letting us skip iterations)
     for (tile_idx = 0; tile_idx < board->nb_of_open_obligatory_point_tiles; tile_idx++)
     {
@@ -325,6 +304,7 @@ static bool check_no_dead_ends(Board *board)
             //  yes so skip it
             continue;
 
+        // add it to the list
         has_already_been_check_matrix[tile->absolute_pos.i][tile->absolute_pos.j] = false;
         board_representation_matrix[tile->absolute_pos.i][tile->absolute_pos.j] = target;
         missing_connection_to_check_array[nb_of_missing_connections_to_check] = tile;
@@ -351,6 +331,7 @@ static bool check_no_dead_ends(Board *board)
             if (get_number_of_missing_connection_in_stack(board_tile_stack) == 2)
                 continue;
 
+            // add it to the list
             has_already_been_check_matrix[tile->absolute_pos.i][tile->absolute_pos.j] = false;
             board_representation_matrix[tile->absolute_pos.i][tile->absolute_pos.j] = target;
             missing_connection_to_check_array[nb_of_missing_connections_to_check] = tile;
@@ -369,16 +350,17 @@ static bool check_no_dead_ends(Board *board)
             continue;
 
         // compute the tile which is linked by an actual path to the starting tile (if there is one)
+        // (see why in this function description)
         not_allowed_target_tile = UNDEFINED_TILE;
         if (start_tile->tile_type != point)
             // can't follow a connection path if the start_tile is a open point of the level
             not_allowed_target_tile = follow_path(board, start_tile);
 
         // Get the nearest target tile from the starting tile
-        // also discard not_allowed_target_tile
+        // also make sure to not pick "not_allowed_target_tile"s
         nearest_target_tile_idx = get_nearest_target_tile_idx(start_tile, missing_connection_to_check_array, nb_of_missing_connections_to_check, not_allowed_target_tile);
         if (nearest_target_tile_idx == -1)
-            // there's not a single valid target for this start_tile
+            // there's not a single valid target for this start_tile, thus no path to be found
             return false;
         nearest_target_tile = missing_connection_to_check_array[nearest_target_tile_idx];
 
@@ -480,6 +462,7 @@ static int check_if_double_missing_connection_is_still_fillable(Board *board, Ti
     // Assuming the directions of missing connections are different, do their sum is a bend-shape or a line-shape
     // only 2 case where the shape formed by the 2 directions can be a line : (RIGHT:0,LEFT:2) (means horizontal line) and (DOWN:1,UP:3) (means vertical line)
     // otherwise it's a bend shape
+    // this computation check if there is an absolute difference of 2 between the two directions, if there is -> this is a line
     is_line_shape = (abs((connection_direction_array[0]) - (connection_direction_array[1]))) == 2;
 
     // A line-shape double missing connection tile can only exist if line2 2 piece has not been played yet
@@ -494,6 +477,12 @@ static int check_if_double_missing_connection_is_still_fillable(Board *board, Ti
 }
 
 // -------------- Main function ---------------------------------------------------------------------------------
+
+//@todo rework this function to implement it as a pre-adding check, which will be much easier
+// just have to update state variable of the position and type of double missing connection tiles, whenever we are adding or removing pieces
+// and we can also discard the board if more than 2 of the same double missing connection type is going on the board (e.g. there can't be 2 double missing connection in bend shape, if there is only 1 piece that can fill 1 of them)
+// check if the change makes it worth
+// don't forget to update where we need the return error code of this function
 
 // the pre-adding checks already invalidate boards that have line2 2 played or T piece played
 // if the last added piece creates an open double missing connection tile, corresponding to the already played piece
@@ -568,11 +557,17 @@ static bool check_double_missing_connections(Board *board, Piece *piece)
 
 // Function to run all checks that have to be done after a piece was added
 // To see if the board is worth continuing or not
-// As soon as one of the check don't pass, function discard all other computation and returns
+// As soon as one of the check doesn't pass, function discards all other computation and returns the corresponding error code (see check_board.h)
 // Let the more likely and easy-to-compute checks be in first to cut down more computation
-// Returns int error_code based on the check that didn't pass else 1
+// Returns int error_code based on the check that didn't pass else true (1)
 int run_all_checks(Board *board, bool enable_not_worth_checks)
 {
+
+    // enable_not_worth_checks is a flag that let all the implemented checking methods run if true
+    // leading to a solution in a fewer number of explored valid boards
+    // but particular checks are not worth doing when we are trying to solve the puzzle in the less amount of time possible
+    // (they are more computation time to the evaluation of each board state, than they save by reducing the number of explored board states).
+
     static Piece *last_added_piece = NULL;
 
     last_added_piece = (board->piece_array) + board->added_piece_idx_array[board->nb_of_added_pieces - 1];
@@ -586,11 +581,8 @@ int run_all_checks(Board *board, bool enable_not_worth_checks)
             return DEAD_END;
     }
 
-    if (enable_not_worth_checks)
-    {
-        if (!check_double_missing_connections(board, last_added_piece))
-            return DOUBLE_MISSING_CONNECTION_NOT_FILLABLE;
-    }
+    if (enable_not_worth_checks && !check_double_missing_connections(board, last_added_piece))
+        return DOUBLE_MISSING_CONNECTION_NOT_FILLABLE;
 
     if (!check_no_loops(board, last_added_piece))
         return LOOP_PATH;

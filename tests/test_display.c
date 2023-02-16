@@ -126,7 +126,7 @@ char *piece_data_display_test()
 
         if (IfAnyIsPressedKey(control_keys, nb_of_keys))
         {
-            // Update all cache live data even the unnecessary ones to simplify debug mode
+            // Update all cached data only when necessary
             blit_piece_main_data(piece, side_idx, base_pos, rotation_state);
             update_piece_border_tiles(piece);
             update_piece_all_drawing(piece, show_missing_connection_tiles, show_border_tiles);
@@ -146,6 +146,14 @@ char *piece_data_display_test()
 
     return 0;
 }
+
+//---------------------------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------
+
+// board_interactive_display_test :  helper functions then main function
+
+// which is basically the prototype version of screen_game.c
 
 bool is_piece_idx_already_played(Board *board, int piece_idx)
 {
@@ -476,7 +484,7 @@ char *board_interactive_display_test()
 
         BeginDrawing();
         ClearBackground(BLACK);
-        draw_board(board, show_missing_connection_tiles);
+        draw_board(board);
         draw_piece(piece, show_missing_connection_tiles, show_border_tiles);
         draw_level_num(level_num);
         if (display_tile_pos)

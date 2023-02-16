@@ -4,7 +4,7 @@
  * And there are a limited number of elementary tiles composing each side : point, line, bend, empty, (and missing_connection)
  * (missing_connection is a special type of tile related to the future main algorithm, it's like an "expected neighbour tile" type of thing)
  *
- * Other constant data is defined, which will be useful in the main algorithm like (border tiles of sides, edge tiles, ...)
+ * Other constant data is defined, which are used in the main solver algorithm like (border tiles of sides -> see check_board.c > check_isolated_tiles_around_piece function)
  * @see piece_data.h
  *
  */

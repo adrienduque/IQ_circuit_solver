@@ -39,7 +39,7 @@
 
 /**
  * @def LINE2_1, one of many identifier of the actual game pieces
- * endoded in the form of indexes
+ * endoded in the form of int indexes
  */
 #define LINE2_1 0
 #define LINE2_2 1
@@ -87,7 +87,7 @@ typedef struct Tile
     // ------ Only useful to board matrix see board.c
     struct Tile *next; // start of a stack
 
-    // ------ Drawing data
+    // ------ Drawing data cache
     Vector2_int top_left_corner_pt;
     Vector2 center_pt;
     Vector2 connection_pt_array[MAX_NB_OF_CONNECTION_PER_TILE];
@@ -105,10 +105,6 @@ typedef struct Side
     Tile tile_array[MAX_NB_OF_TILE_PER_SIDE];
     Tile missing_connection_tile_array[MAX_NB_OF_MISSING_CONNECTION_PER_SIDE];
 
-    // I would like to generalize below constant data, to have 1 per piece instead of 1 per side
-    // but L_piece is not compatible with this design
-    // the length of these arrays are common to each piece and their cache is also common to a piece instead of a side
-    // see Piece::nb_of_border_tiles for example
     Vector2_int border_tile_relative_pos_array[MAX_NB_OF_BORDER_TILE_PER_SIDE]; // not array of tiles but array of relative pos of border tiles which are directly in contact with the piece (no diagonal)
     Vector2_int outline_tile_relative_pos_array[MAX_NB_OF_OUTLINE_POINTS];      // array of relative pos of tiles which have their top-left corners used to draw an outline around the piece
 
@@ -120,9 +116,10 @@ typedef struct Side
     int susceptible_loop_generator_missing_connection_tile_idx_array[MAX_NB_OF_DISTINCT_PATH_PER_SIDE];
     int nb_of_susceptible_loop_generator_tiles;
 
-    int max_nb_of_rotations; // if we need to limit this specific this nb of rotations in the search algorithm
-    // default to NB_OF_DIRECTIONS (4), but usefull if the side is symmetric, we can reduce the max_nb_of_rotations to reduce duplicate valid boards
-    // for the real game pieces, Line pieces have a side full of empty tiles, we only need to test them horizontally and vertically for example
+    int max_nb_of_rotations; // if we need to limit this specific side nb of rotations in the search algorithm
+    // default to NB_OF_DIRECTIONS (4), but rather useful if the side is symmetric, we can reduce duplicate valid boards by lowering this constant
+    // regarding real game pieces, Line pieces have a side full of empty tiles, we only need to test them horizontally and vertically for example
+    // so max_nb_of_rotations is 2 for them
 
     // ----------- Live data part -----------------
     //(None until now)
@@ -143,8 +140,8 @@ typedef struct Piece
     bool has_point_on_first_side;
     int piece_height;                          // vertical space taken by the piece in its default orientation (in number of tiles), useful to draw_piece_priority_array
     int nb_of_sides;                           // length of matching array
-    int nb_of_border_tiles;                    // length of matching array (which is common between sides)
-    int nb_of_outline_tiles;                   // length of matching array (which is common between sides)
+    int nb_of_border_tiles;                    // length of matching array (which is common between sides of the same piece)
+    int nb_of_outline_tiles;                   // length of matching array (which is common between sides of the same piece)
     Side side_array[MAX_NB_OF_SIDE_PER_PIECE]; // array of sides : main data of the piece
 
     // ----------- Live data part -----------------
@@ -156,9 +153,8 @@ typedef struct Piece
 
     // ------ Cached blit results
     Vector2_int border_tile_absolute_pos_array[MAX_NB_OF_BORDER_TILE_PER_SIDE];
-    Vector2_int outline_tile_absolute_pos_array[MAX_NB_OF_OUTLINE_POINTS];
 
-    // ------ Drawing data
+    // ------ Drawing data cache
     Vector2_int border_tile_effective_absolute_top_left_corner_pt_array[MAX_NB_OF_BORDER_TILE_PER_SIDE];
     Vector2 outline_tile_effective_absolute_top_left_corner_pt_array[MAX_NB_OF_OUTLINE_POINTS];
 

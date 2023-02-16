@@ -9,8 +9,8 @@
  * And there is an offset to this 2D coordinates to draw the board in the center of the window
  *
  * The same idea of caching is used for drawing data
- * At each different drawing section there is :
- * 1) Function to compute cache drawing data, used only when they need to be updated, thus called once in a while (e.g : piece moving on the board)
+ * At each different main data drawing section there is :
+ * 1) Function to compute cache drawing data, used only when they need to be updated, thus called once in a while (e.g : piece moving on the board -> time to update its drawing)
  * 2) Function to effectively draw the cached data (which is called in repeat, in classic drawing loops)
  *
  */
@@ -35,7 +35,8 @@
 // --------------------------------- Drawing constants ------------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------------------------------------------------------------------
 
-//---- Main global constant parameters
+//---- Main global constant parameters ------------------------------------------
+
 Vector2_int offset_px;
 static int offset_y_level_num;
 static Color connection_line_color = {212, 175, 55, 255};
@@ -44,7 +45,7 @@ static Color outline_color = {200, 255, 0, 255};
 const int gui_icon_scale = 3;
 
 const int tile_px_width = 101;
-static const int mini_tile_px_width = 31;
+static const int small_tile_px_width = 31;
 
 // Driven parameters
 static const int grid_line_px_thick = tile_px_width / 10;
@@ -52,6 +53,7 @@ static const int connection_line_px_thick = tile_px_width / 10;
 static const int outline_px_thick = (int)(tile_px_width * 0.08);
 static const float bend_circle_radius = (float)(connection_line_px_thick / 2 - 1);
 static const float point_circle_radius = (float)(tile_px_width / 6);
+
 // values to add from center x,y, to get the other point of the line (tip) to draw the connection in the right direction
 // see update_tile_drawing when it treats connection lines
 static Vector2_int connections_tip_offset[] = {
@@ -61,18 +63,22 @@ static Vector2_int connections_tip_offset[] = {
     [UP] = {0, -tile_px_width / 2},
 };
 
-static const int mini_connection_line_px_thick = mini_tile_px_width / 10;
-static const int mini_outline_px_thick = (int)(mini_tile_px_width * 0.08);
-static const float mini_bend_circle_radius = (float)(mini_connection_line_px_thick / 2 - 1);
-static const float mini_point_circle_radius = (float)(mini_tile_px_width / 6);
-static Vector2_int mini_connections_tip_offset[] = {
-    [RIGHT] = {mini_tile_px_width / 2, 0},
-    [DOWN] = {0, mini_tile_px_width / 2},
-    [LEFT] = {-mini_tile_px_width / 2, 0},
-    [UP] = {0, -mini_tile_px_width / 2},
+// small version of the same constants, see  "draw_piece_priority_array" function
+
+static const int small_connection_line_px_thick = small_tile_px_width / 10;
+static const int small_outline_px_thick = (int)(small_tile_px_width * 0.08);
+static const float small_bend_circle_radius = (float)(small_connection_line_px_thick / 2 - 1);
+static const float small_point_circle_radius = (float)(small_tile_px_width / 6);
+
+static Vector2_int small_connections_tip_offset[] = {
+    [RIGHT] = {small_tile_px_width / 2, 0},
+    [DOWN] = {0, small_tile_px_width / 2},
+    [LEFT] = {-small_tile_px_width / 2, 0},
+    [UP] = {0, -small_tile_px_width / 2},
 };
 
-//---- parameter used in functions
+//---- parameter used in functions --------------------------------------------------------------------
+
 static int current_tile_px_width;
 
 static int current_connection_line_px_thick;
@@ -132,11 +138,11 @@ void setup_display(int window_px_width, int window_px_height)
 
 #ifdef USE_SECOND_SCREEN
     // Quality of life for debugging
-    // Hack for my particular setup :
+    // Hack that only works for my particular setup :
     // main screen : laptop 1080p (but scaled to 125% (default Windows parameter))
     // Second screen : to the left, 1080p, but scaled to 100% in Windows parameter
 
-    // SetWindowMonitor(1); -> goes to my second screen, but fullscreen is mandatory with this function
+    // SetWindowMonitor(1); -> goes to my second screen, but fullscreen is mandatory with this function, and is not what I want
 
     // hack go to my second screen to the left, without going fullscreen
     SetWindowPosition(-1920 + 50, 50);
@@ -145,17 +151,6 @@ void setup_display(int window_px_width, int window_px_height)
     SetWindowSize(window_px_width, window_px_height);
 
 #endif
-}
-
-// Function to initialize a raylib window, can be effectively called once
-void setup_display_once(int window_px_width, int window_px_height)
-{
-
-    static bool is_display_setup = false;
-    if (is_display_setup)
-        return;
-    is_display_setup = true;
-    setup_display(window_px_width, window_px_height);
 }
 
 // Function to add on top of raylib library : DrawLineStrip function but with a thickness option
@@ -298,7 +293,7 @@ static void draw_missing_connection_tile(Tile *tile)
 {
     draw_tile_color(tile, RED);
 }
-// --------------------------- Functions to draw border tiles (only in debugging see test_display.c)  --------------------------------------------
+// --------------------------- Functions to draw border tiles (used only in debugging, see test_display.c)  --------------------------------------------
 
 static void update_piece_border_tiles_drawing(Piece *piece)
 {
@@ -339,7 +334,7 @@ static Vector2_int outline_edge_correction_values[] = {{0, 0}, {1, 0}, {1, 1}, {
 static void update_piece_outline_drawing(Piece *piece)
 {
     static Side *side = NULL;
-    static Vector2_int temp_pos_before_correction;
+    static Vector2_int temp_pos;
     static int i;
 
     side = (piece->side_array) + (piece->current_side_idx);
@@ -352,16 +347,17 @@ static void update_piece_outline_drawing(Piece *piece)
 
     for (i = 0; i < piece->nb_of_outline_tiles; i++)
     {
-        temp_pos_before_correction = side->outline_tile_relative_pos_array[i];
-        rotate_pos(&temp_pos_before_correction, piece->current_rotation_state);
-        translate_pos(&temp_pos_before_correction, &(piece->current_base_pos));
+        // classic tile placement
+        temp_pos = side->outline_tile_relative_pos_array[i];
+        rotate_pos(&temp_pos, piece->current_rotation_state);
+        translate_pos(&temp_pos, &(piece->current_base_pos));
 
-        piece->outline_tile_absolute_pos_array[i] = temp_pos_before_correction;
-        translate_pos(&(piece->outline_tile_absolute_pos_array[i]), &(outline_edge_correction_values[piece->current_rotation_state]));
+        // take the right top-left corner according to the correction
+        translate_pos(&temp_pos, &(outline_edge_correction_values[piece->current_rotation_state]));
 
         // Final data used in draw_piece_outline
-        piece->outline_tile_effective_absolute_top_left_corner_pt_array[i].x = (piece->outline_tile_absolute_pos_array[i].i * current_tile_px_width) + offset_px.i;
-        piece->outline_tile_effective_absolute_top_left_corner_pt_array[i].y = (piece->outline_tile_absolute_pos_array[i].j * current_tile_px_width) + offset_px.j;
+        piece->outline_tile_effective_absolute_top_left_corner_pt_array[i].x = (temp_pos.i * current_tile_px_width) + offset_px.i;
+        piece->outline_tile_effective_absolute_top_left_corner_pt_array[i].y = (temp_pos.j * current_tile_px_width) + offset_px.j;
     }
 }
 
@@ -454,7 +450,7 @@ void update_board_static_drawing(Board *board)
         update_piece_all_drawing((board->piece_array) + board->added_piece_idx_array[i], false, false);
 }
 
-void draw_board(Board *board, bool show_missing_connection_tiles)
+void draw_board(Board *board)
 {
     static int i;
     static int piece_idx;
@@ -467,14 +463,18 @@ void draw_board(Board *board, bool show_missing_connection_tiles)
     for (i = 0; i < board->nb_of_added_pieces; i++)
     {
         piece_idx = board->added_piece_idx_array[i];
-        draw_piece((board->piece_array) + piece_idx, show_missing_connection_tiles, false);
+        draw_piece((board->piece_array) + piece_idx, false, false);
     }
 }
+
+// -----------------------------------------------------------------------------------------------------------------------------------------
+// -------------------------- More interface displayed --------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------------------------------------------------------------
 
 void draw_level_num(int level_num)
 {
     static char level_num_str[4];
-    static int previous_level_num = 0;
+    static int previous_level_num = -1;
 
     if (level_num != previous_level_num)
     {
@@ -485,7 +485,7 @@ void draw_level_num(int level_num)
 }
 
 // function used to draw all tile poses on the window
-// to help me when I'm debugging post-adding check methods
+// to help me when I'm debugging post-adding check methods in test_display.c
 void draw_pos_text(void)
 {
     static int corner_offset = 10;
@@ -507,9 +507,9 @@ void draw_pos_text(void)
 }
 
 // Function to draw the current piece priority array, aslo with the remaining pieces to play
-// This is mainly to visualize when search algorithms switch between different combinations
+// This is mainly to visualize when solver algorithm switch between different combinations
 // The idea is to have a column of piece thumbnails next to the board display
-// And fill it from the bottom up with the current priority array, and the other one with the remaining pieces to play
+// And fill it from the bottom up with the current priority array, and the other one with the remaining pieces to play in the array
 // The first pieces in the priority list are at the top, and they are taken out 1 by 1 of the remaining list to be played on the board
 void draw_piece_priority_array(int piece_idx_priority_array[NB_OF_PIECES], int piece_selected, int nb_of_playable_pieces, bool playable_side_per_piece_idx_mask[NB_OF_PIECES][MAX_NB_OF_SIDE_PER_PIECE])
 {
@@ -538,8 +538,8 @@ void draw_piece_priority_array(int piece_idx_priority_array[NB_OF_PIECES], int p
     {
         is_first_call = false;
 
-        priority_legend_pos = (Vector2_int){offset_px.i - mini_tile_px_width * 9, offset_px.j + mini_tile_px_width * 19 + 10};
-        remaining_legend_pos = (Vector2_int){offset_px.i - mini_tile_px_width * 5 + 10, offset_px.j + mini_tile_px_width * 19 + 10};
+        priority_legend_pos = (Vector2_int){offset_px.i - small_tile_px_width * 9, offset_px.j + small_tile_px_width * 19 + 10};
+        remaining_legend_pos = (Vector2_int){offset_px.i - small_tile_px_width * 5 + 10, offset_px.j + small_tile_px_width * 19 + 10};
 
         load_piece_array(piece_priority_array);
         load_piece_array(piece_remaining_array);
@@ -553,49 +553,56 @@ void draw_piece_priority_array(int piece_idx_priority_array[NB_OF_PIECES], int p
     remaining_base_pos.j = 19;
     priority_base_pos.j = 19;
 
-    // Mini piece display setup, (global constants swap)
-    current_tile_px_width = mini_tile_px_width;
-    current_connection_line_px_thick = mini_connection_line_px_thick;
-    current_outline_px_thick = mini_outline_px_thick;
-    current_bend_circle_radius = mini_bend_circle_radius;
-    current_point_circle_radius = mini_point_circle_radius;
-    current_connections_tip_offset = mini_connections_tip_offset;
+    // small piece display setup, (global constants swap)
+    current_tile_px_width = small_tile_px_width;
+    current_connection_line_px_thick = small_connection_line_px_thick;
+    current_outline_px_thick = small_outline_px_thick;
+    current_bend_circle_radius = small_bend_circle_radius;
+    current_point_circle_radius = small_point_circle_radius;
+    current_connections_tip_offset = small_connections_tip_offset;
 
     // fill columns from the bottom up
+    if (need_update)
+    {
+        for (i = nb_of_playable_pieces - 1; i >= 0; i--)
+        {
+            piece_idx = piece_idx_priority_array[i];
+
+            // To show the choosen point pieces with their point side
+            // And avoiding showing point side of other pieces
+            side_idx = 0;
+            if (!playable_side_per_piece_idx_mask[piece_idx][side_idx])
+                side_idx = 1;
+
+            // Piece priority array update
+            piece = piece_priority_array + piece_idx;
+            priority_base_pos.j -= piece->piece_height;
+            blit_piece_main_data(piece, side_idx, priority_base_pos, rotation_state);
+            priority_base_pos.j--; // let a space of 1 small-tile between 2 pieces
+            update_piece_all_drawing(piece, false, false);
+
+            // Remaining pieces udpate
+            if (i < piece_selected)
+                continue;
+            piece = (piece_remaining_array) + piece_idx;
+            remaining_base_pos.j -= piece->piece_height;
+            blit_piece_main_data(piece, side_idx, remaining_base_pos, rotation_state);
+            remaining_base_pos.j--; // let a space of 1 small-tile between 2 pieces
+            update_piece_all_drawing(piece, false, false);
+        }
+    }
+
     for (i = nb_of_playable_pieces - 1; i >= 0; i--)
     {
         piece_idx = piece_idx_priority_array[i];
 
-        // To show the choosen point pieces with their point side
-        // And avoiding showing point side of other pieces
-        side_idx = 0;
-        if (!playable_side_per_piece_idx_mask[piece_idx][side_idx])
-            side_idx = 1;
-
         // Piece priority array display
-
         piece = piece_priority_array + piece_idx;
-        if (need_update)
-        {
-            priority_base_pos.j -= piece->piece_height;
-            blit_piece_main_data(piece, side_idx, priority_base_pos, rotation_state);
-            priority_base_pos.j--; // let a space of 1 mini-tile between 2 pieces
-            update_piece_all_drawing(piece, false, false);
-        }
         draw_piece(piece, false, false);
-
-        // Remaining pieces display
 
         if (i < piece_selected)
             continue;
         piece = (piece_remaining_array) + piece_idx;
-        if (need_update)
-        {
-            remaining_base_pos.j -= piece->piece_height;
-            blit_piece_main_data(piece, side_idx, remaining_base_pos, rotation_state);
-            remaining_base_pos.j--; // let a space of 1 mini-tile between 2 pieces
-            update_piece_all_drawing(piece, false, false);
-        }
         draw_piece(piece, false, false);
     }
 
@@ -612,10 +619,13 @@ void draw_piece_priority_array(int piece_idx_priority_array[NB_OF_PIECES], int p
     DrawText("Remaining", remaining_legend_pos.i, remaining_legend_pos.j, 20, RAYWHITE);
 }
 
+// -----------------------------------------------------------------------------------------------------------------------------------------
+// -------------------------- GUI for screen_game.c and screen_solver.c --------------------------------------------------------------------
+// -----------------------------------------------------------------------------------------------------------------------------------------
+
 void draw_game_controls(void)
 {
     static int line;
-    // static int offset_x = 380;
     static int offset_x = 1150;
     static int legend_offset_x = 220;
     static int offset_y = 150;

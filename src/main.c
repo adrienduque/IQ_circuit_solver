@@ -16,12 +16,23 @@
 #include <local/display.h>          // setup_display
 #include <local/utils.h>            // find_asset_folder_relative_path and defines
 
+static void InitStaticScreens(void);
+static void UnloadStaticScreens(void);
+
+static void UnloadCurrentDynamicScreen(void);
+static void InitCurrentDynamicScreen(void);
+
 static void TransitionToScreen(int screen);
 static void DrawTransition();
-void find_asset_folder_relative_path(void);
 
-static GameScreen currentScreen = LOGO;
-static bool onTransition = false;
+static GameScreen currentScreen;
+static bool onTransition;
+
+/**
+ * @todo : https://github.com/raysan5/raylib/discussions/1326
+ * + record a video of solver when I decided to not upgrade the solver anymore
+ * + https://ezgif.com/video-to-gif to show to github
+ */
 
 int main(void)
 {
@@ -39,8 +50,10 @@ int main(void)
 
     SetTargetFPS(DEFAULT_FPS);
 
-    InitLogoScreen();
-    InitLevelSelectScreen();
+    InitStaticScreens();
+
+    currentScreen = LOGO;
+    onTransition = false;
 
     while (!WindowShouldClose())
     {
@@ -59,10 +72,7 @@ int main(void)
         case LEVEL_SELECT:
             UpdateLevelSelectScreen();
             if (FinishLevelSelectScreen())
-            {
                 TransitionToScreen(GAME);
-                InitGameScreen();
-            }
             break;
 
         case GAME:
@@ -72,10 +82,8 @@ int main(void)
                 TransitionToScreen(LEVEL_SELECT);
 
             else if (FinishGameScreen() == 1)
-            {
                 TransitionToScreen(SOLVER);
-                InitSolverScreen();
-            }
+
             break;
 
         case SOLVER:
@@ -105,7 +113,6 @@ int main(void)
 
         switch (currentScreen)
         {
-
         case LOGO:
             DrawLogoScreen();
             break;
@@ -124,10 +131,8 @@ int main(void)
         EndDrawing();
     }
 
-    UnloadLogoScreen();
-    UnloadLevelSelectScreen();
-    UnloadGameScreen();
-    UnloadSolverScreen();
+    UnloadStaticScreens();
+    UnloadCurrentDynamicScreen(); // (works only if we exit fram GAME or SOLVER screen)
 
     CloseWindow();
 
@@ -147,14 +152,67 @@ int main(void)
 }
 
 //-------------------------------------------------------------------------
+// Helper functions : Init / unload functions (mostly for code clarity)
+//-------------------------------------------------------------------------
+
+static void InitStaticScreens(void)
+{
+
+    InitLogoScreen();
+    InitLevelSelectScreen();
+}
+
+static void UnloadStaticScreens(void)
+{
+
+    UnloadLogoScreen();
+    UnloadLevelSelectScreen();
+}
+
+static void UnloadCurrentDynamicScreen(void)
+{
+    // I only include screens that have their Init functions called multiple times through program execution
+    switch (currentScreen)
+    {
+    case GAME:
+        UnloadGameScreen();
+        break;
+    case SOLVER:
+        UnloadSolverScreen();
+        break;
+
+    default:
+        break;
+    }
+}
+
+static void InitCurrentDynamicScreen(void)
+{
+    // I only include screens that have their Init functions called multiple times through program execution
+    switch (currentScreen)
+    {
+    case GAME:
+        InitGameScreen();
+        break;
+    case SOLVER:
+        InitSolverScreen();
+        break;
+
+    default:
+        break;
+    }
+}
+//-------------------------------------------------------------------------
 // Helper functions : transition screen
 //-------------------------------------------------------------------------
 
 // Request transition to next screen
 static void TransitionToScreen(int screen)
 {
+    UnloadCurrentDynamicScreen();
     onTransition = true;
     currentScreen = screen;
+    InitCurrentDynamicScreen();
 }
 
 static void DrawTransition()

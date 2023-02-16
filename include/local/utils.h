@@ -45,29 +45,19 @@ typedef struct Vector2_int
 
 } Vector2_int;
 
-/**
- * @struct RotationMatrix
- * 2D int rotation matrix type
- */
-typedef struct RotationMatrix
-{
-
-    int m0, m1;
-    int m2, m3;
-
-} RotationMatrix;
-
-void matrix_mul(Vector2_int *pos, const RotationMatrix *matrix);
-
+// ---- pos deplacement functions
 void rotate_pos(Vector2_int *pos, int rotation_state);
-
 void translate_pos(Vector2_int *pos, const Vector2_int *translate_vector);
 void increment_pos_in_direction(Vector2_int *pos, Direction direction);
 
+// ---- pos state functions
 bool is_pos_inside_board(const Vector2_int *pos);
 bool are_pos_equal(const Vector2_int *pos1, const Vector2_int *pos2);
+
 void set_invalid_pos(Vector2_int *pos);
 bool is_pos_valid(const Vector2_int *pos);
+
+// ---- computation with poses
 int manhattan_dist(const Vector2_int *pos1, const Vector2_int *pos2);
 
 // --------------------------- Math needed for main search algorithm --------------------------

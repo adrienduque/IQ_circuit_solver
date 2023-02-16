@@ -1,6 +1,9 @@
 /**
  * @file search_algorithm.c
  *
+ * This file contains older implementations of the solver algorithm
+ * The updated implementation is in screen_solver.c, (which reuse helper functions that are defined here)
+ *
  *
  * Main search algorithm explanation :
  *
@@ -48,13 +51,13 @@
  *          a. the algorithm has successfully played the last piece and try to move on to the next one -> there isn't a next one, it has found the solution to the level !
  *          b. the algorithm can't play the first piece and try to backtrack to the previous one -> there isn't a previous one, the choice it made about the point pieces was not the right one, try all over again in the next choice (next combination).
  *
- *      With this algorithm, we can safely say that it will eventually try all position possibilities, as the solution is one of them, it can find the solution 100% of the time.
+ *      With this algorithm, we can safely say that it will eventually try all position possibilities starting from level hints, as the solution is one of them, it can find the solution 100% of the time.
  *
  *      4) How does it know when a piece can be added to the board or not ? -> it rather knows the cases where a piece can't be added, and by default it can
  *
- *      a. we can skip obvious position of a piece (if the side choosen is set to not be playable : see 2)) (or if we know the board is already filled at the horizontal/vertical position we want to try)
+ *      a. we can skip obvious position of a piece (if the side choosen is set to not be playable : see step 2)) (or if we know the board is already filled at the horizontal/vertical position we want to try)
  *
- *      b. The method to add a piece to the board has a few checks before the piece is blit to the board, (connection checking, superposition of tiles, match of level hints,...) see board.c for more informations  (that is what I call "pre-adding checks")
+ *      b. The method to add a piece to the board has a few checks before the piece is blitted to the board, (connection checking, superposition of tiles, match of level hints,...) see board.c for more informations  (that is what I call "pre-adding checks")
  *      (of course if one of the checks doesn't pass, the piece is not added to the board)
  *
  *      c. After the piece has been successfully added, a list of checks is applied to the board (do the paths contains loops ? (which are not allowed), is there an isolated empty tile ?(which we know can't be filled), ...) see check_board.c (that is what I call "post-adding checks")
@@ -72,13 +75,15 @@
  *
  *      Smarter checks will detect earlier that a board is not completeable <=> the higher on the tree, we close nodes, the lesser remaining nodes to explore.
  *
+ *      Another way of improving it is smarter checking order among all the possibilities (which pieces do we tend to add first, can we order the different combinations to check ?)
+ *
  *      While this project is still in development, we can mesure the pure logic performance of the algorithm by counting the number of valid boards that it had to go through to find the final one that is the solution to the level.
  *      It's like counting the number of explored nodes that the algorithm didn't close.
  *
  *      Of course, the more checks it has to apply to a board, the more computation and time nedded on each node.
  *      It's a trade-off and one that is almost always worth.
  *
- *      See the evolution of my algorithm performance stats in the excel file in showcase_assets folder.
+ *      See the evolution of my algorithm performance stats in the excel file in showcase_binaries_and_assets folder.
  *
  *      In the first complete version of the algorithm, the number of valid boards goes to tens of millions (level 120) for example.
  *      There isn't much post-adding checks yet.
@@ -254,7 +259,7 @@ static void draw(Board *board, int level_num)
 {
     BeginDrawing();
     ClearBackground(BLACK);
-    draw_board(board, false);
+    draw_board(board);
     draw_level_num(level_num);
     // DrawFPS(100, 10);
     EndDrawing();
@@ -405,10 +410,7 @@ void run_algorithm_with_display(int level_num, int FPS)
                             valid_board_count++;
                             if (enable_slow_operations)
                                 printf("new valid board found ! %d\n", valid_board_count);
-                            draw(board, level_num); // draw only when new board found to make everything faster ? -> this is so fast wtf
-                            // so there's no point to separate update_drawing and draw functions :/
-                            // my whole display.c design intention was "update only data when we need to but draw at each iteration even with no updates"
-                            // that means there is a lot of useless drawing cache variables
+                            draw(board, level_num); // draw only when new board found to make everything faster
                             goto next_piece;
                         }
                         piece->current_rotation_state = 0;
@@ -652,6 +654,10 @@ end_loop:
 // -------------------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------------------
+
+// functions that are a draft version of what we display in screen_solver.c and screen_game.c
+// (more interface displayed)
+
 static void setup_extra_draw(Board *board)
 {
     // Functions only needed because we display things
@@ -663,7 +669,7 @@ static void extra_draw(Board *board, int level_num, int piece_idx_priority_array
 {
     BeginDrawing();
     ClearBackground(BLACK);
-    draw_board(board, false);
+    draw_board(board);
     draw_piece_priority_array(piece_idx_priority_array, piece_selected, nb_of_playable_pieces, playable_side_per_piece_idx_mask);
     draw_level_num(level_num);
     EndDrawing();

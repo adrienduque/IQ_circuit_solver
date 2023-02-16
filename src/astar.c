@@ -2,11 +2,11 @@
  * @file astar.c
  * File that contains a custom implementation of the a-star pathfinding algorithm
  *
- * (has a starting position on the board, a target ending position, and can only explore the empty tiles on the board (all the tiles except the ones filled with normal tiles))
+ * (has a starting position on the board, a target ending position, and can only explore the empty tiles on the board (all the tiles except the ones already filled with normal tiles))
  * (also, the board actually have multiple valid targets, the pathfinding algorithm will try to go toward the ending target, but if the algorithm ends up on another one, it returns)
  * (returns the final tile or UNDEFINED_TILE (alias for NULL); not the actual path it took to get here)
  *
- * It is needed in check_board.c > check_no_dead_ends
+ * It is needed in check_board.c > "check_no_dead_ends"
  */
 
 #include <stdlib.h> //malloc and free, NULL
@@ -30,7 +30,7 @@ typedef struct OpenSetElement
 static void free_open_set(OpenSetElement *open_set_element)
 {
     // recursive free basically
-    // to free the pointers, last one first
+    // to free the pointers, the last one is the first released
 
     if (open_set_element == NULL)
         return;
@@ -43,7 +43,7 @@ static void free_open_set(OpenSetElement *open_set_element)
 Tile *find_a_path_(Board *board, Vector2_int *start_pos, Vector2_int *target_pos, SimpleTileType board_representation_matrix[BOARD_WIDTH][BOARD_HEIGHT])
 {
     // A-star implementation :
-    // we need a priority queue for the open_set, I'll not use a heapqueue though, as the open_set is of length n = BOARD_WIDTH*BOARD_HEIGHT maximum, and program heapify-up and down operations are a pain
+    // we need a priority queue for the open_set, I'll not use a heapqueue though, as the open_set is of length n = BOARD_WIDTH*BOARD_HEIGHT maximum, and heapify-up and down operations are a pain to code
     // a simple queue with priority enqueue will do the job
     // the g-scores are stored in a matrix of int
     // h is simply manhattan distance
@@ -76,20 +76,10 @@ Tile *find_a_path_(Board *board, Vector2_int *start_pos, Vector2_int *target_pos
     while (first_open_set_element != NULL)
     {
 
-        // pick the best f-score
+        // pick the best f-score (first element in the queue)
         current_open_set_element = first_open_set_element;
 
-        // successful ending condition
-        if (board_representation_matrix[current_open_set_element->pos.i][current_open_set_element->pos.j] == target)
-        {
-            // we found a path, return the ending tile
-            // store the ending tile before the free erase data
-            return_tile = board->tile_matrix[current_open_set_element->pos.i][current_open_set_element->pos.j];
-            free_open_set(first_open_set_element);
-            return return_tile;
-        }
-
-        // remove element from open set
+        // remove element from open set (free the actual pointer at the end of iteration)
         first_open_set_element = first_open_set_element->next;
 
         // explore neighbours
@@ -117,7 +107,7 @@ Tile *find_a_path_(Board *board, Vector2_int *start_pos, Vector2_int *target_pos
                 return return_tile;
             }
 
-            // early check to not backtrack
+            // early check to avoid backtracking
             temp_g_score = g_score_matrix[current_open_set_element->pos.i][current_open_set_element->pos.j] + 1;
             if (temp_g_score >= g_score_matrix[neighbour_pos.i][neighbour_pos.j])
                 continue;
@@ -217,13 +207,13 @@ Tile *find_a_path_(Board *board, Vector2_int *start_pos, Vector2_int *target_pos
 // I'm trying a static memory allocation version
 // which means, that I have to predict the maximum number of tile explored by the algorithm
 
-#define MAX_NB_OF_TILE_EXPLORED BOARD_HEIGHT *BOARD_WIDTH * 10 // assuming the anti-backtrack feature of this algorithm is working, we can only explore each tile 4 times ? + margin to make sure
+#define MAX_NB_OF_TILE_TO_EXPLORE BOARD_HEIGHT *BOARD_WIDTH * 10 // assuming the anti-backtrack feature of this algorithm is working, we can only explore each tile 4 times ? + margin to make sure
 // (by doing experiments with the dynamic memory version of this algorithm, I actually found out that it never exceeded BOARD_HEIGHT*BOARD_WIDTH, but BOARD_HEIGHT*BOARD_WIDTH*10 is still a small number, so I'm not taking risks)
 
 Tile *find_a_path(Board *board, Vector2_int *start_pos, Vector2_int *target_pos, SimpleTileType board_representation_matrix[BOARD_WIDTH][BOARD_HEIGHT])
 {
     // A-star implementation :
-    // we need a priority queue for the open_set, I'll not use a heapqueue though, as the open_set is of length n = BOARD_WIDTH*BOARD_HEIGHT maximum, and program heapify-up and down operations are a pain
+    // we need a priority queue for the open_set, I'll not use a heapqueue though, as the open_set is of length n = BOARD_WIDTH*BOARD_HEIGHT maximum, and heapify-up and down operations are a pain to code
     // a simple queue with priority enqueue will do the job
     // the g-scores are stored in a matrix of int
     // h is simply manhattan distance
@@ -237,7 +227,7 @@ Tile *find_a_path(Board *board, Vector2_int *start_pos, Vector2_int *target_pos,
     static int i, j;
 
     // static memory emplacements
-    static OpenSetElement open_set_element_placeholders[BOARD_HEIGHT * BOARD_WIDTH * 10];
+    static OpenSetElement open_set_element_placeholders[MAX_NB_OF_TILE_TO_EXPLORE];
     static int nb_of_placeholders;
 
     // replacing all malloc calls by &(open_set_element_placeholders[nb_of_placeholders]); nb_of_placeholders++;
@@ -265,13 +255,8 @@ Tile *find_a_path(Board *board, Vector2_int *start_pos, Vector2_int *target_pos,
 
     while (first_open_set_element != NULL)
     {
-        // pick the best f-score
+        // pick the best f-score (the first element of the queue)
         current_open_set_element = first_open_set_element;
-
-        // successful ending condition
-        if (board_representation_matrix[current_open_set_element->pos.i][current_open_set_element->pos.j] == target)
-            // we found a path, return the ending tile
-            return board->tile_matrix[current_open_set_element->pos.i][current_open_set_element->pos.j];
 
         // remove element from open set
         first_open_set_element = first_open_set_element->next;
@@ -299,7 +284,7 @@ Tile *find_a_path(Board *board, Vector2_int *start_pos, Vector2_int *target_pos,
                 return return_tile;
             }
 
-            // early check to not backtrack
+            // early check to avoid backtracking
             temp_g_score = g_score_matrix[current_open_set_element->pos.i][current_open_set_element->pos.j] + 1;
             if (temp_g_score >= g_score_matrix[neighbour_pos.i][neighbour_pos.j])
                 continue;

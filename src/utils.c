@@ -4,10 +4,14 @@
  * Includes all little math-like functions and macros related to positionning on the board
  * A position on the board is represented by 2 ints :
  *      -by using "Vector2_int" struct -> (i,j) (2D : horizontal / vertical int index of a tile)
- *      works like pixel position on a screen (j increments downwards, (0,0) is in top left corner), ...)
+ *      works like pixel position on a screen (j increments downwards, (0,0) is in top left corner, ...)
  *
  *
  * Also includes helper functions for Direction type (which are encoded as int, and mainly used to specify direction of tile connections)
+ *
+ * A math function to generate the next r-combination from a list of n ints (used in the main solver algorithm)
+ *
+ * A general purpose function to find the assets folder depending of where the binary is executed from.
  */
 
 #include <stdbool.h>
@@ -40,48 +44,60 @@ Direction rotate_direction(Direction direction, int nb_of_clockwise_90_degres_ro
 // -------------------------------------- 2D transformation functions ------------------------------------
 
 /**
+ * @struct Matrix2_2_int
+ * 2D int rotation matrix type
+ */
+typedef struct Matrix2_2_int
+{
+
+    int m0, m1;
+    int m2, m3;
+
+} Matrix2_2_int;
+
+/**
  * identity matrix
  */
-// static RotationMatrix right_rotation_mat = {1, 0, 0, 1};
+// static Matrix2_2_int right_rotation_mat = {1, 0, 0, 1};
 
 /**
  * rotation from right direction (base direction) to down
  * it is a 90° rotation :
  * i unitary vector becomes j  |[1,0]  -> [0,1]
  * j unitary vector becomes -i |[0,1] -> [-1,0]
- * we can see transpose matrix above      ^^
+ * we can see transpose matrix above-------^^
  */
-// static RotationMatrix down_rotation_mat = {0, -1, 1, 0};
+// static Matrix2_2_int down_rotation_mat = {0, -1, 1, 0};
 
 /**
  * rotation from right direction (base direction) to left
  * it is a 180° rotation :
  * i unitary vector becomes -i |[1,0]  -> [-1,0]
  * j unitary vector becomes -j |[0,1] -> [0,-1]
- * we can see transpose matrix above      ^^
+ * we can see transpose matrix above-------^^
  */
-// static RotationMatrix left_rotation_mat = {-1, 0, 0, -1};
+// static Matrix2_2_int left_rotation_mat = {-1, 0, 0, -1};
 
 /**
  * rotation from right direction (base direction) to up
  * it is a 270° rotation :
  * i unitary vector becomes -j |[1,0]  -> [0,-1]
  * j unitary vector becomes i  |[0,1] ->  [1,0]
- * we can see transpose matrix above      ^^
+ * we can see transpose matrix above-------^^
  */
-// static RotationMatrix up_rotation_mat = {0, 1, -1, 0};
+// static Matrix2_2_int up_rotation_mat = {0, 1, -1, 0};
 
 // Array of matrices used for rotation from RIGHT (assumed based direction of all relative positionning data) to another direction
 // See rotate_pos function
 // (Explanation of why the raw data is what it is, in the comments above)
-static RotationMatrix rotation_mat_array[] = {
+static Matrix2_2_int rotation_mat_array[] = {
     [RIGHT] = {1, 0, 0, 1},
     [DOWN] = {0, -1, 1, 0},
     [LEFT] = {-1, 0, 0, -1},
     [UP] = {0, 1, -1, 0},
 };
 
-void matrix_mul(Vector2_int *pos, const RotationMatrix *matrix)
+static void matrix_mul(Vector2_int *pos, const Matrix2_2_int *matrix)
 {
     static int temp_new_i, temp_new_j;
     temp_new_i = pos->i * matrix->m0 + pos->j * matrix->m1;
@@ -196,7 +212,7 @@ int generate_next_combination(const int *input_int_array, int input_array_length
 // -----------------------------------------------------------------------------------------
 
 char assets_folder_relative_path[30];
-// As the executables can be run from different common folder locations
+// As the binaries can be run from different common folder locations
 // I prefer finding the assets folder dynamically
 void find_asset_folder_relative_path(void)
 {

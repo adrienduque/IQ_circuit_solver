@@ -4,9 +4,6 @@
  *
  * They are separate functions as I try to compute as less as possible at each step of the process
  *
- * First of all "blit_piece_main_data" is meant to be used as a first check to see if a piece could fit inside the board by trying to blit it at the wanted position state
- * If a piece doesn't fit, it is useless to compute other live datas
- * Thus these functions are meant to be used in the same order as their declaration
  */
 
 #include <stdlib.h>           // NULL
@@ -16,10 +13,10 @@
 
 #include <local/piece.h>
 
-// Function to blit only piece data used for main computation (normal and missing_connection_tile of the current side of a piece)
+// Function to blit only piece data used for main computation (normal and missing_connection_tile position/rotation of the current side of a piece)
 // Without checks at all...
-// An other function plays the same role (see board.c : "can_piece_be_added_to_board" (which is called by board.c>add_piece_to_board))
-// In this later function, we try to blit the same piece data, but check a few things to say whether or not the piece can even fit in the board
+// An other function plays the same role (see board.c > "can_piece_be_added_to_board" (which is called by board.c > "add_piece_to_board"))
+// In this latter function, we try to blit the same piece data, but check a few things to say whether or not the piece can even fit in the board
 void blit_piece_main_data(Piece *piece, int side_idx, Vector2_int base_pos, int rotation_state)
 {
     static Side *side = NULL;
@@ -54,7 +51,8 @@ void blit_piece_main_data(Piece *piece, int side_idx, Vector2_int base_pos, int 
     piece->current_rotation_state = rotation_state;
 }
 
-// Function to blit only border tiles of piece at the right emplacement in the board
+// Function to blit only border tiles of piece at the right position in the board
+// (only called by check_board.c > "check_isolated_tiles_around_piece")
 void update_piece_border_tiles(Piece *piece)
 {
     static Side *side = NULL;
@@ -68,6 +66,7 @@ void update_piece_border_tiles(Piece *piece)
         temp_pos = side->border_tile_relative_pos_array[i];
         rotate_pos(&temp_pos, piece->current_rotation_state);
         translate_pos(&temp_pos, &(piece->current_base_pos));
+
         if (is_pos_inside_board(&temp_pos))
             piece->border_tile_absolute_pos_array[i] = temp_pos;
         else

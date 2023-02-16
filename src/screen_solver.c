@@ -1,10 +1,11 @@
 /**
  * @file screen_level_select.c
+ * @see screens.h
  *
  * File containing Update and Draw functions for the level solver screen, see screens.h and raylib game templates
  *
- * Adaptation from search_algorithm.c > run_algorithm_with_extra_display() in the classic Update/Draw loop form factor
- * see search_algorithm.c description for an explanation of the algorithm, and later README.md for detailled explanation @todo
+ * Adaptation from search_algorithm.c > run_algorithm_with_extra_display() to the classic Update/Draw loop form factor here
+ * see search_algorithm.c description for an explanation of the algorithm, and later README.md for detailled explanation
  */
 
 #include <stdbool.h>
@@ -16,10 +17,10 @@
 
 #include <raylib/screens.h>
 
-#include <local/board.h>
+#include <local/board.h> // Board
 #include <local/level_data.h>
 #include <local/piece.h>
-#include <local/check_board.h>
+#include <local/check_board.h> // run_all_checks
 #include <local/display.h>
 #include <local/utils.h>
 #include <local/search_algorithm.h>
@@ -52,7 +53,7 @@ static bool playable_side_per_piece_idx_mask[NB_OF_PIECES][MAX_NB_OF_SIDE_PER_PI
 // Variables that represent the internal state of the algorithm
 static int combination_idx;  // current combination index
 static int piece_selected;   // index of piece_priority_array
-static int piece_idx;        // current piece index ( := piece_priority_array[piece_selected])
+static int piece_idx;        // current piece index ( always set to := piece_priority_array[piece_selected])
 static Piece *current_piece; // current piece pointer
 
 static bool is_backtrack_iteration;    // to flag update iteration where we want to replace the previous piece
@@ -64,7 +65,7 @@ static bool successful_ending, ending; // to flag algorithm ending and result
 // lower fps are now emulated (update cycles are skipped when necessary)
 static int frame_count, frame_update_frequency;
 static double previous_time;
-static int fps_choice, target_fps;
+static int fps_choice, previous_fps_choice, target_fps;
 
 // Variables that hold performance measures of the algorithm
 static double start_time, total_time;
@@ -89,6 +90,8 @@ void InitSolverScreen(void)
 
     frame_count = -1;
 
+    previous_fps_choice = -1;
+
     start_time = GetTime();
     previous_time = start_time;
     valid_board_count = 0;
@@ -105,10 +108,11 @@ void UpdateSolverScreen(void)
         return;
 
     if (manual_frame_unwind_mode && !IsKeyPressed(KEY_SPACE))
+        // allow to go through the rest of the function only if spacebar has been pressed in manual mode
         return;
 
-    // don't update the frame at a given frequency to emulate slow down of the visualization
     if (frame_count % frame_update_frequency != 0)
+        // don't update the frame at a given frequency to emulate slow down of the visualization
         return;
     frame_count = 0;
 
@@ -146,7 +150,7 @@ algo_beginning:
     // Incrementing current_piece positionning test variables in nested while loops
     //      because we want to start / restart from previous position of the piece, and increment from it
     //      but limit the incrementation
-    //      and only when the limit happens, reset the state of the position variable
+    //      and only when the limit is reached, reset the state of the position variable
     // It has the effect to work kind of like a python generator
 
     while (current_piece->current_side_idx < current_piece->nb_of_sides)
@@ -162,8 +166,7 @@ algo_beginning:
         {
             while (current_piece->current_base_pos.j < BOARD_HEIGHT)
             {
-                // skip the current position (i,j) if it is already filled with a normal tile on the board
-                // even before trying to add the piece
+                // don't even consider adding the piece at this position (i,j) if there's already a normal tile on the board
                 if (is_position_already_occupied(board, &(current_piece->current_base_pos)))
                 {
                     (current_piece->current_base_pos.j)++;
@@ -172,9 +175,9 @@ algo_beginning:
 
                 while (current_piece->current_rotation_state < current_piece->side_array[current_piece->current_side_idx].max_nb_of_rotations)
                 {
-                    // to not test the exact same position of the piece, when we are backtracking
-                    // increment the global position by 1
-                    // we want to move it to explore new possibilities
+                    // when we backtrack, we need to increment the previous piece overall position by 1
+                    // (if not, the piece will be added where it was just removed on the board)
+                    // we do it, by skipping 1 iteration in the innermost loop
                     if (is_backtrack_iteration)
                     {
                         is_backtrack_iteration = false;
@@ -187,6 +190,7 @@ algo_beginning:
                     // pre-adding checks
                     if (add_piece_to_board(board, piece_idx, current_piece->current_side_idx, current_piece->current_base_pos, current_piece->current_rotation_state) != 1)
                     {
+                        // didn't pass, try again
                         (current_piece->current_rotation_state)++;
                         continue;
                     }
@@ -194,7 +198,7 @@ algo_beginning:
                     // post-adding checks
                     if (run_all_checks(board, enable_slow_checks) != 1)
                     {
-                        // remove the piece if the post-adding checks didn't pass
+                        // remove the piece if the post-adding checks didn't pass, and try again
                         undo_last_piece_adding(board);
                         (current_piece->current_rotation_state)++;
                         continue;
@@ -218,8 +222,9 @@ algo_beginning:
         current_piece->current_base_pos.i = 0;
         (current_piece->current_side_idx)++;
     }
-    // end of play possibilities for this piece, try to go to previous one (actual "backtrack")
     current_piece->current_side_idx = 0;
+
+    // end of play possibilities for this piece, try to go to previous one (actual "backtrack")
     setup_previous_piece();
     goto algo_beginning;
 }
@@ -229,7 +234,7 @@ void DrawSolverScreen(void)
 
     ClearBackground(BLACK);
 
-    draw_board(board, false);
+    draw_board(board);
 
     // UI
     draw_piece_priority_array(piece_priority_array, piece_selected, nb_of_playable_pieces, playable_side_per_piece_idx_mask);
@@ -244,7 +249,6 @@ void DrawSolverScreen(void)
 }
 void UnloadSolverScreen(void)
 {
-
     free(board);
     free(level_hints);
 }
@@ -293,6 +297,7 @@ static void setup_next_piece(void)
     piece_idx = piece_priority_array[piece_selected];
     current_piece = (board->piece_array) + piece_idx;
 }
+
 // --------------------------------------------------------------------------------------------------------------
 // More helper functions about custom fps for algorithm's visualization and updating input events
 // --------------------------------------------------------------------------------------------------------------
@@ -341,8 +346,6 @@ static void set_target_fps(void)
 
 static void update_inputs(void)
 {
-    static int previous_fps_choice = -1;
-
     if (IsKeyPressed(KEY_ESCAPE))
     {
         finishScreen = 1;
@@ -352,6 +355,8 @@ static void update_inputs(void)
     fps_choice = draw_FPS_choice();
     if (fps_choice == previous_fps_choice)
         return;
+
+    previous_fps_choice = fps_choice;
 
     set_target_fps();
 
@@ -368,6 +373,4 @@ static void update_inputs(void)
         // we want to update 1 frame out of 6
         // thus allow updating when frame_count % 6 == 0
     }
-
-    previous_fps_choice = fps_choice;
 }

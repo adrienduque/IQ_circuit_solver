@@ -56,8 +56,10 @@ char *test_blit_piece_main_data()
     mu_assert("Bug spotted", ((tile->nb_of_connections == 2) && (tile->connection_direction_array[0] == DOWN) && (tile->connection_direction_array[1] == LEFT)));
 
     /**
-     * @warning this test function and this file are not finished yet, but it seems that everything is right with the visual test of test_display.c
+     * @warning this test function and this file are not finished yet, but it seems that everything is correct with the visual test of test_display.c
      * Thus writing this test function is not my priority
+     *
+     * This principle was applied a lot more than I expected through the whole project
      */
 
     return 0;

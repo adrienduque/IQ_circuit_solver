@@ -10,7 +10,7 @@
 #include <local/board.h> // Board
 
 /**
- * @struct SimpletileTyple
+ * @struct SimpleTileTyple
  * Simpler tile representation than in piece_data.h to categorize different tiles
  * for the pathfinding algorithm
  *
@@ -19,8 +19,8 @@
  * ::wall :  a tile where the pathfinding can't go
  * ::target : clear tile + the pathfinding algorithm ends when it reaches one
  *
- * This struct is meant to be a matrix type, see SimpleTileType board_representation_matrix[BOARD_WIDTH][BOARD_HEIGHT]
- * It is in fact a cache shared between multiple pathfinding function calls, computed as the pathfinding goes through "no_info" tiles
+ * This struct is meant to be a matrix type, see SimpleTileType board_representation_matrix[BOARD_WIDTH][BOARD_HEIGHT] in check_board.c > "check_no_dead_ends"
+ * It is in fact a cache shared between multiple pathfinding function calls, computed as the pathfinding goes through "no_info" tiles, it explores the current board state as it needs
  */
 typedef enum SimpleTileType
 {

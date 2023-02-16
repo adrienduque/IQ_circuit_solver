@@ -1,5 +1,6 @@
 /**
  * @file screen_level_select.c
+ * @see screens.h
  *
  * File containing Update and Draw functions for the level selection screen, see screens.h and raylib game templates
  */
@@ -24,16 +25,16 @@
 #define NB_OF_PAGES 6            // NB_OF_LEVELS / NB_OF_LEVELS_PER_PAGE (has to be a whole number !)
 
 static Texture2D level_texture_array[NB_OF_LEVELS];
-static Rectangle hitbox;
-static int texture_px_width, texture_px_height, spacing_px_x, spacing_px_y, font_size, constant_offset_y;
+static Rectangle level_hitbox;
+static int texture_px_width, texture_px_height, grid_spacing_px_x, grid_spacing_px_y, font_size, constant_offset_y;
 
 static int current_page, current_page_first_index, selected_index, finishScreen;
 
-static Rectangle hitbox_logo;
-static Texture2D texture_logo;
+static Rectangle logo_hitbox;
+static Texture2D logo_texture;
 static bool is_mouse_over_logo;
 
-static int icon_spacing_from_center;
+static int button_spacing_from_center;
 static Rectangle right_button_hitbox, left_button_hitbox;
 
 int level_num_selected; // global variable shared between modules
@@ -44,9 +45,9 @@ void InitLevelSelectScreen(void)
 
     image_logo = LoadImage(TextFormat("%s/IQ_circuit_official_logo.png", assets_folder_relative_path));
     ImageResize(&image_logo, (int)(image_logo.width / 4), (int)(image_logo.height / 4));
-    texture_logo = LoadTextureFromImage(image_logo);
+    logo_texture = LoadTextureFromImage(image_logo);
     UnloadImage(image_logo);
-    hitbox_logo = (Rectangle){GetScreenWidth() - 30 - texture_logo.width, 30, texture_logo.width, texture_logo.height};
+    logo_hitbox = (Rectangle){GetScreenWidth() - 30 - logo_texture.width, 30, logo_texture.width, logo_texture.height};
     is_mouse_over_logo = false;
 
     for (int i = 0; i < NB_OF_LEVELS; i++)
@@ -55,18 +56,20 @@ void InitLevelSelectScreen(void)
     texture_px_width = level_texture_array[0].width;
     texture_px_height = level_texture_array[0].height;
 
-    spacing_px_x = (int)((GetScreenWidth() - NB_OF_COLS * texture_px_width) / (NB_OF_COLS + 1));
-    spacing_px_y = (int)((GetScreenHeight() - NB_OF_ROWS * texture_px_height) / (NB_OF_ROWS + 1));
+    grid_spacing_px_x = (int)((GetScreenWidth() - NB_OF_COLS * texture_px_width) / (NB_OF_COLS + 1));
+    grid_spacing_px_y = (int)((GetScreenHeight() - NB_OF_ROWS * texture_px_height) / (NB_OF_ROWS + 1));
 
-    constant_offset_y = (int)(spacing_px_y / 2);
-    font_size = (int)(spacing_px_y / 3);
+    constant_offset_y = (int)(grid_spacing_px_y / 2);
+    font_size = (int)(grid_spacing_px_y / 3);
 
-    hitbox = (Rectangle){0, 0, texture_px_width, texture_px_height};
+    level_hitbox = (Rectangle){0, 0, texture_px_width, texture_px_height};
 
-    icon_spacing_from_center = 230;
+    button_spacing_from_center = 230;
 
-    left_button_hitbox = (Rectangle){(int)(GetScreenWidth() / 2 - icon_spacing_from_center) - 16 * gui_icon_scale, constant_offset_y - 10, 16 * gui_icon_scale, 16 * gui_icon_scale};
-    right_button_hitbox = (Rectangle){(int)(GetScreenWidth() / 2 + icon_spacing_from_center), constant_offset_y - 10, 16 * gui_icon_scale, 16 * gui_icon_scale};
+    left_button_hitbox = (Rectangle){(int)(GetScreenWidth() / 2 - button_spacing_from_center) - DEFAULT_ICON_PIXEL_SIZE * gui_icon_scale, constant_offset_y - 10, DEFAULT_ICON_PIXEL_SIZE * gui_icon_scale, DEFAULT_ICON_PIXEL_SIZE * gui_icon_scale};
+    right_button_hitbox = (Rectangle){(int)(GetScreenWidth() / 2 + button_spacing_from_center), constant_offset_y - 10, DEFAULT_ICON_PIXEL_SIZE * gui_icon_scale, DEFAULT_ICON_PIXEL_SIZE * gui_icon_scale};
+
+    // ----------------
 
     current_page = 0;
     current_page_first_index = current_page * NB_OF_LEVELS_PER_PAGE;
@@ -93,7 +96,7 @@ void UpdateLevelSelectScreen(void)
     current_page_first_index = current_page * NB_OF_LEVELS_PER_PAGE;
 
     is_mouse_over_logo = false;
-    if (CheckCollisionPointRec(GetMousePosition(), hitbox_logo))
+    if (CheckCollisionPointRec(GetMousePosition(), logo_hitbox))
     {
         is_mouse_over_logo = true;
         if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
@@ -108,10 +111,10 @@ void UpdateLevelSelectScreen(void)
 
             index = current_page_first_index + i + NB_OF_COLS * j;
 
-            hitbox.x = spacing_px_x + (spacing_px_x + texture_px_width) * i;
-            hitbox.y = spacing_px_y + (spacing_px_y + texture_px_height) * j + constant_offset_y;
+            level_hitbox.x = grid_spacing_px_x + (grid_spacing_px_x + texture_px_width) * i;
+            level_hitbox.y = grid_spacing_px_y + (grid_spacing_px_y + texture_px_height) * j + constant_offset_y;
 
-            if (CheckCollisionPointRec(GetMousePosition(), hitbox))
+            if (CheckCollisionPointRec(GetMousePosition(), level_hitbox))
             {
                 selected_index = index;
                 if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
@@ -144,18 +147,18 @@ void DrawLevelSelectScreen(void)
 
             col = (index == selected_index) ? ORANGE : RAYWHITE;
 
-            hitbox.x = spacing_px_x + (spacing_px_x + texture_px_width) * i;
-            hitbox.y = spacing_px_y + (spacing_px_y + texture_px_height) * j + constant_offset_y;
+            level_hitbox.x = grid_spacing_px_x + (grid_spacing_px_x + texture_px_width) * i;
+            level_hitbox.y = grid_spacing_px_y + (grid_spacing_px_y + texture_px_height) * j + constant_offset_y;
 
-            DrawTexture(level_texture_array[index], hitbox.x, hitbox.y, col);
-            DrawText(TextFormat("%d", real_index), hitbox.x, hitbox.y - font_size - 7, font_size, ORANGE);
-            DrawRectangleRoundedLines(hitbox, 0.1, 30, 6, col);
+            DrawTexture(level_texture_array[index], level_hitbox.x, level_hitbox.y, col);
+            DrawText(TextFormat("%d", real_index), level_hitbox.x, level_hitbox.y - font_size - 7, font_size, ORANGE);
+            DrawRectangleRoundedLines(level_hitbox, 0.1, 30, 6, col);
         }
     }
 
-    DrawTexture(texture_logo, hitbox_logo.x, hitbox_logo.y, is_mouse_over_logo ? ORANGE : WHITE);
-    DrawRectangleRoundedLines(hitbox_logo, 0.1, 15, 2, is_mouse_over_logo ? ORANGE : WHITE);
-    DrawText("from Raf Peeters", hitbox_logo.x - 2, hitbox_logo.y + hitbox_logo.height + 5, 10, is_mouse_over_logo ? GOLD : RAYWHITE);
+    DrawTexture(logo_texture, logo_hitbox.x, logo_hitbox.y, is_mouse_over_logo ? ORANGE : WHITE);
+    DrawRectangleRoundedLines(logo_hitbox, 0.1, 15, 2, is_mouse_over_logo ? ORANGE : WHITE);
+    DrawText("from Raf Peeters", logo_hitbox.x - 2, logo_hitbox.y + logo_hitbox.height + 5, 10, is_mouse_over_logo ? GOLD : RAYWHITE);
 }
 
 void UnloadLevelSelectScreen(void)
@@ -163,7 +166,7 @@ void UnloadLevelSelectScreen(void)
     for (int i = 0; i < NB_OF_LEVELS; i++)
         UnloadTexture(level_texture_array[i]);
 
-    UnloadTexture(texture_logo);
+    UnloadTexture(logo_texture);
 }
 
 int FinishLevelSelectScreen(void)

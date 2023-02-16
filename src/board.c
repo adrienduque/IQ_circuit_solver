@@ -66,6 +66,7 @@ Board *init_board(LevelHints *level_hints)
 
     // because the main algorithm relies on values like "piece->current_base_pos"
     // to see where the piece was previously, and continue from this position when the backtracking happens
+    // so the "first previous position" needs to be set
     set_all_board_pieces_pos_to_zero(board);
 
     // 4) set stop end of stacks in tile matrix (implemented like linked lists)
@@ -148,8 +149,8 @@ static bool is_tile_matching_level_hints(Tile *current_tile, Tile *obligatory_ti
     if (current_tile->tile_type != obligatory_tile->tile_type)
         return false; // If their type is not matching, neither their connection directions
 
-    if (obligatory_tile->tile_type == point || obligatory_tile->tile_type == empty)
-        return true; // In this special case, we don't need to check for connection directions
+    if (obligatory_tile->tile_type == point)
+        return true; // In this particular case, we don't check for connection directions (level open points don't have obligatory connection direction)
 
     // Connection directions matching check
     for (connection_i = 0; connection_i < obligatory_tile->nb_of_connections; connection_i++)
@@ -168,7 +169,7 @@ static bool is_tile_matching_level_hints(Tile *current_tile, Tile *obligatory_ti
             return false;
     }
     // There might be a false positive case where current_tile have more connections than obligatory_tile
-    // but with current datas, it doesn't happen
+    // but with current datas, it can't happen
 
     return true;
 }
@@ -212,8 +213,8 @@ static bool is_tile_matching_missing_connections(Tile *normal_tile, Tile *missin
     return true;
 }
 
-// Return a pointer to a normal tile in the input stack (linked list) of tiles
-// Return UNDEFINED_TILE if not found
+// Returns a pointer to a normal tile in the input stack (linked list) of tiles
+// Returns UNDEFINED_TILE if not found
 Tile *extract_normal_tile_from_stack(Tile *tile_stack)
 {
     static Tile *temp_tile = NULL;
@@ -228,9 +229,8 @@ Tile *extract_normal_tile_from_stack(Tile *tile_stack)
     return UNDEFINED_TILE;
 }
 
-// public tool to interact with the board
-// function that return a tile pointer on the normal tile at base_pos (i,j) on the board
-// if there is any, and return UNDEFINED_TILE if not found
+// function that returns a tile pointer on the normal tile at base_pos (i,j) on the board
+// if there is any, and returns UNDEFINED_TILE if not found
 Tile *extract_normal_tile_at_pos(Board *board, Vector2_int *base_pos)
 {
     return extract_normal_tile_from_stack(board->tile_matrix[base_pos->i][base_pos->j]);
@@ -241,18 +241,18 @@ Tile *extract_normal_tile_at_pos(Board *board, Vector2_int *base_pos)
 // Function to check if a piece can be added to the board while blitting its live data cache which will be used to add it
 //  A piece can be added to the board if all of the below checks pass :
 //  To every normal tile of the blitted piece :
-//  * tile is not outside the board
-//  * tile is not superposed to existing normal tile on the board
-//  * if it is superposed to an existing missing_connection_tile / double missing connection tile: does the connection of the normal tile fulfill the missing connection(s)
-//  * if this tile emplacement is in the level hints (i.e. not UNDEFINED_TILE), check if the tile_type is the same (always) + connections are the same (only if the tile is not a point)
+//  - tile is not outside the board
+//  - tile is not superposed to existing normal tile on the board
+//  - if it is superposed to an existing missing_connection_tile / double missing connection tile: does the connection of the normal tile fulfill the missing connection(s)
+//  - if this tile emplacement is in the level hints (i.e. not UNDEFINED_TILE), check if the tile_type is the same (always) + connections are the same (only if the tile is not a point)
 // To every missing connection tile of the blitted piece :
-// * tile is not outside the board
-// * if tile is superposed to an existing normal tile -> does the connection of the normal tile fulfill the missing connection
-// * tile can be superposed to another existing missing connection tile to form a double missing connection tile, if and only if special pieces containing the corresponding double connexion has not been played
+// - tile is not outside the board
+// - if tile is superposed to an existing normal tile -> does the connection of the normal tile fulfill the missing connection
+// - tile can be superposed to another existing missing connection tile to form a double missing connection tile, if and only if special pieces containing the corresponding double connection has not been played
 // (only line2 2 has a tile that can fulfill a double missing connection in a line and only T piece has tile that can fulfill a double missing connection in a bend)
-// * triple missing connection can't be valid
+// - triple missing connection can't be valid
 //
-// The function discard all computations as soon as it has been detected that the piece doesn't fit and returns an error code
+// The function discard all computations as soon as it has been detected that the piece doesn't fit and returns an error code > see board.h
 // else returns 1 (true)
 // Let the more likely error cases be check in first to make the whole thing faster
 // (It doesn't matter if garbage / incomplete data is left in the piece cache, as only piece cache that had been through this function will be used in the rest of the program)
@@ -303,7 +303,8 @@ static int can_piece_be_added_to_board(Board *board, Side *side, Vector2_int bas
         }
         else
         {
-            // case where 2 missing connection tiles are about to be superposed, there's multiple cases to be considered
+            // case where 2 missing connection tiles are about to be superposed (reminder : existing_tile_stack != UNDEFINED_TILE here)
+            // there are multiple cases to be considered
 
             // the existing tile could already be a double missing connection tile, a triple missing connection tile can't exist in vanilla game setup
             if (existing_tile_stack->next != UNDEFINED_TILE)
@@ -312,6 +313,7 @@ static int can_piece_be_added_to_board(Board *board, Side *side, Vector2_int bas
             // Assuming the directions of missing connections are different, do their sum is a bend-shape or a line-shape
             // only 2 case where the shape formed by the 2 directions can be a line : (RIGHT:0,LEFT:2) (means horizontal line) and (DOWN:1,UP:3) (means vertical line)
             // otherwise it's a bend shape
+            // this computation check if there is an absolute difference of 2 between the two directions, if there is -> this is a line
             is_line_shape = (abs((current_tile->connection_direction_array[0]) - (existing_tile_stack->connection_direction_array[0]))) == 2;
 
             // A line-shape double missing connection tile can only exist if line2 2 piece has not been played yet
@@ -351,14 +353,16 @@ static int can_piece_be_added_to_board(Board *board, Side *side, Vector2_int bas
         }
         else
         {
-            // Case where a tile already exist at this position on the board and superposition of two normal tiles is not allowed
-            // we don't need to have computed connection directions to check this
             if (extract_normal_tile_from_stack(existing_tile_stack) != UNDEFINED_TILE)
+                // Case where a tile already exist at this position on the board and superposition of two normal tiles is not allowed
+                // we don't need to have computed connection directions to check this
                 return SUPERPOSED_TILES;
 
             // tile connection direction change computation needed for further checking
             tile_connection_directions_computation();
 
+            // If we are here, it means that the current tile is about to be superposed to an existing missing connection tile
+            // does it match ?
             if (!is_tile_matching_missing_connections(current_tile, existing_tile_stack))
                 return TILE_NOT_MATCHING_MISSING_CONNECTIONS;
         }
@@ -378,10 +382,10 @@ static int can_piece_be_added_to_board(Board *board, Side *side, Vector2_int bas
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 // Function to blit a piece to the board
-// Return error code if the piece doesn't fit at all (by checking "can_piece_be_added_to_board")
+// Returns error code if the piece doesn't fit at all (by checking "can_piece_be_added_to_board"), see board.h
 // In this case, it doesn't do anything
 // The error code returned is the same as "can_piece_be_added_to_board"
-// Return true (1) if the piece has been successfully added
+// Returns true (1) if the piece has been successfully added
 int add_piece_to_board(Board *board, int piece_idx, int side_idx, Vector2_int base_pos, int rotation_state)
 {
     static int error_code;
@@ -395,7 +399,7 @@ int add_piece_to_board(Board *board, int piece_idx, int side_idx, Vector2_int ba
     piece = (board->piece_array) + piece_idx;
     side = (piece->side_array) + side_idx;
 
-    // check if the piece can even fit in the board while loading it by the same occasion
+    // check if the piece can even fit in the board while blitting it by the same occasion (see piece.c > blit_piece_main_data)
     error_code = can_piece_be_added_to_board(board, side, base_pos, rotation_state);
     if (error_code != true) // to confirm only the case where 1 is returned
         return error_code;
@@ -429,6 +433,7 @@ int add_piece_to_board(Board *board, int piece_idx, int side_idx, Vector2_int ba
     piece->current_rotation_state = rotation_state;
 
     // check if the piece added is a special piece that we care for double missing connection tiles
+    // and update state flags
     switch (piece_idx)
     {
     case LINE2_2:
@@ -441,7 +446,7 @@ int add_piece_to_board(Board *board, int piece_idx, int side_idx, Vector2_int ba
         break;
     }
 
-    // Record other board attributes
+    // Record that we actually added the piece
     board->added_piece_idx_array[board->nb_of_added_pieces] = piece_idx;
     board->nb_of_added_pieces++;
 
@@ -465,6 +470,7 @@ void undo_last_piece_adding(Board *board)
     side = (piece->side_array) + piece->current_side_idx;
 
     // check if the piece added is a special piece that we care for double missing connection tiles
+    // update state flags
     switch (piece_idx)
     {
     case LINE2_2:

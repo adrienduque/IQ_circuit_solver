@@ -1,5 +1,6 @@
 /**
  * @file screen_level_select.c
+ * @see screens.h
  *
  * File containing Update and Draw functions for the user playable mode of a game level, see screens.h and raylib game templates
  */
@@ -11,10 +12,10 @@
 
 #include <raylib/screens.h>
 
-#include <local/board.h>
+#include <local/board.h> // Board
 #include <local/level_data.h>
 #include <local/piece.h>
-#include <local/check_board.h>
+#include <local/check_board.h> // run_all_checks
 #include <local/display.h>
 #include <local/utils.h> // assets_folder_relative_path
 
@@ -35,7 +36,10 @@ typedef struct Controls
 } Controls;
 
 static void reset_controls();
+static void set_controls(int piece_idx);
 static void update_controls();
+
+static void update_current_piece();
 
 static bool is_piece_idx_already_played(int piece_idx);
 static int get_next_piece_idx(int piece_idx);
@@ -44,6 +48,8 @@ static Board *board;
 static LevelHints *level_hints;
 static Piece *current_piece;
 static Controls controls;
+
+static GameMode game_mode, previous_game_mode;
 
 static int nb_of_level_pieces;
 static int error_status;
@@ -60,7 +66,9 @@ void InitGameScreen(void)
     nb_of_level_pieces = board->nb_of_added_pieces;
 
     reset_controls();
-    current_piece = (board->piece_array) + controls.piece_idx;
+
+    game_mode = draw_game_mode_choice();
+    previous_game_mode = game_mode;
 
     error_status = IDLE; // Waiting for user to add a piece
     are_all_pieces_played = false;
@@ -70,18 +78,20 @@ void InitGameScreen(void)
 
 void UpdateGameScreen(void)
 {
-    static GameMode game_mode, previous_game_mode;
-    static int temp_idx;
+    static int next_piece_idx;
 
     // Screen switching logic
-    finishScreen = draw_launch_button(); // finishScreen = 0 or 1
-    if (finishScreen)
+    if (draw_launch_button())
+    {
+        finishScreen = 1;
         return;
+    }
 
     if (IsKeyPressed(KEY_ESCAPE))
+    {
         finishScreen = -1; // go back to previous screen, see main.c
-    if (finishScreen)
         return;
+    }
 
     update_controls();
 
@@ -90,7 +100,7 @@ void UpdateGameScreen(void)
     // Reset everything when switching modes
     if (game_mode != previous_game_mode)
     {
-        previous_game_mode = game_mode;
+        UnloadGameScreen();
         InitGameScreen();
         return;
     }
@@ -100,7 +110,10 @@ void UpdateGameScreen(void)
     {
         controls.remove_piece_this_frame = false;
 
-        if (board->nb_of_added_pieces > nb_of_level_pieces)
+        if (board->nb_of_added_pieces <= nb_of_level_pieces)
+            error_status = UNDO_ERROR; // error : there is no piece to remove (or these are part of level hints)
+
+        else
         {
             // different undo methods for the different game modes
             if (game_mode == ASSISTED)
@@ -108,26 +121,22 @@ void UpdateGameScreen(void)
             else
                 board->nb_of_added_pieces--;
 
-            error_status = UNDO_SUCCESS; // Successfully removed piece
-
+            // undo blocking end flag, we can add piece again
             if (are_all_pieces_played)
             {
                 are_all_pieces_played = false;
                 reset_controls();
-                current_piece = (board->piece_array) + controls.piece_idx;
             }
+
+            error_status = UNDO_SUCCESS; // Successfully removed piece
         }
-        else
-            error_status = UNDO_ERROR; // error : there is no piece to remove (or these are part of level hints)
+
         return;
     }
 
     // can't add more pieces if they already all have been played
     if (are_all_pieces_played)
         return;
-
-    // to display the current piece location (without adding it to the board yet)
-    blit_piece_main_data(current_piece, controls.side_idx, controls.base_pos, controls.rotation_state);
 
     // add logic in 2 different game modes
     if (controls.add_piece_this_frame)
@@ -145,8 +154,8 @@ void UpdateGameScreen(void)
             error_status = ADD_SUCCESS;
 
             // check if all pieces have been played while trying to get the next playable piece index
-            controls.piece_idx = get_next_piece_idx(controls.piece_idx);
-            if (controls.piece_idx == -1)
+            next_piece_idx = get_next_piece_idx(controls.piece_idx);
+            if (next_piece_idx == -1)
             {
                 // board maybe completed, we just know that all piece have been played in this case
                 current_piece = NULL;
@@ -155,13 +164,7 @@ void UpdateGameScreen(void)
                 return;
             }
             // if all the pieces have not been played, update next piece
-            temp_idx = controls.piece_idx;
-            reset_controls();
-            controls.piece_idx = temp_idx;
-
-            current_piece = (board->piece_array) + controls.piece_idx;
-            blit_piece_main_data(current_piece, controls.side_idx, controls.base_pos, controls.rotation_state);
-
+            set_controls(next_piece_idx);
             break;
 
         case ASSISTED:
@@ -187,9 +190,9 @@ void UpdateGameScreen(void)
 
             // Answer : Yes, it has been successfully added (error_status == ADD_SUCCESS here)
             // check if all pieces have been played while trying to get the next playable piece index
-            controls.piece_idx = get_next_piece_idx(controls.piece_idx);
+            next_piece_idx = get_next_piece_idx(controls.piece_idx);
 
-            if (controls.piece_idx == -1)
+            if (next_piece_idx == -1)
             {
                 // In this case, we know that all piece have been played
                 // But it means that the last piece have been added without errors
@@ -201,13 +204,7 @@ void UpdateGameScreen(void)
             }
 
             // if the board is not completed yet, update next piece
-            temp_idx = controls.piece_idx;
-            reset_controls();
-            controls.piece_idx = temp_idx;
-
-            current_piece = (board->piece_array) + controls.piece_idx;
-            blit_piece_main_data(current_piece, controls.side_idx, controls.base_pos, controls.rotation_state);
-
+            set_controls(next_piece_idx);
             break;
 
         default:
@@ -220,13 +217,10 @@ void DrawGameScreen(void)
 {
     ClearBackground(BLACK);
 
-    draw_board(board, false);
+    draw_board(board);
 
     if (current_piece != NULL)
-    {
-        update_piece_all_drawing(current_piece, false, false);
         draw_piece(current_piece, false, false);
-    }
 
     // UI
     draw_level_num(level_num_selected);
@@ -276,10 +270,18 @@ static int get_next_piece_idx(int piece_idx)
     return piece_idx;
 }
 
+static void set_controls(int piece_idx)
+{
+    controls = (Controls){.side_idx = 0, .rotation_state = 0, .base_pos = (Vector2_int){-2, -2}, .add_piece_this_frame = false, .remove_piece_this_frame = false};
+
+    controls.piece_idx = (piece_idx != -1) ? piece_idx : get_next_piece_idx(piece_idx); // to account for piece already played, the starting index is dynamically set with piece_idx=-1 and searching for next valid piece_idx
+
+    update_current_piece();
+}
+
 static void reset_controls(void)
 {
-    controls = (Controls){.piece_idx = -1, .side_idx = 0, .rotation_state = 0, .base_pos = (Vector2_int){-2, -2}, .add_piece_this_frame = false, .remove_piece_this_frame = false};
-    controls.piece_idx = get_next_piece_idx(controls.piece_idx); // to account for piece already played by level hints
+    set_controls(-1);
 }
 
 static void update_controls(void)
@@ -288,8 +290,8 @@ static void update_controls(void)
     if (IsKeyPressed(KEY_E))
         controls.remove_piece_this_frame = true;
 
-    // disable further controls if all the piece have been played
     if (are_all_pieces_played)
+        // disable further controls if all the piece have been played (current_piece == NULL here too)
         return;
 
     if (IsKeyPressed(KEY_W))
@@ -312,12 +314,19 @@ static void update_controls(void)
 
     if (IsKeyPressed(KEY_C))
     {
-
         controls.piece_idx = get_next_piece_idx(controls.piece_idx);
-        current_piece = (board->piece_array) + controls.piece_idx;
         controls.side_idx = 0;
     }
 
     if (IsKeyPressed(KEY_SPACE))
         controls.add_piece_this_frame = true;
+
+    update_current_piece();
+}
+
+static void update_current_piece(void)
+{
+    current_piece = (board->piece_array) + controls.piece_idx;
+    blit_piece_main_data(current_piece, controls.side_idx, controls.base_pos, controls.rotation_state);
+    update_piece_all_drawing(current_piece, false, false);
 }
