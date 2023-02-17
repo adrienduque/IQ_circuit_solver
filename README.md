@@ -1,6 +1,5 @@
+<a name="readme-top"></a>
 # IQ_circuit_solver
-
-@todo formatting of this file on github, with actual preview
 
 ## Introduction
 
@@ -10,28 +9,49 @@ This project is the result of a self-imposed challenge, to see if I could make a
 
 Of course, I recommend to check out the actual puzzle, which has such a cool design and is very pretty :
 
-- Commercial site : https://www.smartgames.eu/uk/one-player-games/iq-circuit
-- Author's commentaries : https://www.smartgamesandpuzzles.com/iq-circuit.html
+<img src = "https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/SmartGames_IQ-467_IQ-Circuit_lifestyle-shot_cfb270.jpg" align="left" width = "200px">
+
+  Commercial site : https://www.smartgames.eu/uk/one-player-games/iq-circuit
+  
+  Author's commentaries : https://www.smartgamesandpuzzles.com/iq-circuit.html
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
 
 This is my first big and "official" project not only in C, but in general. I'm pretty much self-taught and learned a lot through the making of this project. I'm open to upgrade suggestions on the actual code, and especially on the whole presentation/convention side of things, as I feel I'm missing on.
 
 ### Screenshots
 
-@todo + animated gif of the final version
+#### Important Note :
+
+I don't feel like these assets are rightfully representing this project, because I mostly focused on its **speed** and that is what I want to show.
+Thus I really recommend to run yourself the demo **(see : [next section](https://github.com/adrienduque/IQ_circuit_solver/edit/master/README.md#how-to-play-with-the-demo))**. Solving 1 level takes at most a few seconds on my mid range laptop.
+
++ @todo animated gif of the final version
+
++ @todo maybe do a demo video in real time (ytb unlisted) ? with like a timer next to it, in order to better show the speed, regarding the note I just made
+
+<img src= "https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/level_selection_screen.png">
+<img src= "https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/game_screen.png">
+<img src= "https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/solver_screen.png">
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## How to play with the demo
 
+<a name="readme-top"></a>
+
 First download the files in this directory (zip) or clone this repo locally on your machine :
-
-    ```sh
+    
     git clone https://github.com/adrienduque/IQ_circuit_solver.git
-    ```
 
-- If you are on a Windows 64-bit machine, there are already built binaires in "**showcase_binaries_and_assets**" @todo:link directory, that you can simply run as-is, latter versions the better. The main interactive demo is called **"spaghetti_solver"** _(If you can run the solver algorithm above 60 fps you might see why)_.
+- If you are on a Windows 64-bit machine, there are already built binaires in [**showcase_binaries_and_assets**](https://github.com/adrienduque/IQ_circuit_solver/tree/master/showcase_binaries_and_assets) directory, that you can simply run as-is, latter versions the better. The main demo is called **"spaghetti_solver"** _(If you can run the solver algorithm above 60 fps you might see why)_.
 
-- If you are on a different OS, you can try to build it yourself, see the makefile @todo:link, the actual code I wrote might be compatible between OS, and the below informations might help you. (**Warning : I didn't test it**).
+- If you are on a different OS, you can try to build it yourself, see the [makefile](https://github.com/adrienduque/IQ_circuit_solver/blob/master/makefile), the actual code I wrote might be compatible between OS, and the below informations might help you too. (**Warning : I didn't test it**).
 
 I originally built this project for Windows 64-bit, with MinGW-w64 10.0.0 (URCT) (gcc 12.2.0) provided by https://winlibs.com/.
 
@@ -41,53 +61,90 @@ The only non-standard library I used is called [raylib](https://github.com/raysa
 
 ## Algorithm Explanation
 
-**"Brute force algorithm with backtracking"**
+First, I suggest reading the game rules in the booklet if you didn't have already, I will assume them as **knew** from now on.
+(game rules can be found [here](https://www.smartgames.eu/uk/one-player-games/iq-circuit#downloads) too).
 
-First I suggest reading the game rules in the booklet if you didn't have already, I will assume them as knew from now on.
-(game rules can be found here too : https://www.smartgames.eu/uk/one-player-games/iq-circuit)
+We can summarize this algorithm by describing it as a **"brute force algorithm with backtracking"**. The main idea is to test every possibility to find the correct one, but in a particular order so that it tests the less possibilities as possible (this is where the backtracking plays an important role).
 
-1. First we select a level and see which hints it has, I only implemented the 3 last difficulties :
+(We can roughly (over)estimate the total number of possibilities by noticing that there are 10 pieces, each piece has 2 playable sides in average, and each side can be played with 4 different rotations, there is a number of 32 tile on the game board (8 width * 4 height), then we can play a piece in (32 x 4 x 2 = 256) different positions on the board, with 10 pieces, the total number of possibilities (number of different boards) become 256^10 = 2^80 = about 10^24.)
 
-They consist of pre-added pieces on the board + or/and obligatory tiles on the board, or at least I generalized it like that.
+---
+
+### 1) First we select a level 
+
+The type of level hints depens on the difficulty, and they consist of pre-added pieces on the board + or/and obligatory tiles on the board, or at least I generalized it like that.
+
+(I only implemented the 3 last difficulties)
 
 - Expert levels (from 49 to 72 included) : board is completely filled with obligatory tiles of different types (all paths are shown)
+<img src= "https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/expert_level_example.png" width="200px">
+
 - Master levels (from 73 to 96 included) : board has pre-added pieces and obligatory open point tiles (point tiles that are missing, but we know their numbers and positions)
+<img src= "https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/master_level_example.png" width="200px">
+
 - Wizard levels (from 97 to 120 included) : board only has obligatory open point tiles
+<img src= "https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/wizard_level_example.png" width="200px">
 
-@todo : example screenshot for each difficulty
+---
 
-2. According to the level hints, we need to choose which pieces will fill the open points, and which pieces won't
+### 2) Setup the main algorithm, preprocessing of level hints
 
-It's a way to stay pretty organized, it determines which sides of which pieces we can play and limit the number of possibilities.
-(the choosen pieces that fill points can only play their side with a point, other ones can play all their sides except the ones with a point)
+- According to the level hints, we need to choose which pieces will fill the open points, and which pieces won't, and the remaining pieces to test (priority list).
 
-(also at this point in time, we assume that we don't have the already played pieces at our disposition (the pre-added pieces by level hints))
+  It's a way to stay pretty organized, it determines which sides of which pieces can be played and limit the number of possibilities tested.
 
-As there are a lot more pieces with a point than potential points to fill on the board, we might not choose the right pieces the first time
+  **(e.g : The choosen pieces that will fill open points can only play their side with a point, other ones can play all their sides except the ones with a point)**
 
-That is why we need to record all the choices we could have made for the pieces, and explore all of them one at a time.
+  Note : at this step, we also have to account for the pre-added pieces by level hints, the preprocessing will not include them in the list of pieces to play.
 
-My algorithm makes up a preprocessed list of combinations for the choosen point pieces, then make an ordered list of pieces to play (starting by the point ones) for each combination.
+- As there are a lot more pieces with a point than potential points to fill on the board, we might not choose the right pieces the first time, that is why we need to record all the choices we could have made for the pieces, and explore all of them one at a time. 
 
-@todo example screenshot for level 86 combinations
+  My algorithm makes up a preprocessed list of combinations, each combination has different choosen point pieces, different priority list of pieces to play. (see examples below for level 86).
 
-3. Testing and backtracking (for one choice, one ordedred list)
+<img src= "https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/level_86_first_tested_combination.png">
+<img src= "https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/level_86_second_tested_combination.png">
+<img src= "https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/level_86_actual_solution_combination.png">
 
-For each piece, we can define a global position vector on the board, for example composed of (which side, horizontal position, vertical position, rotation)
+This last combination leads to the solution ! Meaning that this is the correct choice (combination) to the question : "What pieces should we pick to fill the open points in level 86 ?".
 
-Basically, the algorithm try every global position of the current piece, and play it as soon as it can.
-2 cases :
-a. the piece is successfully played -> try the same thing for the next piece in the ordered list
-b. the piece can't be played (it reached the end of global position possibilities) -> backtrack and try to move the previous piece in the ordered list
-(the piece that can't be played is also reset to the base global position to try all over again in another configuration of the previous pieces.)
+---
 
-Each piece keeps track of its global position, and moves from it when we backtrack, it doesn't restart from the base global position.
+### 3) Actual backtracking algorithm
 
-2 cases :
-a. the algorithm has successfully played the last piece and try to move on to the next one -> there isn't a next one, it has found the solution to the level !
-b. the algorithm can't play the first piece and try to backtrack to the previous one -> there isn't a previous one, the choice it made about the point pieces was not the right one, try all over again in the next choice (next combination).
+Note : 
+  - For each piece, we can define a global position on the board, composed of (which side, horizontal position, vertical position, rotation)
+  - Each piece keeps track of its current global position, and moves from it when we backtrack, it doesn't restart from the base global position, unless we "reset" the piece.
+  - We have an ordered list of combinations to test, and for each combination, have a priority list of pieces to play.
+
+We kickstart the algorithm by choosing the first piece of the first combination as the current piece to play. All pieces are also reset.
+
+**Basically, it tries every global position of the current piece one by one, and play it as soon as it can.**<br>
+<ol>
+  <li>
+  normal output cases :
+  <ul>
+    <li>the piece is successfully played -> try the same thing for the next piece in the priority list</li>
+	<li>the piece can't be played (it reached the end of global position possibilities without being playable) -> reset the piece position, then backtrack and try to move the previous piece in the priority list.</li>
+  </ul>
+  </li>
+  <br>
+  <li>
+  edge cases : 
+  <ul>
+    <li>the algorithm has successfully played the last piece and try to move on to the next one -> there isn't a next one, it has found the solution to the level !</li>
+	<li>the algorithm can't play the first piece and try to backtrack to the previous one -> there isn't a previous one (meaning that there is no solution to be found with the current combination of pieces) -> try again with the next combination.</li>
+  </ul>
+  </li>
+</ol>
+
 
 With this algorithm, we can safely say that it will eventually try all position possibilities starting from level hints, as the solution is one of them, it can find the solution 100% of the time.
+
+Notice in each combination, how the first piece's position is never reset, and will continue to be incremented until the solution to the level is found or until there's no position left to play.
+
+---
+
+### 4)
 
 4. How does it know when a piece can be added to the board or not ? -> it rather knows the cases where a piece can't be added, and by default it can
 
@@ -103,7 +160,9 @@ Brief example step by step
 @todo 114_steps screenshots with explanation of why pieces are played in this order
 and so on...
 
-Conclusion :
+---
+
+### Conclusion :
 
 We can see this as a depth first search algorithm, in a tree without loops, in which we search for the right path from root to the correct leaf node.
 Where each middle node of the tree is an incomplete state of the board (board that don't have all the game pieces on it).
@@ -140,7 +199,7 @@ There isn't much post-adding checks yet.
 
 ## License
 
-Distributed under the MIT License. See LICENSE.txt @todo:link for more information.
+Distributed under the MIT License. See [LICENSE.txt](https://github.com/adrienduque/IQ_circuit_solver/blob/master/LICENSE.txt) for more information.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -152,6 +211,6 @@ Adrien Duqué - adrienduquepro@gmail.com
 
 ## Acknowledgments
 
-- Another algorithm with backtracking that reminded me of this project : [Computerphile sudoku solver](https://youtu.be/G_UYXzGuqvM)
+- Video of another algorithm with backtracking that reminded me of this project : [Computerphile sudoku solver](https://youtu.be/G_UYXzGuqvM)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
