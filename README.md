@@ -29,7 +29,7 @@ This is my first big and "official" project not only in C, but in general. I'm p
 #### Important Note :
 
 I don't feel like these assets are rightfully representing this project, because I mostly focused on its **speed** and that is what I want to show.
-Thus I really recommend to run yourself the demo **(see : [next section](https://github.com/adrienduque/IQ_circuit_solver/edit/master/README.md#how-to-play-with-the-demo))**. Solving 1 level takes at most a few seconds on my mid range laptop.
+Thus I really recommend to run yourself the demo **(see : [next section](https://github.com/adrienduque/IQ_circuit_solver/edit/master/README.md#how-to-play-with-the-demo))**. Solving 1 level takes at most a few seconds on my mid range laptop, to give you an idea.
 
 + @todo animated gif of the final version
 
@@ -61,7 +61,7 @@ The only non-standard library I used is called [raylib](https://github.com/raysa
 
 ## Algorithm Explanation
 
-First, I suggest reading the game rules in the booklet if you didn't have already, I will assume them as **knew** from now on.
+First, I suggest reading the game rules in the booklet if you have not already, I will assume them as **knew** from now on.
 (game rules can be found [here](https://www.smartgames.eu/uk/one-player-games/iq-circuit#downloads) too).
 
 We can summarize this algorithm by describing it as a **"brute force algorithm with backtracking"**. The main idea is to test every possibility to find the correct one, but in a particular order so that it tests the less possibilities as possible (this is where the backtracking plays an important role).
@@ -111,7 +111,7 @@ This last combination leads to the solution ! Meaning that this is the correct c
 
 ### 3) Actual backtracking algorithm
 
-Note : 
+Setup : 
   - For each piece, we can define a global position on the board, composed of (which side, horizontal position, vertical position, rotation)
   - Each piece keeps track of its current global position, and moves from it when we backtrack, it doesn't restart from the base global position, unless we "reset" the piece.
   - We have an ordered list of combinations to test, and for each combination, have a priority list of pieces to play.
@@ -138,23 +138,27 @@ We kickstart the algorithm by choosing the first piece of the first combination 
 </ol>
 
 
-With this algorithm, we can safely say that it will eventually try all position possibilities starting from level hints, as the solution is one of them, it can find the solution 100% of the time.
+With this algorithm, we can safely say that it will eventually try all valid position possibilities starting from level hints, as the solution is one of them, it can find the solution 100% of the time.
 
-Notice in each combination, how the first piece's position is never reset, and will continue to be incremented until the solution to the level is found or until there's no position left to play.
+Notice in each combination, how the first piece's position is never reset, and will continue to be incremented until the solution to the level is found or until there is no position left to play.
 
 ---
 
-### 4)
+### 4) Game board checking/validation
 
-4. How does it know when a piece can be added to the board or not ? -> it rather knows the cases where a piece can't be added, and by default it can
+How does it know when a piece can be added to the board or not ? -> it rather knows the cases where a piece can't be added, and by default it can.
 
-a. we can skip obvious position of a piece (if the side choosen is set to not be playable : see step 2)) (or if we know the board is already filled at the horizontal/vertical position we want to try)
+- we can skip obvious positions of a piece (if the side choosen is set to not be playable : see step 2)) (or if we know the board is already filled at the position we want to try).
 
-b. The method to add a piece to the board has a few checks before the piece is blitted to the board, (connection checking, superposition of tiles, match of level hints,...) see board.c for more informations (that is what I call "pre-adding checks")
+- The method to add a piece to the board has a few checks before the piece is blitted to the board, (connection checking, superposition of tiles, match of level hints,...) (that is what I call "pre-adding checks") (implementation in [board.c](https://github.com/adrienduque/IQ_circuit_solver/blob/master/src/board.c)).
 (of course if one of the checks doesn't pass, the piece is not added to the board)
 
 c. After the piece has been successfully added, a list of checks is applied to the board (do the paths contains loops ? (which are not allowed), is there an isolated empty tile ?(which we know can't be filled), ...) see check_board.c (that is what I call "post-adding checks")
 (if one of these checks doesn't pass, the piece is instantly removed from the board, it's as if it was never added)
+
+Thus, in summary, this is where I implemented game rules, as well as, my own rules for the algorithm to promote faster solving time.
+
+---
 
 Brief example step by step
 @todo 114_steps screenshots with explanation of why pieces are played in this order
