@@ -1,4 +1,7 @@
 /**
+ * @author Adrien Duqué (@adrienduque)
+ * Original Github repository : https://github.com/adrienduque/IQ_circuit_solver
+ *
  * @file screen_level_select.c
  * @see screens.h
  *
@@ -6,6 +9,12 @@
  *
  * Adaptation from search_algorithm.c > run_algorithm_with_extra_display() to the classic Update/Draw loop form factor here
  * see search_algorithm.c description for an explanation of the algorithm, and later README.md for detailled explanation
+ */
+
+/**
+ * @todo can i make this screen more fluid if I display board state where a piece was just removed ?
+ *
+ * and update README with new visuals steps by steps, have a better example of the backtrack algorithm
  */
 
 #include <stdbool.h>

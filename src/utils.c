@@ -1,4 +1,7 @@
 /**
+ * @author Adrien Duqué (@adrienduque)
+ * Original Github repository : https://github.com/adrienduque/IQ_circuit_solver
+ *
  * @file utils.c
  *
  * Includes all little math-like functions and macros related to positionning on the board

@@ -1,4 +1,7 @@
 /**
+ * @author Adrien Duqué (@adrienduque)
+ * Original Github repository : https://github.com/adrienduque/IQ_circuit_solver
+ *
  * @file piece.h
  * @see piece.c
  */

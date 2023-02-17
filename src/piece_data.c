@@ -1,4 +1,7 @@
 /**
+ * @author Adrien Duqué (@adrienduque)
+ * Original Github repository : https://github.com/adrienduque/IQ_circuit_solver
+ *
  * @file piece_data.c defines the numeric model of the game puzzle pieces
  * Each piece in the game is composed of many sides, each side is composed of tiles
  * And there are a limited number of elementary tiles composing each side : point, line, bend, empty, (and missing_connection)

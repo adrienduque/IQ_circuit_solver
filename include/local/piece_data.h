@@ -1,4 +1,7 @@
 /**
+ * @author Adrien Duqué (@adrienduque)
+ * Original Github repository : https://github.com/adrienduque/IQ_circuit_solver
+ *
  * @file piece_data.h
  * @see piece_data.c
  * Struct members might seem weird, but they all serve a purpose in later algorithms of board checking and display

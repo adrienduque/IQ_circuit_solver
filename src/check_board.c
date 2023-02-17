@@ -1,4 +1,7 @@
 /**
+ * @author Adrien Duqué (@adrienduque)
+ * Original Github repository : https://github.com/adrienduque/IQ_circuit_solver
+ *
  * @file check_board.c
  *
  * File where we will have a succession checking methods to determine if the current state of a board is worthy to be continued on
