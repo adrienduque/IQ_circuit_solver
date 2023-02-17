@@ -22,7 +22,9 @@ Of course, I recommend to check out the actual puzzle, which has such a cool des
   <br>
   <br>
 
-This is my first big and "official" project not only in C, but in general. I'm pretty much self-taught and learned a lot through the making of this project. I'm open to upgrade suggestions on the actual code, and especially on the whole presentation/convention side of things, as I feel I'm missing on.
+This is my first big and "official" project not only in C, but in general. I'm pretty much self-taught and learned a lot through the making of this project. I'm open to upgrade suggestions on the actual code, and especially on the whole presentation/convention side of things, as I feel I'm missing on. I'm not a native English speaker as well, so let me know if you spot any mistake.
+
+So if you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
 
 ### Screenshots
 
@@ -150,54 +152,93 @@ How does it know when a piece can be added to the board or not ? -> it rather kn
 
 - we can skip obvious positions of a piece (if the side choosen is set to not be playable : see step 2)) (or if we know the board is already filled at the position we want to try).
 
-- The method to add a piece to the board has a few checks before the piece is blitted to the board, (connection checking, superposition of tiles, match of level hints,...) (that is what I call "pre-adding checks") (implementation in [board.c](https://github.com/adrienduque/IQ_circuit_solver/blob/master/src/board.c)).
-(of course if one of the checks doesn't pass, the piece is not added to the board)
+- The method to add a piece to the board has a few checks before the piece is blitted to the board, (connection checking, superposition of tiles, match of level hints,...) (that is what I call **"pre-adding checks"**).
+<br>(of course if one of the checks doesn't pass, the piece is not added to the board)
 
-c. After the piece has been successfully added, a list of checks is applied to the board (do the paths contains loops ? (which are not allowed), is there an isolated empty tile ?(which we know can't be filled), ...) see check_board.c (that is what I call "post-adding checks")
-(if one of these checks doesn't pass, the piece is instantly removed from the board, it's as if it was never added)
+- After the piece has been successfully added, a list of checks is applied to the board (do the paths contains loops ? (which are not allowed), is there an isolated empty tile ?(which we know can't be filled), ...). (that is what I call **"post-adding checks"**).
+(if one of these checks doesn't pass, the piece is instantly removed from the board, it's as if it was never added).
 
-Thus, in summary, this is where I implemented game rules, as well as, my own rules for the algorithm to promote faster solving time.
+Thus, in summary, this is where I implemented vanilla game rules, as well as, my own rules to try to detect early if a board state is worth continuing or not (they are part of post-adding checks).
+
+You can directly interact with those rules, by playing the demo in "assisted" game mode, where my checks are run on each of the user's move, and the demo shows various information messages based on them.
+
+ @todo example screenshot of assisted game mode, where there is a dead end
 
 ---
 
-Brief example step by step
-@todo 114_steps screenshots with explanation of why pieces are played in this order
-and so on...
+### Brief concrete example step by step
+
+<img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/114_step_1.png">
+
+Here, the algorithm is trying to solve level 114. You can see the current priority list on the far left of the screen (priority to higher pieces) which is a result of the current combination.<br>
+The pieces have been played 1 by 1 to this point, where the last added piece is the T-shaped piece.<br>
+Now the algorithm will try to add the L-shaped piece in a valid position according to pre and post adding checks (see [step 4) Game board checking](https://github.com/adrienduque/IQ_circuit_solver/edit/master/README.md#4-game-board-checkingvalidation)).<br>
+
+<img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/114_step_2.png">
+
+It didn't found a location where the L-shaped piece could be successfully added to the board.<br>
+So it backtracked, now searching for the next valid position of the precedent piece : the T-shaped one.<br>
+It didn't found a next valid location for the T-shaped one either (with preceding pieces before T-shaped, still on the board).<br>
+So it backtracked again to the 4th piece, didn't found a next valid position, and backtracked again to the 3rd piece.<br>
+A next valid position for the 3rd piece has been found, and it's the board state that is displayed here.<br>
+
+Now it will try to play the next pieces, starting from this board new base state.<br>
+
+<img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/114_step_3.png">
+
+It didn't find a valid position for the 4th piece (we can see on the previous screenshot, that if this piece was added to fill the open point, it would have created wrong connections).<br>
+So it backtracked to the point where the current piece is the first one, and moved it to its next valid position, and it's the board state that is displayed here.<br>
+
+Now it will try to play the next pieces, starting from this board new base state.<br>
+
+<img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/114_step_4.png">
+
+It found a valid position to the 2nd piece.<br>
+
+Now it will try to play the next pieces, starting from this board new base state.<br>
+
+And so on, until a solution is found with the current combination (meaning that we successfully added the last piece in the list), or until the first piece has played all its valid position, in which case, the algorithm will try the next combination.
+
+@todo show the solution to this example and comment on it
 
 ---
 
 ### Conclusion :
 
-We can see this as a depth first search algorithm, in a tree without loops, in which we search for the right path from root to the correct leaf node.
+We can see this as a depth first search algorithm, in a tree without loops, in which we search for the correct path from root to the correct leaf node.
 Where each middle node of the tree is an incomplete state of the board (board that don't have all the game pieces on it).
 Each leaf node is a complete state of the board (all the pieces are here), but there is only 1 valid complete board per level (we can imagine many of them are complete but with superposed pieces for example, thus invalid)
 The current piece the algorithm is trying to add, represents the depth in the tree.
-Each combination is a new tree.
+Each new combination is a new tree.
 
-@todo tree_example.png and tree_example_path.png
--> explain that "can't be added with current board state", is purely a decision of the algorithm
-according to pre-adding or post-adding checks it "can't"
+<img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/tree_example.png">
 
-- we don't see the other side of the pieces in this example, but when the T piece "can't be added", it makes sure to have check both sides, the piece order only display one of the side, don't be mistaken
+Example of a tree (which is not fully represented of course).
 
-Having more and smarter checks to not add a piece, is the way we cut down computational costs and time. By closing a node, we don't have to explore its children.
+<img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/tree_example_path.png">
 
-Smarter checks will detect earlier that a board is not completeable <=> the higher on the tree, we close nodes, the lesser remaining nodes to explore.
+The path that the algorithm is taking to explore this tree, based on the decisions made in [step 4) Game board checking](https://github.com/adrienduque/IQ_circuit_solver/edit/master/README.md#4-game-board-checkingvalidation).
 
-Another way of improving it is smarter checking order among all the possibilities (which pieces do we tend to add first, can we order the different combinations to check ?)
+(Maybe the tree explanation would have been clearer without these 2 visuals ?)
 
-see potential_upgrades directory @todo:link
+<br>
+
+- Having more and smarter checks to not add a piece, is the way we cut down computational costs and time. By closing a node, we don't have to explore its children. Smarter checks will detect earlier that a board is not completeable <=> the higher on the tree, we close nodes, the lesser remaining nodes to explore.
+
+- Another way of improving it is smarter checking order among all the possibilities (Which pieces do we tend to add first ? Can we order the different combinations to check ?)
 
 While this project is still in development, we can mesure the pure logic performance of the algorithm by counting the number of valid boards that it had to go through to find the final one that is the solution to the level.
 It's like counting the number of explored nodes that the algorithm didn't close.
 
-Of course, the more checks it has to apply to a board, the more computation and time nedded on each node.
-It's a trade-off and one that is almost always worth.
+Of course, the more checks it has when doing board validation, the more computation and time nedded on each node.
+It's a trade-off and one that is almost always worth, regarding total solving time.
 
-See the evolution of my algorithm performance stats in the excel file in showcase_binaries_and_assets directory.
+See the evolution of my algorithm performance stats in the [excel file](https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/IQ_circuit_solver_stats.xlsx) in [showcase_binaries_and_assets](https://github.com/adrienduque/IQ_circuit_solver/tree/master/showcase_binaries_and_assets) directory.
 
-In the first complete version of the algorithm, the number of valid boards goes to tens of millions (level 120) for example.
-There isn't much post-adding checks yet.
+And for more information about the future improvements, see [potential_upgrades](https://github.com/adrienduque/IQ_circuit_solver/tree/master/potential_upgrades) directory.
+
+(To give you a glimpse of it, in the first complete version of the algorithm, the number of valid boards goes to tens of millions (level 120).
+Whereas, V5.2 only has 2365 valid boards to explore before finding the solution.)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
