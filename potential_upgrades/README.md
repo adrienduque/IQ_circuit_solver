@@ -1,9 +1,9 @@
 # Intro
 
-This folder is meant to be dynamically filled and unfilled between software versions.
+This directory is meant to be dynamically filled and unfilled between software versions.
 
- - 1 upgrade implementation = 1 commit (+ dump the upgrade observation in the commit).
-And a new update of showcase_binaries_and_assets > IQ_circuit_solver_statx.xlsx, with quantified results and hypotheses re-evaluation.
+- 1 upgrade implementation = 1 commit (+ dump the upgrade observation in the commit).
+  And a new update of showcase_binaries_and_assets > IQ_circuit_solver_statx.xlsx, with quantified results and hypotheses re-evaluation.
 
 ---
 
@@ -41,7 +41,7 @@ If I implement it, I also should make the function returns a few more error code
 
 ### Observation
 
-Maybe switch the first priority piece first when going to the next combination, instead of switching the last choosen point piece. Because when a combination contains no solution, it means that starting point pieces were not compatible to begin with, and especially when we have a lot of level points to fill : 
+Maybe switch the first priority piece first when going to the next combination, instead of switching the last choosen point piece. Because when a combination contains no solution, it means that starting point pieces were not compatible to begin with, and especially when we have a lot of level points to fill :
 
 the current setup tests the 4 starting piece -> incompatibility -> switch to the next combination -> but the 4 starting piece of the next combination are still the same ! because only the 6th one is changed. See example screenshots.
 
@@ -58,4 +58,3 @@ But when we switch between combinations, the next combination has the same 4 sta
 ### Hypothesis
 
 This might be a big free improvement, as we might find the right combination earlier without any added computational cost.
-

@@ -11,7 +11,7 @@
  *
  * A math function to generate the next r-combination from a list of n ints (used in the main solver algorithm)
  *
- * A general purpose function to find the assets folder depending of where the binary is executed from.
+ * A general purpose function to find the assets directory depending of where the binary is executed from.
  */
 
 #include <stdbool.h>
@@ -212,8 +212,8 @@ int generate_next_combination(const int *input_int_array, int input_array_length
 // -----------------------------------------------------------------------------------------
 
 char assets_folder_relative_path[30];
-// As the binaries can be run from different common folder locations
-// I prefer finding the assets folder dynamically
+// As the binaries can be run from different common directory locations
+// I prefer finding the assets directory dynamically
 void find_asset_folder_relative_path(void)
 {
     static const char *path_to_test[] = {"assets", "../assets", "../../assets"};

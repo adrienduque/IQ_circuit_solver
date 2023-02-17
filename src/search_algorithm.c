@@ -83,7 +83,7 @@
  *      Of course, the more checks it has to apply to a board, the more computation and time nedded on each node.
  *      It's a trade-off and one that is almost always worth.
  *
- *      See the evolution of my algorithm performance stats in the excel file in showcase_binaries_and_assets folder.
+ *      See the evolution of my algorithm performance stats in the excel file in showcase_binaries_and_assets directory.
  *
  *      In the first complete version of the algorithm, the number of valid boards goes to tens of millions (level 120) for example.
  *      There isn't much post-adding checks yet.
