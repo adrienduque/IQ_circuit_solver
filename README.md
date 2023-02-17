@@ -162,7 +162,9 @@ Thus, in summary, this is where I implemented vanilla game rules, as well as, my
 
 You can directly interact with those rules, by playing the demo in "assisted" game mode, where my checks are run on each of the user's move, and the demo shows various information messages based on them.
 
- @todo example screenshot of assisted game mode, where there is a dead end
+<img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/assisted_game_mode_example.png">
+
+The last piece I tried to add was the square shaped one, in this example.
 
 ---
 
@@ -199,7 +201,9 @@ Now it will try to play the next pieces, starting from this board new base state
 
 And so on, until a solution is found with the current combination (meaning that we successfully added the last piece in the list), or until the first piece has played all its valid position, in which case, the algorithm will try the next combination.
 
-@todo show the solution to this example and comment on it
+<img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/114_solution.png">
+
+The actual solution was in another combination.
 
 ---
 
@@ -220,8 +224,6 @@ Example of a tree (which is not fully represented of course).
 The path that the algorithm is taking to explore this tree, based on the decisions made in [step 4) Game board checking](https://github.com/adrienduque/IQ_circuit_solver/edit/master/README.md#4-game-board-checkingvalidation).
 
 (Maybe the tree explanation would have been clearer without these 2 visuals ?)
-
-<br>
 
 - Having more and smarter checks to not add a piece, is the way we cut down computational costs and time. By closing a node, we don't have to explore its children. Smarter checks will detect earlier that a board is not completeable <=> the higher on the tree, we close nodes, the lesser remaining nodes to explore.
 
