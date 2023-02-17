@@ -64,7 +64,7 @@ The only non-standard library I used is called [raylib](https://github.com/raysa
 ## Algorithm Explanation
 
 First, I suggest reading the game rules in the booklet if you have not already, I will assume them as **knew** from now on.
-(game rules can be found [here](https://www.smartgames.eu/uk/one-player-games/iq-circuit#downloads) too).
+(game rules can be found [here](https://www.smartgamesandpuzzles.com/iq-circuit.html) too).
 
 We can summarize this algorithm by describing it as a **"brute force algorithm with backtracking"**. The main idea is to test every possibility to find the correct one, but in a particular order so that it tests the less possibilities as possible (this is where the backtracking plays an important role).
 
