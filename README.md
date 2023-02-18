@@ -302,7 +302,7 @@ How did I improved its performance ?
   Smarter checks will detect earlier that a board is not completeable <=> the higher on the tree, we close nodes, the lesser remaining nodes to explore.
   Of course, the more checks it has when doing board validation, the more computation and time needed on each node. It's a trade-off and one that is almost always worth, regarding total solving time.
 
-- Another way of improving it, is smarter checking **order** among all the possibilities (Which pieces do we tend to add first ? Can we order the different combinations to check ?)
+- Another way of improving it, is smarter **order** to explore all the possibilities (Which pieces do we tend to add first ? Can we order the different combinations to check ?)
 
 **This is the most important part of my project, in my opinion :** 
 
