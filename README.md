@@ -170,7 +170,9 @@ The last piece I tried to add was the square shaped one, in this example.
 
 ### Concrete walkthrough step by step
 
-@todo make this section foldable
+<details>
+
+<summary>Show details</summary>
 
 <img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/level_50_walkthrough/first_combination.png">
 
@@ -268,8 +270,10 @@ It found a valid location to play the 10th piece, thus it will try to do the sam
 Actually, there is not a next piece, meaning that the last piece has been added, passing all the board validation checks, meaning that it found the solution !
 
 Note : 
-- When the actual demo runs, it will skip most of these displays, displaying only board states where a new piece has just been successfully added or if a new combination is being tested (to save time).
+- When the actual demo runs, it will skip a few of these displays, displaying only board states where a new piece has just been successfully added or if a new combination is being tested (to save time).
 - The "valid board count" is the number of times that the algorithm successfully added a piece to the board, thus creating a new valid board state. It is a measure of the algorithm's performance, which is more discussed in the conclusion below.
+
+</details>
 
 ---
 
@@ -289,17 +293,16 @@ Example of a tree (which is not fully represented of course).
 
 The path that the algorithm is taking to explore this tree, based on the decisions made in [step 4) Game board checking](https://github.com/adrienduque/IQ_circuit_solver/edit/master/README.md#4-game-board-checkingvalidation).
 
-(Maybe the tree explanation would have been clearer without these 2 visuals ?)
-
-- Having more and smarter checks to not add a piece, is the way we cut down computational costs and time. By closing a node, we don't have to explore its children. Smarter checks will detect earlier that a board is not completeable <=> the higher on the tree, we close nodes, the lesser remaining nodes to explore.
-
-- Another way of improving it is smarter checking order among all the possibilities (Which pieces do we tend to add first ? Can we order the different combinations to check ?)
-
 While this project is still in development, we can mesure the pure logic performance of the algorithm by counting the number of valid boards that it had to go through to find the final one that is the solution to the level.
 It's like counting the number of explored nodes that the algorithm didn't close.
 
-Of course, the more checks it has when doing board validation, the more computation and time needed on each node.
-It's a trade-off and one that is almost always worth, regarding total solving time.
+How did I improved its performance ?
+
+- Having more and smarter checks to not add a piece, is the way we cut down computational costs and time. By closing a node, we don't have to explore its children.
+  Smarter checks will detect earlier that a board is not completeable <=> the higher on the tree, we close nodes, the lesser remaining nodes to explore.
+  Of course, the more checks it has when doing board validation, the more computation and time needed on each node. It's a trade-off and one that is almost always worth, regarding total solving time.
+
+- Another way of improving it, is smarter checking **order** among all the possibilities (Which pieces do we tend to add first ? Can we order the different combinations to check ?)
 
 **This is the most important part of my project, in my opinion :** 
 
