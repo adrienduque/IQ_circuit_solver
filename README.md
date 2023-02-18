@@ -150,7 +150,7 @@ Notice in each combination, how the first piece's position is never reset, and w
 
 How does it know when a piece can be added to the board or not ? -> it rather knows the cases where a piece can't be added, and by default it can.
 
-- we can skip obvious positions of a piece (if the side choosen is set to not be playable : see step 2)) (or if we know the board is already filled at the position we want to try).
+- we can skip obvious positions of a piece (if the side choosen is set to not be playable : see step [2) Setup](https://github.com/adrienduque/IQ_circuit_solver)) (or if we know the board is already filled at the position we want to try).
 
 - The method to add a piece to the board has a few checks before the piece is blitted to the board, (connection checking, superposition of tiles, match of level hints,...) (that is what I call **"pre-adding checks"**).
 <br>(of course if one of the checks doesn't pass, the piece is not added to the board)
@@ -232,14 +232,16 @@ The path that the algorithm is taking to explore this tree, based on the decisio
 While this project is still in development, we can mesure the pure logic performance of the algorithm by counting the number of valid boards that it had to go through to find the final one that is the solution to the level.
 It's like counting the number of explored nodes that the algorithm didn't close.
 
-Of course, the more checks it has when doing board validation, the more computation and time nedded on each node.
+Of course, the more checks it has when doing board validation, the more computation and time needed on each node.
 It's a trade-off and one that is almost always worth, regarding total solving time.
 
-See the evolution of my algorithm performance stats in the [excel file](https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/IQ_circuit_solver_stats.xlsx) in [showcase_binaries_and_assets](https://github.com/adrienduque/IQ_circuit_solver/tree/master/showcase_binaries_and_assets) directory.
+**This is the most important part of my project, in my opinion :** 
 
-And for more information about the future improvements, see [potential_upgrades](https://github.com/adrienduque/IQ_circuit_solver/tree/master/potential_upgrades) directory.
+- See the evolution of my algorithm performance stats in the [excel file](https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/IQ_circuit_solver_stats.xlsx) in [showcase_binaries_and_assets](https://github.com/adrienduque/IQ_circuit_solver/tree/master/showcase_binaries_and_assets) directory.
 
-(To give you a glimpse of it, in the first complete version of the algorithm, the number of valid boards goes to tens of millions (level 120).
+- And for more information about the future improvements, see [potential_upgrades](https://github.com/adrienduque/IQ_circuit_solver/tree/master/potential_upgrades) directory.
+
+- (To give you a glimpse of it, in the first complete version of the algorithm, the number of valid boards goes to tens of millions (level 120).
 Whereas, V5.2 only has 2365 valid boards to explore before finding the solution.)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
