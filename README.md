@@ -168,42 +168,108 @@ The last piece I tried to add was the square shaped one, in this example.
 
 ---
 
-### Brief concrete example step by step
+### Concrete walkthrough step by step
 
-<img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/114_step_1.png">
+@todo make this section foldable
 
-Here, the algorithm is trying to solve level 114. You can see the current priority list on the far left of the screen (priority to higher pieces) which is a result of the current combination.<br>
-The pieces have been played 1 by 1 to this point, where the last added piece is the T-shaped piece.<br>
-Now the algorithm will try to add the L-shaped piece in a valid position according to pre and post adding checks (see [step 4) Game board checking](https://github.com/adrienduque/IQ_circuit_solver/edit/master/README.md#4-game-board-checkingvalidation)).<br>
+<img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/level_50_walkthrough/first_combination.png">
 
-<img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/114_step_2.png">
+Here, the algorithm is trying to solve level 50. You can see the first combination and its priority list on the far left of the screen (priority to higher pieces).<br>
+Keep in mind that, in the expert levels like this one, the main check that determines if we can play a piece or not is the level hints matching check, because the board is filled with level hints. There are more complex and important checks that come into play in harder levels (see [step 4) Game board checking](https://github.com/adrienduque/IQ_circuit_solver/edit/master/README.md#4-game-board-checkingvalidation)).<br>
 
-It didn't found a location where the L-shaped piece could be successfully added to the board.<br>
-So it backtracked, now searching for the next valid position of the precedent piece : the T-shaped one.<br>
-It didn't found a next valid location for the T-shaped one either (with preceding pieces before T-shaped, still on the board).<br>
-So it backtracked again to the 4th piece, didn't found a next valid position, and backtracked again to the 3rd piece.<br>
-A next valid position for the 3rd piece has been found, and it's the board state that is displayed here.<br>
+We can see that the first piece can't even be played here, thus the algorithm goes to the next combination. Since this is still the case for a couple more combinations, let's jump directly to a combination where pieces can be played.
 
-Now it will try to play the next pieces, starting from this board new base state.<br>
+<img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/level_50_walkthrough/step_0.png">
+<img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/level_50_walkthrough/step_1.png">
 
-<img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/114_step_3.png">
+It found a valid location to play the 1st piece, thus it will try to do the same for the next piece.<br>
 
-It didn't find a valid position for the 4th piece (we can see on the previous screenshot, that if this piece was added to fill the open point, it would have created wrong connections).<br>
-So it backtracked to the point where the current piece is the first one, and moved it to its next valid position, and it's the board state that is displayed here.<br>
+<img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/level_50_walkthrough/step_2.png">
 
-Now it will try to play the next pieces, starting from this board new base state.<br>
+It found a valid location to play the 2nd piece, thus it will try to do the same for the next piece.<br>
 
-<img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/114_step_4.png">
+<img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/level_50_walkthrough/step_3.png">
 
-It found a valid position to the 2nd piece.<br>
+It found a valid location to play the 3rd piece, thus it will try to do the same for the next piece.<br>
 
-Now it will try to play the next pieces, starting from this board new base state.<br>
+<img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/level_50_walkthrough/step_4.png">
 
-And so on, until a solution is found with the current combination (meaning that we successfully added the last piece in the list), or until the first piece has played all its valid position, in which case, the algorithm will try the next combination.
+It didn't found a valid location to play the 4th piece in this board state, thus the 4th piece has been reset, and the 3rd piece removed from the board.<br>
+The algorithm will now try to find a next valid location to play the 3rd piece, and try again. **(This is what is called the "backtracking part")**.<br>
 
-<img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/114_solution.png">
+<img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/level_50_walkthrough/step_5.png">
 
-The actual solution was in another combination.
+It didn't found either a next valid location to play the 3rd piece in this board state, thus the 3rd piece has been reset, and the 2nd piece removed from the board.<br>
+The algorithm will now try to find a next valid location to play the 2nd piece, and try again.<br>
+
+<img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/level_50_walkthrough/step_6.png">
+
+It didn't found a next valid location to play the 2nd piece in this board state, backtracked again to the 1st piece, that didn't have either a next valid location and can't be played anymore.<br>
+It means that the previous combination was not the right one, the algorithm will try again with a new combination (which is displayed here).<br>
+
+<img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/level_50_walkthrough/step_7.png">
+
+It found a valid location to play the 1st piece, thus it will try to do the same for the next piece.<br>
+
+<img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/level_50_walkthrough/step_8.png">
+
+It found a valid location to play the 2nd piece, thus it will try to do the same for the next piece.<br>
+
+<img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/level_50_walkthrough/step_9.png">
+
+It found a valid location to play the 3rd piece, thus it will try to do the same for the next piece.<br>
+
+<img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/level_50_walkthrough/step_10.png">
+
+It found a valid location to play the 4th piece, thus it will try to do the same for the next piece.<br>
+
+<img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/level_50_walkthrough/step_11.png">
+
+It found a valid location to play the 5th piece, thus it will try to do the same for the next piece.<br>
+
+<img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/level_50_walkthrough/step_12.png">
+
+It found a valid location to play the 6th piece, thus it will try to do the same for the next piece.<br>
+
+<img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/level_50_walkthrough/step_13.png">
+
+It didn't found a valid location to play the 7th piece in this board state, thus the 7th piece has been reset, and the 6th piece removed from the board.<br>
+The algorithm will now try to find a next valid location to play the 6th piece, and try again.<br>
+
+<img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/level_50_walkthrough/step_14.png">
+
+It didn't found either a next valid location to play the 6th piece in this board state, thus the 6th piece has been reset, and the 5th piece removed from the board.<br>
+The algorithm will now try to find a next valid location to play the 5th piece, and try again.<br>
+
+<img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/level_50_walkthrough/step_15.png">
+
+It found the next valid location to play the 5th piece, thus it will try to add the 6th piece again.<br>
+
+<img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/level_50_walkthrough/step_16.png">
+
+It found a valid location to play the 6th piece, thus it will try to do the same for the next piece.<br>
+
+<img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/level_50_walkthrough/step_17.png">
+
+It found a valid location to play the 7th piece, thus it will try to do the same for the next piece.<br>
+
+<img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/level_50_walkthrough/step_18.png">
+
+It found a valid location to play the 8th piece, thus it will try to do the same for the next piece.<br>
+
+<img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/level_50_walkthrough/step_19.png">
+
+It found a valid location to play the 9th piece, thus it will try to do the same for the next piece.<br>
+(I marked the remaining hole that we can't really see as the piece drawings blend in).<br>
+
+<img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/level_50_walkthrough/step_20.png">
+
+It found a valid location to play the 10th piece, thus it will try to do the same for the next piece.<br>
+Actually, there is not a next piece, meaning that the last piece has been added, passing all the board validation checks, meaning that it found the solution !
+
+Note : 
+- When the actual demo runs, it will skip most of these displays, displaying only board states where a new piece has just been successfully added or if a new combination is being tested (to save time).
+- The "valid board count" is the number of times that the algorithm successfully added a piece to the board, thus creating a new valid board state. It is a measure of the algorithm's performance, which is more discussed in the conclusion below.
 
 ---
 
