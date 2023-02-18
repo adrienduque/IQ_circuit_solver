@@ -173,6 +173,8 @@ The last piece I tried to add was the square shaped one, in this example.
 <details>
 
 <summary>Show details</summary>
+	
+Note : This is made from the version 5.2 of the program.
 
 <img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/level_50_walkthrough/first_combination.png">
 
