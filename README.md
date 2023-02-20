@@ -31,7 +31,7 @@ So if you have a suggestion that would make this better, please fork the repo an
 #### Important Note :
 
 I don't feel like these assets are rightfully representing this project, because I mostly focused on its **speed** and that is what I want to show.
-Thus I really recommend to run yourself the demo **(see : [next section](https://github.com/adrienduque/IQ_circuit_solver/edit/master/README.md#how-to-play-with-the-demo))**. Solving 1 level takes at most a few seconds on my mid range laptop, to give you an idea.
+Thus I really recommend to run yourself the demo **(see : [next section](https://github.com/adrienduque/IQ_circuit_solver#how-to-play-with-the-demo))**. Solving 1 level takes at most a few seconds on my mid range laptop, to give you an idea.
 
 + @todo animated gif of the final version
 
@@ -63,7 +63,7 @@ The only non-standard library I used is called [raylib](https://github.com/raysa
 
 ## Algorithm Explanation
 
-First, I suggest reading the game rules in the booklet if you have not already, I will assume them as **knew** from now on.
+First, I suggest reading the game rules in the booklet if you have not already, I will assume them as **known** from now on.
 (game rules can be found [here](https://www.smartgamesandpuzzles.com/iq-circuit.html) too).
 
 We can summarize this algorithm by describing it as a **"brute force algorithm with backtracking"**. The main idea is to test every possibility to find the correct one, but in a particular order so that it tests the less possibilities as possible (this is where the backtracking plays an important role).
@@ -150,7 +150,7 @@ Notice in each combination, how the first piece's position is never reset, and w
 
 How does it know when a piece can be added to the board or not ? -> it rather knows the cases where a piece can't be added, and by default it can.
 
-- we can skip obvious positions of a piece (if the side choosen is set to not be playable : see step [2) Setup](https://github.com/adrienduque/IQ_circuit_solver)) (or if we know the board is already filled at the position we want to try).
+- we can skip obvious positions of a piece (if the side choosen is set to not be playable : see step [2) Setup](https://github.com/adrienduque/IQ_circuit_solver#2-setup-the-main-algorithm-preprocessing-of-level-hints)) (or if we know the board is already filled at the position we want to try).
 
 - The method to add a piece to the board has a few checks before the piece is blitted to the board, (connection checking, superposition of tiles, match of level hints,...) (that is what I call **"pre-adding checks"**).
 <br>(of course if one of the checks doesn't pass, the piece is not added to the board)
@@ -158,13 +158,21 @@ How does it know when a piece can be added to the board or not ? -> it rather kn
 - After the piece has been successfully added, a list of checks is applied to the board (do the paths contains loops ? (which are not allowed), is there an isolated empty tile ?(which we know can't be filled), ...). (that is what I call **"post-adding checks"**).
 (if one of these checks doesn't pass, the piece is instantly removed from the board, it's as if it was never added).
 
-Thus, in summary, this is where I implemented vanilla game rules, as well as, my own rules to try to detect early if a board state is worth continuing or not (they are part of post-adding checks).
+Thus, in summary, this is where I implemented vanilla game rules, as well as, my own rules to try to detect early if a board state is worth continuing or not (they are part of post-adding checks). See [Changelog of performance changes](https://github.com/adrienduque/IQ_circuit_solver/tree/master/showcase_binaries_and_assets#readme) for more informations on each check.
 
 You can directly interact with those rules, by playing the demo in "assisted" game mode, where my checks are run on each of the user's move, and the demo shows various information messages based on them.
 
 <img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/assisted_game_mode_example.png">
 
-The last piece I tried to add was the square shaped one, in this example.
+_The last piece I tried to add was the square shaped one, in this example.<br>_
+
+### Note :
+
+Of course, the goal for making these checks, is to not make too big assumptions on what we know of the actual game abritrary informations (these are in the *_data.c files in my codebase for example), or else anyone can just make a program that gives the solution to levels by looking for them in the game booklet.
+
+This is what I would call "overfitting" rules.
+
+Some of my checking methods are questionnable on this point, because I'm only thinking of this looking back at it. I feel like I naturally fixed the limit to the statement : "The algorithm knows the exact game rules, and the exact game pieces (shapes,connections,...), everything else is not assumed as known".
 
 ---
 
@@ -179,7 +187,7 @@ Note : This is made from the version 5.2 of the program.
 <img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/level_50_walkthrough/first_combination.png">
 
 Here, the algorithm is trying to solve level 50. You can see the first combination and its priority list on the far left of the screen (priority to higher pieces).<br>
-Keep in mind that, in the expert levels like this one, the main check that determines if we can play a piece or not is the level hints matching check, because the board is filled with level hints. There are more complex and important checks that come into play in harder levels (see [step 4) Game board checking](https://github.com/adrienduque/IQ_circuit_solver/edit/master/README.md#4-game-board-checkingvalidation)).<br>
+Keep in mind that, in the expert levels like this one, the main check that determines if we can play a piece or not is the level hints matching check, because the board is filled with level hints. There are more complex and important checks that come into play in harder levels (see [step 4) Game board checking](https://github.com/adrienduque/IQ_circuit_solver#4-game-board-checkingvalidation)).<br>
 
 We can see that the first piece can't even be played here, thus the algorithm goes to the next combination. Since this is still the case for a couple more combinations, let's jump directly to a combination where pieces can be played.
 
@@ -293,7 +301,7 @@ Example of a tree (which is not fully represented of course).
 
 <img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/tree_example_path.png">
 
-The path that the algorithm is taking to explore this tree, based on the decisions made in [step 4) Game board checking](https://github.com/adrienduque/IQ_circuit_solver/edit/master/README.md#4-game-board-checkingvalidation).
+The path that the algorithm is taking to explore this tree, based on the decisions made in [step 4) Game board checking](https://github.com/adrienduque/IQ_circuit_solver#4-game-board-checkingvalidation).
 
 While this project is still in development, we can mesure the pure logic performance of the algorithm by counting the number of valid boards that it had to go through to find the final one that is the solution to the level.
 It's like counting the number of explored nodes that the algorithm didn't close.
@@ -308,7 +316,7 @@ How did I improved its performance ?
 
 **This is the most important part of my project, in my opinion :** 
 
-- See the evolution of my algorithm performance stats in the [excel file](https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/IQ_circuit_solver_stats.xlsx) in [showcase_binaries_and_assets](https://github.com/adrienduque/IQ_circuit_solver/tree/master/showcase_binaries_and_assets) directory.
+- See the evolution of my algorithm performance in the [showcase_binaries_and_assets](https://github.com/adrienduque/IQ_circuit_solver/tree/master/showcase_binaries_and_assets) directory.
 
 - And for more information about the future improvements, see [potential_upgrades](https://github.com/adrienduque/IQ_circuit_solver/tree/master/potential_upgrades) directory.
 
