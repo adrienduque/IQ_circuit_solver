@@ -58,11 +58,11 @@ We can't have this setup, because connection paths can't cross or branch from ea
 
 ### Double missing connection
 
-<img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/check_examples/double_missing_connection_line_case_1.png">
-
 <img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/check_examples/double_missing_connection_bend_case_1.png">
 
-In the game pieces, there are only 2 pieces that have tiles with 2 connections directed to the outside of the piece (T shaped one, and one of the lines of length 2, they are both displayed above).<br>
+<img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/check_examples/double_missing_connection_line_case_1.png">
+
+In the game pieces, there are **only** 2 pieces that have tiles with **2 connections directed to the outside of the piece** (T shaped one, and one of the lines of length 2, they are both displayed above).<br>
 Their corresponding double missing connection tile can only exist if the piece has not been played yet, and the piece is necessary being played to fill this tile. This is not the case in both screenshots, thus the board states displayed are not valid.<br>
 
 ### First post-adding check : isolated empty tiles case
@@ -104,27 +104,29 @@ _Failing case, red ink : one missing connection can't be linked with a potential
 
 This check is using a pathfinding algorithm (A-star) to find at least one potential connection path for each missing connection tile on the board, (the pathfinding algorithm can only go through empty tiles).<br>
 As we can see above, all the potential couples are linked with a different color, but in reality, as soon as the pathfinding algorithm finds a valid partner tile for a particular starting tile, it doesn't search for all its potential valid partners, and the existence of both these tiles is considered valid.<br>
-The most important part being : as soon as the pathfinding algorithm doesn't find a valid partner tile for a particular starting tile, the whole check fail, because this means there is a dead end (see the last screenshot above).<br>
+The most important part being : as soon as the pathfinding algorithm doesn't find any valid partner tile for a particular starting tile, the whole check fail, because this means there is a dead end (see the last screenshot above).<br>
 
 ## V3.2 : exploration of different piece order setups
 
-Does changing the default priority order of played piece by the algorithm will affect the performance ?
+Does changing the default priority order of played piece by the algorithm will affect the performance ?<br>
+The answer is yes, and by a lot, for more informations, see the [excel file](https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/IQ_circuit_solver_stats.xlsx).
 
-The answer is yes, and by a lot, for more informations, see the excel file. @todo:link
-
-These screenshot all presents the first combination and piece priority order choosen for the level 120, in different priority setups.
+These screenshot all presents the first choosen combination and piece priority order for the level 120, in different priority setups.
 
 <img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/check_examples/piece_order_A_setup.png">
 
-A setup : This was the piece priority order by default since the beginning, from top to bottom, we can see the exact order in which I programmed the actual game pieces into code. I just didn't pay attention to the order of pieces until this point. This makes the smaller pieces be picked first, when choosing point pieces, and also to fill the remaining list of pieces the algorithm will have to play.
+A setup : This was the piece priority order by default since the beginning, from top to bottom, we can see the exact order in which I programmed the actual game pieces into code. I just didn't pay attention to the order of pieces until this point.<br>
+This makes the smaller pieces be picked first, when choosing point pieces, and also to fill the remaining list of pieces the algorithm will have to play.<br>
 
 <img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/check_examples/piece_order_B_setup.png">
 
-B setup : The idea was to play bigger pieces first, to make the algorithm play less pieces until a board state is found invalid, just because there is a lot more that can go wrong when playing bigger pieces (more prone to being out of bounds, superpositions, dead ends, ...). So I just reversed the order of A, meaning that bigger pieces are picked first when choosing point pieces, and also to fill the remaining list of pieces the algorithm will have to play.
+B setup : The idea was to play bigger pieces first, to make the algorithm play less pieces until a board state is found invalid, just because there is a lot more that can go wrong when playing bigger pieces (more prone to being out of bounds, superpositions, dead ends, ...).<br>
+So I just reversed the order of A, meaning that bigger pieces are picked first when choosing point pieces, and also to fill the remaining list of pieces the algorithm will have to play.<br>
 
 <img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/check_examples/piece_order_C_setup.png">
 
-C setup : The idea was to mix A and B, by observing that smaller pieces (all the 4 line-shaped ones) have 3 sides to play. In order to limit the number of possibilities, why not trying to pick them first as the point pieces (they are forced to play 1 side out of 3 by doing so), and still prioritize bigger pieces to fill the remaining list of pieces the algorithm will have to play.
+C setup : The idea was to mix A and B, by observing that smaller pieces (all the 4 line-shaped ones) have 3 sides to play.<br>
+In order to limit the number of possibilities, why not trying to pick them first as the point pieces (they are forced to play 1 side out of 3 by doing so, whereas they have 2 sides to play with, if they are not choosen as point pieces), and still prioritize bigger pieces to fill the remaining list of pieces the algorithm will have to play.<br>
 
 Turns out B and C setups were a lot more efficient than A, and B a little more than C. **B setup is from now on the default priority order.**
 
@@ -132,8 +134,6 @@ Turns out B and C setups were a lot more efficient than A, and B a little more t
 
 <img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/check_examples/double_missing_connection_bend_case_1.png">
 
-As you can see, this is the same setup here @todo:link. The only thing is that this board state would be spotted as invalid only if the last added piece between the 3 played here, was not the T-shaped one.
-
-This post-adding check is to complete the existing pre-adding check, to spot this invalid board state whatever the pieces order.
-
-Turns out this implementation was not worth adding, regarding the total average solving time of the algorithm, which has increased between V3.2B and V4, see the excel file. @todo:link.
+As you can see, this is the same setup [here](https://github.com/adrienduque/IQ_circuit_solver/edit/master/showcase_binaries_and_assets/README.md#double-missing-connection). The only thing is that this board state would be spotted as invalid only if the last added piece between the 3 played here, was not the T-shaped one.<br>
+This post-adding check is to complete the existing pre-adding check, to spot this invalid board state whatever the pieces order.<br>
+Turns out this implementation was not worth adding, regarding the total average solving time of the algorithm, which has increased between V3.2B and V4, see the [excel file](https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/IQ_circuit_solver_stats.xlsx).<br>
