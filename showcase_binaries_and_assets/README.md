@@ -1,12 +1,6 @@
-# Changelog of performance changes made
+# Changelog of performance changes
 
 This is only a visual presentation of the changes (most are added checking methods). See the [excel file](https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/IQ_circuit_solver_stats.xlsx) for detailled observations based on quantitative results.
-
-- @todo ajouter un lien vers ici sur le main readme
-
-* ajouter une ligne dans l'explication de l'algorithme global :
-
-  Le but, c'est bien de résoudre un niveau avec le moins d'étapes possible. Et l'intérêt est bien sûr de ne pas faire des trops grosses suppositions (not too precize rules), (sinon tout le monde pourrait juste faire un algorithme qui donne la solution d'un niveau directement en allant chercher dans le livret), this is what I would call "overfitting". Du coup, c'est ce que j'ai essayé de faire, même si certains de mes checks sont questionnable.
 
 The idea is that every screenshot presents a example of a board state that we want to invalidate with its corresponding checking method.
 
