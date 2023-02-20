@@ -1,6 +1,6 @@
 # Changelog of performance changes made
 
-This is only a visual presentation of the changes (most are added checking methods). See the excel file @todo:link for detailled observations based on quantitative results.
+This is only a visual presentation of the changes (most are added checking methods). See the [excel file](https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/IQ_circuit_solver_stats.xlsx) for detailled observations based on quantitative results.
 
 - @todo ajouter un lien vers ici sur le main readme
 
@@ -12,7 +12,7 @@ The idea is that every screenshot presents a example of a board state that we wa
 
 ## V1 : baseline
 
-Most of the pre-adding checks are already here, and only the post-adding check implemented is the one that checks for isolated empty tiles.<br>
+Most of the pre-adding checks are already here, and the only post-adding check implemented is the one that checks for isolated empty tiles.<br>
 We can quickly go through them one by one, obvious ones first.<br>
 
 ### Out of bounds check
@@ -102,10 +102,11 @@ _Passing case, to show how the remaining level open points are considered the sa
 
 _Failing case, red ink : one missing connection can't be linked with a potential path to at least another missing connection, the whole board is not valid._
 
-This check is using a pathfinding algorithm (A-star) to find at least one potential connection path for each missing connection tile on the board, the pathfinding algorithm can only go through empty tiles.<br>
+This check is using a pathfinding algorithm (A-star) to find at least one potential connection path for each missing connection tile on the board, (the pathfinding algorithm can only go through empty tiles).<br>
 As we can see above, all the potential couples are linked with a different color, but in reality, as soon as the pathfinding algorithm finds a valid partner tile for a particular starting tile, it doesn't search for all its potential valid partners, and the existence of both these tiles is considered valid.<br>
+The most important part being : as soon as the pathfinding algorithm doesn't find a valid partner tile for a particular starting tile, the whole check fail, because this means there is a dead end (see the last screenshot above).<br>
 
-### V3.2 : exploration of different piece order setups
+## V3.2 : exploration of different piece order setups
 
 Does changing the default priority order of played piece by the algorithm will affect the performance ?
 
@@ -127,7 +128,7 @@ C setup : The idea was to mix A and B, by observing that smaller pieces (all the
 
 Turns out B and C setups were a lot more efficient than A, and B a little more than C. **B setup is from now on the default priority order.**
 
-### V4 : added double missing connection check (post-adding)
+## V4 : added double missing connection check (post-adding)
 
 <img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/check_examples/double_missing_connection_bend_case_1.png">
 
