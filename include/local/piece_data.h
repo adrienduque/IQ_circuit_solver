@@ -55,6 +55,9 @@
 #define T_PIECE 8
 #define Z_PIECE 9
 
+#define BEND_DOUBLE_FILLING_TILE_IDX 0 // index in tile array of T_PIECE piece of which tile is the spcial one, that has 2 connections to the outside of the piece, see piece_data.c
+#define LINE_DOUBLE_FILLING_TILE_IDX 0 // index in tile array of LINE2_2 piece of which tile is the spcial one, that has 2 connections to the outside of the piece, see piece_data.c
+
 /**
  * @enum TileType
  * there is a limited number of elementary tiles types which are defined here

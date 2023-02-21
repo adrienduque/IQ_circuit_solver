@@ -131,3 +131,14 @@ Turns out B and C setups were a lot more efficient than A, and B a little more t
 As you can see, this is the same setup [here](https://github.com/adrienduque/IQ_circuit_solver/tree/master/showcase_binaries_and_assets#double-missing-connection). The only thing is that this board state would be spotted as invalid only if the last added piece between the 3 played here, was not the T-shaped one.<br>
 This post-adding check is to complete the existing pre-adding check, to spot this invalid board state whatever the pieces order.<br>
 Turns out this implementation was not worth adding, regarding the total average solving time of the algorithm, which has increased between V3.2B and V4, see the [excel file](https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/IQ_circuit_solver_stats.xlsx).<br>
+
+## V6 : reworked double missing connection check (post-adding)
+
+Note : V5 was all about better user interface.
+
+The new implementation makes the V4 check (see above) worth doing.
+
+<img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/check_examples/double_missing_connection_bend_case_2.png">
+
+Furthermore, the check has been improved to also invalidate this board state : 2 of the same double missing connection tiles can't exist at the same time on the board, there only can be 1, which will be filled by its corresponding piece.<br>
+(The example displayed is the bend-shape double missing connection one, but it also works with line-shape double missing connection).

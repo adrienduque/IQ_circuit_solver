@@ -48,8 +48,12 @@ Board *init_board(LevelHints *level_hints)
 
     // 1) Basic data init
     board->nb_of_added_pieces = 0;
-    board->has_line2_2_been_added = false;
+
+    // 1 bis) init for the double missing connection pre-adding check
+    set_invalid_pos(&(board->bend_double_missing_connection_position));
+    set_invalid_pos(&(board->line_double_missing_connection_position));
     board->has_T_piece_been_added = false;
+    board->has_line2_2_been_added = false;
 
     // 2) Set every tile pointer to UNDEFINED_TILE (NULL pointer)
     for (int i = 0; i < BOARD_WIDTH; i++)
@@ -239,6 +243,26 @@ Tile *extract_normal_tile_at_pos(Board *board, Vector2_int *base_pos)
     return extract_normal_tile_from_stack(board->tile_matrix[base_pos->i][base_pos->j]);
 }
 
+// Function to count the number of missing connection tiles in the tile stack
+// (stack implemented as a linked list, see piece_data.h > Tile struct)
+int get_number_of_missing_connection_in_stack(Tile *tile_stack)
+{
+    static int nb;
+    static Tile *temp_tile = NULL;
+
+    nb = 0;
+    temp_tile = tile_stack;
+
+    while (temp_tile != UNDEFINED_TILE)
+    {
+        if (temp_tile->tile_type == missing_connection)
+            nb++;
+
+        temp_tile = temp_tile->next;
+    }
+    return nb;
+}
+
 // -------------- Main function --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 // Function to check if a piece can be added to the board while blitting its live data cache which will be used to add it
@@ -259,7 +283,7 @@ Tile *extract_normal_tile_at_pos(Board *board, Vector2_int *base_pos)
 // else returns 1 (true)
 // Let the more likely error cases be check in first to make the whole thing faster
 // (It doesn't matter if garbage / incomplete data is left in the piece cache, as only piece cache that had been through this function will be used in the rest of the program)
-static int can_piece_be_added_to_board(Board *board, Side *side, Vector2_int base_pos, int rotation_state)
+static int can_piece_be_added_to_board(Board *board, int piece_idx, Side *side, Vector2_int base_pos, int rotation_state)
 {
     static Tile *current_tile = NULL;
     static Tile *existing_tile_stack = NULL;
@@ -268,6 +292,11 @@ static int can_piece_be_added_to_board(Board *board, Side *side, Vector2_int bas
     static int tile_idx;
     static int connection_idx;
     static bool is_line_shape;
+
+    // We only want to update non temp_* variables if the whole check pass, and that we actually want to add this piece after this check
+    // That is why we used sort of proxy variables here
+    board->temp_bend_double_missing_connection_position = board->bend_double_missing_connection_position;
+    board->temp_line_double_missing_connection_position = board->line_double_missing_connection_position;
 
     // Missing connection tiles are checked in first, as there are usually less of them in game pieces
     // Less checks to be done to them compared to normal tiles
@@ -319,16 +348,33 @@ static int can_piece_be_added_to_board(Board *board, Side *side, Vector2_int bas
             // this computation check if there is an absolute difference of 2 between the two directions, if there is -> this is a line
             is_line_shape = (abs((current_tile->connection_direction_array[0]) - (existing_tile_stack->connection_direction_array[0]))) == 2;
 
-            // A line-shape double missing connection tile can only exist if line2 2 piece has not been played yet
-            if (is_line_shape && !(board->has_line2_2_been_added))
-                continue;
+            if (is_line_shape)
+            {
 
-            // A bend-shape double missing connection tile can only exist if T-piece has not been played yet
-            if (!is_line_shape && !(board->has_T_piece_been_added))
-                continue;
+                // A line-shape double missing connection tile can only exist if line2 2 piece has not been played yet
+                if ((board->has_line2_2_been_added))
+                    return INVALID_DOUBLE_MISSING_CONNECTION;
 
-            // Else there can't be a double missing connection tile in vanilla game
-            return INVALID_DOUBLE_MISSING_CONNECTION;
+                // There can be only 1 double missing connection of this type on the board
+                if (is_pos_valid(&(board->temp_line_double_missing_connection_position)))
+                    return INVALID_DOUBLE_MISSING_CONNECTION;
+
+                // Record it, if everything above is ok
+                board->temp_line_double_missing_connection_position = current_tile->absolute_pos;
+            }
+            else // it is bend shape then
+            {
+                // A bend-shape double missing connection tile can only exist if T-piece has not been played yet
+                if (board->has_T_piece_been_added)
+                    return INVALID_DOUBLE_MISSING_CONNECTION;
+
+                // There can be only 1 double missing connection of this type on the board
+                if (is_pos_valid(&(board->temp_bend_double_missing_connection_position)))
+                    return INVALID_DOUBLE_MISSING_CONNECTION;
+
+                // Record it, if everything above is ok
+                board->temp_bend_double_missing_connection_position = current_tile->absolute_pos;
+            }
         }
     }
 
@@ -377,6 +423,30 @@ static int can_piece_be_added_to_board(Board *board, Side *side, Vector2_int bas
             return TILE_NOT_MATCHING_LEVEL_HINTS;
     }
 
+    // check if the normal tiles that would be added fill double missing connection tiles and flag them
+    // this is only possible if we are trying to add certain piece
+    switch (piece_idx)
+    {
+    case LINE2_2:
+
+        current_tile = side->tile_array + LINE_DOUBLE_FILLING_TILE_IDX;
+        if (are_pos_equal(&(current_tile->absolute_pos), &(board->temp_line_double_missing_connection_position)))
+            set_invalid_pos(&(board->temp_line_double_missing_connection_position));
+
+        break;
+
+    case T_PIECE:
+
+        current_tile = side->tile_array + BEND_DOUBLE_FILLING_TILE_IDX;
+        if (are_pos_equal(&(current_tile->absolute_pos), &(board->temp_bend_double_missing_connection_position)))
+            set_invalid_pos(&(board->temp_bend_double_missing_connection_position));
+
+        break;
+
+    default:
+        break;
+    }
+
     return true;
 }
 
@@ -403,7 +473,7 @@ int add_piece_to_board(Board *board, int piece_idx, int side_idx, Vector2_int ba
     side = (piece->side_array) + side_idx;
 
     // check if the piece can even fit in the board while blitting it by the same occasion (see piece.c > blit_piece_main_data)
-    error_code = can_piece_be_added_to_board(board, side, base_pos, rotation_state);
+    error_code = can_piece_be_added_to_board(board, piece_idx, side, base_pos, rotation_state);
     if (error_code != true) // to confirm only the case where 1 is returned
         return error_code;
 
@@ -449,6 +519,10 @@ int add_piece_to_board(Board *board, int piece_idx, int side_idx, Vector2_int ba
         break;
     }
 
+    // dump the proxy variable values, if we actually can add the piece to the board
+    board->bend_double_missing_connection_position = board->temp_bend_double_missing_connection_position;
+    board->line_double_missing_connection_position = board->temp_line_double_missing_connection_position;
+
     // Record that we actually added the piece
     board->added_piece_idx_array[board->nb_of_added_pieces] = piece_idx;
     board->nb_of_added_pieces++;
@@ -472,20 +546,6 @@ void undo_last_piece_adding(Board *board)
     piece = (board->piece_array) + piece_idx;
     side = (piece->side_array) + piece->current_side_idx;
 
-    // check if the piece added is a special piece that we care for double missing connection tiles
-    // update state flags
-    switch (piece_idx)
-    {
-    case LINE2_2:
-        board->has_line2_2_been_added = false;
-        break;
-    case T_PIECE:
-        board->has_T_piece_been_added = false;
-        break;
-    default:
-        break;
-    }
-
     // undo the superposition of normal tiles and missing_connection tiles of the piece (which is still at the same location)
     for (tile_idx = 0; tile_idx < side->nb_of_tiles; tile_idx++)
     {
@@ -499,5 +559,37 @@ void undo_last_piece_adding(Board *board)
         current_tile = (side->missing_connection_tile_array) + tile_idx;
         board->tile_matrix[current_tile->absolute_pos.i][current_tile->absolute_pos.j] = current_tile->next;
         current_tile->next = UNDEFINED_TILE;
+    }
+
+    // check if double missing connections are still here
+    if (is_pos_valid(&(board->bend_double_missing_connection_position)) && get_number_of_missing_connection_in_stack(board->tile_matrix[board->bend_double_missing_connection_position.i][board->bend_double_missing_connection_position.j]) != 2)
+        set_invalid_pos(&(board->bend_double_missing_connection_position));
+    if (is_pos_valid(&(board->line_double_missing_connection_position)) && get_number_of_missing_connection_in_stack(board->tile_matrix[board->line_double_missing_connection_position.i][board->line_double_missing_connection_position.j]) != 2)
+        set_invalid_pos(&(board->line_double_missing_connection_position));
+
+    // check if the piece added is a special piece that we care for double missing connection tiles
+    // update state flags
+    switch (piece_idx)
+    {
+    case LINE2_2:
+        board->has_line2_2_been_added = false;
+
+        // does removing this piece "unfill" a double missing connection tile on the board ?
+        current_tile = side->tile_array + LINE_DOUBLE_FILLING_TILE_IDX;
+        if (get_number_of_missing_connection_in_stack(board->tile_matrix[current_tile->absolute_pos.i][current_tile->absolute_pos.j]) == 2)
+            board->line_double_missing_connection_position = current_tile->absolute_pos;
+
+        break;
+    case T_PIECE:
+        board->has_T_piece_been_added = false;
+
+        // does removing this piece "unfill" a double missing connection tile on the board ?
+        current_tile = side->tile_array + BEND_DOUBLE_FILLING_TILE_IDX;
+        if (get_number_of_missing_connection_in_stack(board->tile_matrix[current_tile->absolute_pos.i][current_tile->absolute_pos.j]) == 2)
+            board->bend_double_missing_connection_position = current_tile->absolute_pos;
+
+        break;
+    default:
+        break;
     }
 }

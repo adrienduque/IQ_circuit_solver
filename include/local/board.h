@@ -40,8 +40,14 @@ typedef struct Board
     int added_piece_idx_array[NB_OF_PIECES]; // array of indexes of game pieces that have been added to the board
     int nb_of_added_pieces;                  // length of matching array
 
+    // Useful information for double missing connection pre-adding check
+    Vector2_int bend_double_missing_connection_position;
+    Vector2_int line_double_missing_connection_position;
+    bool has_T_piece_been_added;
     bool has_line2_2_been_added;
-    bool has_T_piece_been_added; // these two are special game piece, see board.c > can_piece_be_added_to_board
+    // makes the implementation works (proxy-like variables)
+    Vector2_int temp_bend_double_missing_connection_position;
+    Vector2_int temp_line_double_missing_connection_position;
 
     // ------ Drawing data specific to the board
     Vector2 grid_lines_pt_array[NB_OF_GRID_LINES][2];
@@ -74,5 +80,6 @@ void undo_last_piece_adding(Board *board);
 // ------------ other public tools to interact with the board state ----------------------------------------------------
 Tile *extract_normal_tile_from_stack(Tile *tile_stack);
 Tile *extract_normal_tile_at_pos(Board *board, Vector2_int *base_pos);
+int get_number_of_missing_connection_in_stack(Tile *tile_stack);
 
 #endif

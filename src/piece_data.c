@@ -109,7 +109,7 @@ void load_piece_array(Piece piece_array[NB_OF_PIECES])
                 .nb_of_tiles = 2,
                 .nb_of_missing_connection_tiles = 2,
                 .tile_array = {
-                    {.tile_type = line, .relative_pos = {0, 0}, .nb_of_connections = 2, .constant_connection_direction_array = {DOWN, UP}},
+                    [LINE_DOUBLE_FILLING_TILE_IDX] = {.tile_type = line, .relative_pos = {0, 0}, .nb_of_connections = 2, .constant_connection_direction_array = {DOWN, UP}},
                     {.tile_type = empty, .relative_pos = {1, 0}, .nb_of_connections = 0},
                 },
                 .missing_connection_tile_array = {
@@ -471,10 +471,10 @@ void load_piece_array(Piece piece_array[NB_OF_PIECES])
                 .nb_of_tiles = 4,
                 .nb_of_missing_connection_tiles = 4,
                 .tile_array = {
+                    [BEND_DOUBLE_FILLING_TILE_IDX] = {.tile_type = bend, .relative_pos = {0, 1}, .nb_of_connections = 2, .constant_connection_direction_array = {DOWN, LEFT}},
                     {.tile_type = line, .relative_pos = {0, 0}, .nb_of_connections = 2, .constant_connection_direction_array = {RIGHT, LEFT}},
                     {.tile_type = line, .relative_pos = {-1, 0}, .nb_of_connections = 2, .constant_connection_direction_array = {RIGHT, LEFT}},
                     {.tile_type = bend, .relative_pos = {1, 0}, .nb_of_connections = 2, .constant_connection_direction_array = {DOWN, LEFT}},
-                    {.tile_type = bend, .relative_pos = {0, 1}, .nb_of_connections = 2, .constant_connection_direction_array = {DOWN, LEFT}},
                 },
                 .missing_connection_tile_array = {
                     {.tile_type = missing_connection, .relative_pos = {1, 1}, .nb_of_connections = 1, .constant_connection_direction_array = {UP}},
