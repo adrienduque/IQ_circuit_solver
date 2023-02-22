@@ -226,13 +226,6 @@ static int get_nearest_target_tile_idx(Tile *start_tile, Tile *missing_connectio
 
 // -------------- Main function ---------------------------------------------------------------------------------
 
-/**
- * @todo change the behavior when a missing connection is superposed to a point
- * it means that they will necessary be connected by a path
- *
- * + if corner_1 already has been played, this is not even possible, see potential upgrades readme
- */
-
 // Function to check if the current open missing connections on the board can still be linked by a future path between them
 // If not, this is obviously bad, and the board is discarded
 // How do I check this ?
@@ -255,7 +248,7 @@ static bool check_no_dead_ends(Board *board)
     static Piece *piece;
     static Side *side;
     static Tile *tile;
-    static Tile *board_tile_stack;
+    static Tile *board_tile_stack, *obligatory_tile;
     static Tile *start_tile, *not_allowed_target_tile, *nearest_target_tile, *end_tile;
     static int nearest_target_tile_idx;
 
@@ -319,6 +312,11 @@ static bool check_no_dead_ends(Board *board)
 
             // also ignore double missing connection tiles
             if (get_number_of_missing_connection_in_stack(board_tile_stack) == 2)
+                continue;
+
+            // single missing connection tile superposed to a point tile is also to be considered like if it was a double missing connection
+            obligatory_tile = board->obligatory_tile_matrix[tile->absolute_pos.i][tile->absolute_pos.j];
+            if (obligatory_tile != UNDEFINED_TILE && obligatory_tile->tile_type == point)
                 continue;
 
             // add it to the list
@@ -432,11 +430,8 @@ int run_all_checks(Board *board, bool enable_not_worth_checks)
     if (!check_isolated_tiles_around_piece(board, last_added_piece))
         return ISOLATED_EMPTY_TILE;
 
-    if (board->nb_of_added_pieces > 1)
-    {
-        if (!check_no_dead_ends(board))
-            return DEAD_END;
-    }
+    if (!check_no_dead_ends(board))
+        return DEAD_END;
 
     if (!check_double_missing_connections(board))
         return DOUBLE_MISSING_CONNECTION_NOT_FILLABLE;

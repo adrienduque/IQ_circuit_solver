@@ -33,6 +33,12 @@ My guess is that, it's such a rare case, that the check might not be worth addin
 But it's actually pretty simple to implement it as a sub-check of "check_no_dead_ends", we are already messing around with open point and missing connection tiles here. It might be worth, as it costs almost nothing more.
 If I implement it, I also should make the function returns a few more error codes, as it has nothing to do with dead ends.
 
+### Reevaluation
+
+I was wrong, it is simpler to implement it like a double missing connection case (e.g : record in pre-adding if the corner 1 piece has been played, + the position of a missing connection on a open level point if there is + post-adding check to make sure the current values of these variables are compatible).
+
+And I'm pretty confident from experience, that this is 100% not worth adding, regarding total solving time of a level.
+
 ---
 
 # Other upgrades ?
@@ -58,3 +64,13 @@ But when we switch between combinations, the next combination has the same 4 sta
 ### Hypothesis
 
 This might be a big free improvement, as we might find the right combination earlier without any added computational cost.
+
+### Reevaluation
+
+In fact, this might have the opposite effect, to prioritize changing the first piece to go to the next combination means to bring smaller pieces earlier in the global combination order.
+
+In wrong starting combinations (the ones that don't correspond to the combination of the actual level solution), there is a huge difference in the number of useless explored board states, e.g. : starting combinations composed of smaller pieces have a lot more than the others.
+
+Thus, instead of changing the order of combinations tested, I'm rather going to setup a system in which the next combination is skipped depending on its common pieces with the current combination, and of course, the depth at which the current combination failed. E.g : still have the combination of the second screenshot be generated after the first one, but skipped even before the algorithm tries to play it, because we know from previous experience it will fail.
+
+I'm not sure if I make the "previous experience memory" to only come from the previously tested combination, or if I store all new different failed combination data. Finally, I think I'll try to implement the first solution, and make new observations from it.
