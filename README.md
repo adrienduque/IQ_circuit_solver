@@ -117,6 +117,7 @@ Setup :
   - For each piece, we can define a global position on the board, composed of (which side, horizontal position, vertical position, rotation)
   - Each piece keeps track of its current global position, and moves from it when we backtrack, it doesn't restart from the base global position, unless we "reset" the piece.
   - We have an ordered list of combinations to test, and for each combination, have a priority list of pieces to play.
+  - Combinations may be skipped based on [V7](https://github.com/adrienduque/IQ_circuit_solver/tree/master/showcase_binaries_and_assets#v7--added-combinations-skip)
 
 We kickstart the algorithm by choosing the first piece of the first combination as the current piece to play. All pieces are also reset.
 
