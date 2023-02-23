@@ -142,3 +142,15 @@ The new implementation makes the V4 check (see above) worth doing.
 
 Furthermore, the check has been improved to also invalidate this board state : 2 of the same double missing connection tiles can't exist at the same time on the board, there only can be 1, which will be filled by its corresponding piece.<br>
 (The example displayed is the bend-shape double missing connection one, but it also works with line-shape double missing connection).
+
+## V7 : added combinations skip
+
+<img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/check_examples/dumb_combination_order_1.png">
+
+_The 5th piece can't be played if these 4 previous pieces are played before it (we tested all positions possibilities of these 5 pieces)._
+
+<img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/check_examples/dumb_combination_order_2.png">
+
+_But when we switch between combinations, the next combination has the same 5 starting pieces. The difference between the two combinations being the 6th piece._
+
+With the new update, this is not the case anymore, combinations are still generated in the same order, but combinations can be skipped based on the failure of their direct predecessor. (i.e : the second combination is now skipped in the example above).

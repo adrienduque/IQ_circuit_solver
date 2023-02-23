@@ -43,34 +43,38 @@ And I'm pretty confident from experience, that this is 100% not worth adding, re
 
 # Other upgrades ?
 
-## Reorder combinations :
+## Board savestates between combinations
 
-### Observation
+This is still mostly unclear for me, this is only a draft explanation.
 
-Maybe switch the first priority piece first when going to the next combination, instead of switching the last choosen point piece. Because when a combination contains no solution, it means that starting point pieces were not compatible to begin with, and especially when we have a lot of level points to fill :
+### Example and observations
 
-the current setup tests the 4 starting piece -> incompatibility -> switch to the next combination -> but the 4 starting piece of the next combination are still the same ! because only the 6th one is changed. See example screenshots.
+<img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/potential_upgrades/combination_savestates_1.png">
 
-### Example
+This is the first board state composed of these first 4 pieces, that we can even attempt to play the 5th piece, it took 12 valid board states to go to this particular states, and a little more to realizes that this was not the combination of the solution (but couldn't attempt to play the 5th after). Thus, this is the **only** state where we can even attempt to play a 5th piece with the current 4 first pieces.
 
-<img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/potential_upgrades/dumb_combination_order_1.png">
+<img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/potential_upgrades/combination_savestates_2.png">
 
-The 5th piece can't be played if these 4 previous pieces are played before it (we tested all positions possibilities of these 4 pieces).
+With V7, the next combination is this one, since the previous maximum depth was 4 (we didn't successfully added the 5th piece), we can see it switched the 5th piece to test a new one.
 
-<img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/potential_upgrades/dumb_combination_order_2.png">
+But the algorithm will have to go through again all the 12 valid board states, to return to the one composed of the 4 common first piece, where we can attempt to play the 5th piece !
 
-But when we switch between combinations, the next combination has the same 4 starting pieces. The difference between the two combinations being the 6th piece.
+**My goal here is to prevent doing the same computations between combinations.**
+
+I want to make a system that record all of the board states where we reached a new maximum depth (and everytime we reach it, not only when this is a new maximum).
+
+Then, the algorithm could look into previous data, and if the starting pieces are common to a previous savestate, start directly from it, (I.e : direct test of the 5th piece in the example above). Based on its "similarity_depth".
 
 ### Hypothesis
 
-This might be a big free improvement, as we might find the right combination earlier without any added computational cost.
+I think it would speed up a lot of the combinations to be evaluated as wrong combinations.
 
-### Reevaluation
+### Implementation plan
 
-In fact, this might have the opposite effect, to prioritize changing the first piece to go to the next combination means to bring smaller pieces earlier in the global combination order.
+Not only does it work for a "similarity_depth" with the same value as the "maximum depth reached", but for all the depths below. We only have to reset savestates that are beyond current "similarity_depth" as the concerned pieces will not be played anymore. (I mean, the current combination may have only a few common starting pieces with the previous combination, we could skip all computations done to play these common starting pieces).
 
-In wrong starting combinations (the ones that don't correspond to the combination of the actual level solution), there is a huge difference in the number of useless explored board states, e.g. : starting combinations composed of smaller pieces have a lot more than the others.
+In the function "is_current_combination_skippable", we can know the "similarity_depth" of the current combination from its direct predecessor.
 
-Thus, instead of changing the order of combinations tested, I'm rather going to setup a system in which the next combination is skipped depending on its common pieces with the current combination, and of course, the depth at which the current combination failed. E.g : still have the combination of the second screenshot be generated after the first one, but skipped even before the algorithm tries to play it, because we know from previous experience it will fail.
+The algorithm will now have to begin from the found savestates (to test the first piece that is not common) (and there can be multiple savestates to test here). and make "piece_selected" in agreement with the savestate. -> thus, this is a new loop between the setup of the next combination to test, and before testing the first piece in the actual algorithm.
 
-I'm not sure if I make the "previous experience memory" to only come from the previously tested combination, or if I store all new different failed combination data. Finally, I think I'll try to implement the first solution, and make new observations from it.
+(and not display the switch between combinations anymore ? It would make this switch stuttery ?)
