@@ -54,7 +54,6 @@ static Controls controls;
 
 static GameMode game_mode, previous_game_mode;
 
-static int nb_of_level_pieces;
 static int error_status;
 static bool are_all_pieces_played;
 
@@ -65,8 +64,6 @@ void InitGameScreen(void)
     level_hints = get_level_hints(level_num_selected);
     board = init_board(level_hints);
     update_board_static_drawing(board);
-
-    nb_of_level_pieces = board->nb_of_added_pieces;
 
     reset_controls();
 
@@ -113,7 +110,7 @@ void UpdateGameScreen(void)
     {
         controls.remove_piece_this_frame = false;
 
-        if (board->nb_of_added_pieces <= nb_of_level_pieces)
+        if (board->nb_of_added_pieces <= board->nb_of_level_pieces)
             error_status = UNDO_ERROR; // error : there is no piece to remove (or these are part of level hints)
 
         else

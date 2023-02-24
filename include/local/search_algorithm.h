@@ -35,6 +35,7 @@ typedef struct StartCombinations
 StartCombinations determine_start_combinations(Board *board);
 void load_combination_data(Board *board, StartCombinations *start_combinations, int combination_idx, int *piece_idx_priority_array, int *nb_of_playable_pieces, bool playable_side_per_piece_idx_mask[][MAX_NB_OF_SIDE_PER_PIECE]);
 bool is_position_already_occupied(Board *board, Vector2_int *base_pos);
+bool is_current_combination_skippable(int current_max_depth, int piece_priority_array[NB_OF_PIECES], int previous_piece_priority_array[NB_OF_PIECES]);
 
 // -----------------------------------------------------------------------------
 
@@ -43,5 +44,7 @@ bool is_position_already_occupied(Board *board, Vector2_int *base_pos);
 void run_algorithm_with_display(int level_num, int FPS);
 void run_algorithm_without_display(int level_num);
 void run_algorithm_with_extra_display(int level_num, int FPS);
+
+void run_alternative_algorithm(int level_num, int FPS);
 
 #endif

@@ -128,6 +128,8 @@ Board *init_board(LevelHints *level_hints)
             board->open_obligatory_point_tile_array[i] = &(level_hints->obligatory_tile_array[level_hints->open_obligatory_point_tile_idx_array[i]]);
     }
 
+    board->nb_of_level_pieces = board->nb_of_added_pieces;
+
     return board;
 }
 

@@ -20,8 +20,8 @@
 
 #include <raylib/screens.h>
 
-#include <local/board.h> // Board
-#include <local/level_data.h>
+#include <local/board.h>      // Board
+#include <local/level_data.h> // PieceAddInfos
 #include <local/piece.h>
 #include <local/check_board.h> // run_all_checks
 #include <local/display.h>
@@ -29,7 +29,6 @@
 #include <local/search_algorithm.h>
 
 // algorithm helper functions
-static bool is_current_combination_skippable(void);
 static void setup_next_combination(void);
 static void setup_previous_piece(void);
 static void setup_next_piece(void);
@@ -56,7 +55,7 @@ static bool playable_side_per_piece_idx_mask[NB_OF_PIECES][MAX_NB_OF_SIDE_PER_PI
 
 // Variables used to make the decision to skip or not the current combination
 // Based on the fail data of the previous one, see "setup_next_combination"
-static int max_depth;
+static int current_max_depth;
 static int previous_piece_priority_array[NB_OF_PIECES];
 
 // Variables that represent the internal state of the algorithm
@@ -93,7 +92,7 @@ void InitSolverScreen(void)
 
     combination_idx = -1;
 
-    max_depth = 0;
+    current_max_depth = 0;
     piece_priority_array[0] = -1;
 
     setup_next_combination();
@@ -226,10 +225,10 @@ algo_beginning:
                     // get next piece to play
                     setup_next_piece();
 
-                    // record max_depth (after "setup_next_piece()" to have effectively piece_selected+1)
+                    // record current_max_depth (after "setup_next_piece()" to have effectively piece_selected+1)
                     // (+1, because piece_selected = 0 <=> depth = 1)
-                    if (piece_selected > max_depth)
-                        max_depth = piece_selected;
+                    if (piece_selected > current_max_depth)
+                        current_max_depth = piece_selected;
 
                     return; // draw every frame that a new board is found
                 }
@@ -278,29 +277,14 @@ int FinishSolverScreen(void) { return finishScreen; }
 // More helper functions for the algorithm
 // --------------------------------------------------------------------------------------------------------------
 
-static bool is_current_combination_skippable(void)
-{
-    static int i;
-    // if the current piece has the exact same starting pieces that have failed before in the previous combination
-    // skip it
-
-    // (example : if the algorithm couldn't play the 5th piece (max_depth=4) (the 5th piece is also at the index 4), we want to see if the combination has the exact 5 starting pieces)
-    // (if so, it is assumed that they would be in the same order (because of how the combination generation works))
-
-    for (i = 0; i < max_depth + 1; i++)
-        if (piece_priority_array[i] != previous_piece_priority_array[i])
-            return false;
-
-    return true;
-}
-
 static void setup_next_combination(void)
 {
     static int i;
     // copy the current piece_priority_array up to the failure point
-    for (i = 0; i < max_depth + 1; i++)
+    for (i = 0; i < current_max_depth + 1; i++)
         previous_piece_priority_array[i] = piece_priority_array[i];
 
+    // skip the next combination until we know we are testing new things
     do
     {
         combination_idx++;
@@ -314,9 +298,9 @@ static void setup_next_combination(void)
         }
 
         load_combination_data(board, &start_combinations, combination_idx, piece_priority_array, &nb_of_playable_pieces, playable_side_per_piece_idx_mask);
-    } while (is_current_combination_skippable());
+    } while (is_current_combination_skippable(current_max_depth, piece_priority_array, previous_piece_priority_array));
 
-    max_depth = 0;
+    current_max_depth = 0;
     is_backtrack_iteration = false;
     piece_selected = -1;
     setup_next_piece();

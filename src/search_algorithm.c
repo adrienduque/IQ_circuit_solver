@@ -100,12 +100,13 @@
 
 #include <raylib/raylib.h> // WindowShouldClose, CloseWindow, BeginDrawing, EndDrawing, ClearBackground, DrawFPS, SetTargetFPS
 
-#include <local/utils.h>       // Vector2_int, generate_next_combination and defines
-#include <local/piece_data.h>  // Tile, Side, Piece and defines
-#include <local/level_data.h>  // LevelHints, and defines
-#include <local/board.h>       // Board, helper functions and defines
-#include <local/check_board.h> // run_all_checks
-#include <local/display.h>     // tile_px_width, and other drawing functions
+#include <local/utils.h>             // Vector2_int, generate_next_combination and defines
+#include <local/piece_data.h>        // Tile, Side, Piece and defines
+#include <local/level_data.h>        // LevelHints, and defines
+#include <local/board.h>             // Board, helper functions and defines
+#include <local/check_board.h>       // run_all_checks
+#include <local/display.h>           // tile_px_width, and other drawing functions
+#include <local/board_save_states.h> // savestates helper functions and defines
 
 #include <local/search_algorithm.h>
 
@@ -248,17 +249,23 @@ void load_combination_data(Board *board, StartCombinations *start_combinations, 
     }
 }
 
-static bool is_current_combination_skippable(int max_depth, int piece_priority_array[NB_OF_PIECES], int previous_piece_priority_array[NB_OF_PIECES])
+// Function to only check if a position is already taken by a normal tile on the board
+bool is_position_already_occupied(Board *board, Vector2_int *base_pos)
+{
+    return (extract_normal_tile_at_pos(board, base_pos) != UNDEFINED_TILE);
+}
+
+bool is_current_combination_skippable(int current_max_depth, int piece_priority_array[NB_OF_PIECES], int previous_piece_priority_array[NB_OF_PIECES])
 {
 
     static int i;
     // if the current piece has the exact same starting pieces that have failed before in the previous combination
     // skip it
 
-    // (example : if the algorithm couldn't play the 5th piece (max_depth=4) (the 5th piece is also at the index 4), we want to see if the combination has the exact 5 starting pieces)
+    // (example : if the algorithm couldn't play the 5th piece (current_max_depth=4) (the 5th piece is also at the index 4), we want to see if the combination has the exact 5 starting pieces)
     // (if so, it is assumed that they would be in the same order (because of how the combination generation works))
 
-    for (i = 0; i < max_depth + 1; i++)
+    for (i = 0; i < current_max_depth + 1; i++)
         if (piece_priority_array[i] != previous_piece_priority_array[i])
             return false;
 
@@ -283,12 +290,6 @@ static void draw(Board *board, int level_num)
     draw_level_num(level_num);
     // DrawFPS(100, 10);
     EndDrawing();
-}
-
-// Function to only check if a position is already taken by a normal tile on the board
-bool is_position_already_occupied(Board *board, Vector2_int *base_pos)
-{
-    return (extract_normal_tile_at_pos(board, base_pos) != UNDEFINED_TILE);
 }
 
 // -------------------------------------------------------------------------------------------------------------------------------
@@ -319,9 +320,9 @@ void run_algorithm_with_display(int level_num, int FPS)
     bool playable_side_per_piece_idx_mask[NB_OF_PIECES][MAX_NB_OF_SIDE_PER_PIECE];
 
     // Variables used to make the decision to skip or not the current combination
-    int max_depth;
+    int current_max_depth;
     int previous_piece_priority_array[NB_OF_PIECES];
-    max_depth = 0;
+    current_max_depth = 0;
     previous_piece_priority_array[0] = -1;
 
     // variable to explore current piece_idx_priority_array
@@ -357,13 +358,13 @@ void run_algorithm_with_display(int level_num, int FPS)
         // the algorithm can work without this last informations, but it is meant to skip obviously useless iterations
         load_combination_data(board, &start_combinations, combination_idx, piece_idx_priority_array, &nb_of_playable_pieces, playable_side_per_piece_idx_mask);
 
-        if (is_current_combination_skippable(max_depth, piece_idx_priority_array, previous_piece_priority_array))
+        if (is_current_combination_skippable(current_max_depth, piece_idx_priority_array, previous_piece_priority_array))
             continue;
 
         // Setup the exploration of the current combination
         piece_selected = 0;
         backtrack_iteration = false;
-        max_depth = 0;
+        current_max_depth = 0;
 
         // Loop to explore the current combination
         // The backtracking part is made by decrementing "piece_selected"
@@ -378,7 +379,7 @@ void run_algorithm_with_display(int level_num, int FPS)
                 // case where the first piece used all its position possibilities, which means there are no solution with current combination
 
                 // copy the current piece_priority_array up to the failure point
-                for (int i = 0; i < max_depth + 1; i++)
+                for (int i = 0; i < current_max_depth + 1; i++)
                     previous_piece_priority_array[i] = piece_idx_priority_array[i];
 
                 break;
@@ -449,10 +450,9 @@ void run_algorithm_with_display(int level_num, int FPS)
                                 printf("new valid board found ! %d\n", valid_board_count);
                             draw(board, level_num); // draw only when new board found to make everything faster
 
-                            // record max_depth (after "piece_selected++" to have effectively piece_selected+1)
-                            // (+1, because piece_selected = 0 <=> depth = 1)
-                            if (piece_selected > max_depth)
-                                max_depth = piece_selected;
+                            // record current_max_depth
+                            if (board->nb_of_added_pieces > current_max_depth)
+                                current_max_depth = board->nb_of_added_pieces;
 
                             goto next_piece;
                         }
@@ -530,9 +530,9 @@ void run_algorithm_without_display(int level_num)
     bool playable_side_per_piece_idx_mask[NB_OF_PIECES][MAX_NB_OF_SIDE_PER_PIECE];
 
     // Variables used to make the decision to skip or not the current combination
-    int max_depth;
+    int current_max_depth;
     int previous_piece_priority_array[NB_OF_PIECES];
-    max_depth = 0;
+    current_max_depth = 0;
     previous_piece_priority_array[0] = -1;
 
     // variable to explore current piece_idx_priority_array
@@ -568,13 +568,13 @@ void run_algorithm_without_display(int level_num)
         // the algorithm can work without this last informations, but it is meant to skip obviously useless iterations
         load_combination_data(board, &start_combinations, combination_idx, piece_idx_priority_array, &nb_of_playable_pieces, playable_side_per_piece_idx_mask);
 
-        if (is_current_combination_skippable(max_depth, piece_idx_priority_array, previous_piece_priority_array))
+        if (is_current_combination_skippable(current_max_depth, piece_idx_priority_array, previous_piece_priority_array))
             continue;
 
         // Setup the exploration of the current combination
         piece_selected = 0;
         backtrack_iteration = false;
-        max_depth = 0;
+        current_max_depth = 0;
 
         // Loop to explore the current combination
         // The backtracking part is made by decrementing "piece_selected"
@@ -589,7 +589,7 @@ void run_algorithm_without_display(int level_num)
                 // case where the first piece used all its position possibilities, which means there are no solution with current combination
 
                 // copy the current piece_priority_array up to the failure point
-                for (int i = 0; i < max_depth + 1; i++)
+                for (int i = 0; i < current_max_depth + 1; i++)
                     previous_piece_priority_array[i] = piece_idx_priority_array[i];
 
                 break;
@@ -655,10 +655,9 @@ void run_algorithm_without_display(int level_num)
                             valid_board_count++;
                             // printf("new valid board found ! %d\n", valid_board_count);
 
-                            // record max_depth (after "piece_selected++" to have effectively piece_selected+1)
-                            // (+1, because piece_selected = 0 <=> depth = 1)
-                            if (piece_selected > max_depth)
-                                max_depth = piece_selected;
+                            // record current_max_depth
+                            if (board->nb_of_added_pieces > current_max_depth)
+                                current_max_depth = board->nb_of_added_pieces;
 
                             goto next_piece;
                         }
@@ -767,10 +766,14 @@ void run_algorithm_with_extra_display(int level_num, int FPS)
     bool playable_side_per_piece_idx_mask[NB_OF_PIECES][MAX_NB_OF_SIDE_PER_PIECE];
 
     // Variables used to make the decision to skip or not the current combination
-    int max_depth;
+    int current_max_depth;
     int previous_piece_priority_array[NB_OF_PIECES];
-    max_depth = 0;
+    current_max_depth = 0;
     previous_piece_priority_array[0] = -1;
+
+    // @todo comment
+    PieceAddInfos board_savestates[MAX_DEPTH][MAX_SAVESTATES_PER_DEPTH][NB_OF_PIECES];
+    int number_of_savestates_per_depth[MAX_DEPTH] = {0};
 
     // variable to explore current piece_idx_priority_array
     // basically the depth at which the algorithm currently is, in the search tree
@@ -805,13 +808,13 @@ void run_algorithm_with_extra_display(int level_num, int FPS)
         // the algorithm can work without this last informations, but it is meant to skip obviously useless iterations
         load_combination_data(board, &start_combinations, combination_idx, piece_idx_priority_array, &nb_of_playable_pieces, playable_side_per_piece_idx_mask);
 
-        if (is_current_combination_skippable(max_depth, piece_idx_priority_array, previous_piece_priority_array))
+        if (is_current_combination_skippable(current_max_depth, piece_idx_priority_array, previous_piece_priority_array))
             continue;
 
         // Setup the exploration of the current combination
         piece_selected = 0;
         backtrack_iteration = false;
-        max_depth = 0;
+        current_max_depth = 0;
 
         extra_draw(board, level_num, piece_idx_priority_array, piece_selected, nb_of_playable_pieces, playable_side_per_piece_idx_mask);
 
@@ -828,7 +831,7 @@ void run_algorithm_with_extra_display(int level_num, int FPS)
                 // case where the first piece used all its position possibilities, which means there are no solution with current combination
 
                 // copy the current piece_priority_array up to the failure point
-                for (int i = 0; i < max_depth + 1; i++)
+                for (int i = 0; i < current_max_depth + 1; i++)
                     previous_piece_priority_array[i] = piece_idx_priority_array[i];
 
                 break;
@@ -893,19 +896,15 @@ void run_algorithm_with_extra_display(int level_num, int FPS)
                             }
                             // case where we successfully added a piece
                             update_piece_all_drawing(piece, false, false);
-                            piece->current_side_idx = piece->current_side_idx;
-                            piece->current_base_pos = piece->current_base_pos;
-                            piece->current_rotation_state = piece->current_rotation_state;
                             piece_selected++;
                             valid_board_count++;
                             if (enable_slow_operations)
                                 printf("new valid board found ! %d\n", valid_board_count);
                             extra_draw(board, level_num, piece_idx_priority_array, piece_selected, nb_of_playable_pieces, playable_side_per_piece_idx_mask);
 
-                            // record max_depth (after "piece_selected++" to have effectively piece_selected+1)
-                            // (+1, because piece_selected = 0 <=> depth = 1)
-                            if (piece_selected > max_depth)
-                                max_depth = piece_selected;
+                            // record current_max_depth
+                            if (board->nb_of_added_pieces > current_max_depth)
+                                current_max_depth = board->nb_of_added_pieces; // @todo don't forget to change "screen_solver" here too
 
                             goto next_piece;
                         }

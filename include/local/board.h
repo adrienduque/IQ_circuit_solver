@@ -39,6 +39,7 @@ typedef struct Board
     Piece piece_array[NB_OF_PIECES];         // all game pieces informations and their live data cache, see piece_data.h
     int added_piece_idx_array[NB_OF_PIECES]; // array of indexes of game pieces that have been added to the board
     int nb_of_added_pieces;                  // length of matching array
+    int nb_of_level_pieces;                  // there might be level piece indexes in the added_piece_idx_array that we want to distinguish
 
     // Useful information for double missing connection pre-adding check
     Vector2_int bend_double_missing_connection_position;

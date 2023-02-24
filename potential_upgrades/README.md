@@ -78,3 +78,11 @@ In the function "is_current_combination_skippable", we can know the "similarity_
 The algorithm will now have to begin from the found savestates (to test the first piece that is not common) (and there can be multiple savestates to test here). and make "piece_selected" in agreement with the savestate. -> thus, this is a new loop between the setup of the next combination to test, and before testing the first piece in the actual algorithm.
 
 (and not display the switch between combinations anymore ? It would make this switch stuttery ?)
+
+## Reorder pieces again ?
+
+The issue with the board savestates improvement is that it will only improves performance of the algorithm in levels which have a lot of open point pieces. Indeed, they are the one in which consecutive combinations can have a lot of pieces in common.
+
+Why don't we try to have a fixed priority order of pieces to play, the combination will only decide which pieces play their side with a point, and which don't.
+
+It would make the overall solver benefit more from the board savestates improvement.

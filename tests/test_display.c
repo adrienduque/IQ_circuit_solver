@@ -323,8 +323,6 @@ char *board_interactive_display_test()
     Board *board = init_board(level_hints);
     update_board_static_drawing(board);
 
-    int nb_of_level_pieces = board->nb_of_added_pieces;
-
     // input variables
     int piece_idx = -1;
     int side_idx = 0;
@@ -384,7 +382,7 @@ char *board_interactive_display_test()
             system("cls");
             // print_controls();
             printf("Currently trying to remove the last piece added to the board...\n");
-            if (board->nb_of_added_pieces > nb_of_level_pieces)
+            if (board->nb_of_added_pieces > board->nb_of_level_pieces)
             {
                 undo_last_piece_adding(board);
                 printf("Success !\n");
@@ -417,7 +415,6 @@ char *board_interactive_display_test()
             level_hints = get_level_hints(level_num);
             board = init_board(level_hints);
             update_board_static_drawing(board);
-            nb_of_level_pieces = board->nb_of_added_pieces;
 
             // to account for already played pieces (obligatory pieces from level hints)
             piece_idx = -1;
