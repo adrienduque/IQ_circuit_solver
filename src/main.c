@@ -37,8 +37,15 @@ static bool onTransition;
  * + https://ezgif.com/video-to-gif to show to github
  */
 
+void previous_main(void);
+void alternative_main(void);
+
 int main(void)
 {
+
+    // previous_main();
+    alternative_main();
+    return 0;
 #ifndef AUTOMATED_RUNS
 
     setup_display((BOARD_WIDTH + 9) * tile_px_width, (BOARD_HEIGHT + 5) * tile_px_width);
@@ -247,6 +254,28 @@ void previous_main(void)
     // run_algorithm_without_display(level_num);
 
     run_algorithm_with_extra_display(level_num, 0);
+
+    printf("\n");
+}
+
+void alternative_main(void)
+{
+
+    int level_num;
+
+    printf("Welcome to Spaghetti solver.\n\n");
+    printf("Enter the level number you want to solve (49 to 120 included) : ");
+    scanf("%3d", &level_num);
+    while (level_num < 49 || level_num > 120)
+    {
+        system("cls");
+        printf("Enter the level number you want to solve (49 to 120 included) : ");
+        scanf("%3d", &level_num);
+    }
+    run_alternative_algorithm(level_num, 10);
+
+    // for (int level_num = 49; level_num <= 120; level_num++)
+    //     run_alternative_algorithm(level_num, 0);
 
     printf("\n");
 }

@@ -1,0 +1,73 @@
+ 49 : solved -> 13 | 26
+ 50 : solved -> 14 | 26
+ 51 : solved -> 11 | 22
+ 52 : solved -> 14 | 31
+ 53 : solved -> 10 | 24
+ 54 : solved -> 10 | 25
+ 55 : solved -> 16 | 30
+ 56 : solved -> 14 | 28
+ 57 : solved -> 16 | 33
+ 58 : solved -> 10 | 22
+ 59 : solved -> 10 | 24
+ 60 : solved -> 27 | 43
+ 61 : solved -> 10 | 25
+ 62 : solved -> 19 | 34
+ 63 : solved -> 15 | 29
+ 64 : solved -> 10 | 24
+ 65 : solved -> 12 | 25
+ 66 : solved -> 25 | 39
+ 67 : solved -> 24 | 38
+ 68 : solved -> 17 | 32
+ 69 : solved -> 10 | 24
+ 70 : solved -> 22 | 38
+ 71 : solved -> 11 | 23
+ 72 : solved -> 14 | 27
+ 73 : solved -> 14 | 26
+ 74 : solved -> 6 | 17
+ 75 : solved -> 15 | 26
+ 76 : solved -> 6 | 19
+ 77 : solved -> 9 | 24
+ 78 : solved -> 18 | 30
+ 79 : solved -> 16 | 28
+ 80 : solved -> 9 | 21
+ 81 : solved -> 161 | 286
+ 82 : solved -> 30 | 44
+ 83 : solved -> 10 | 23
+ 84 : solved -> 182 | 315
+ 85 : solved -> 27 | 41
+ 86 : solved -> 26 | 41
+ 87 : solved -> 24 | 40
+ 88 : solved -> 42 | 65
+ 89 : solved -> 9 | 24
+ 90 : solved -> 60 | 177
+ 91 : solved -> 425 | 625
+ 92 : solved -> 68 | 184
+ 93 : solved -> 459 | 628
+ 94 : solved -> 89 | 217
+ 95 : solved -> 12 | 27
+ 96 : solved -> 560 | 752
+ 97 : solved -> 1738 | 2062
+ 98 : solved -> 414 | 580
+ 99 : solved -> 4542 | 5240
+100 : solved -> 36 | 150
+101 : solved -> 73 | 189
+102 : solved -> 446 | 632
+103 : solved -> 259 | 399
+104 : solved -> 92 | 209
+105 : solved -> 7130 | 8317
+106 : solved -> 2153 | 2594
+107 : solved -> 207 | 373
+108 : solved -> 10 | 30
+109 : solved -> 484 | 666
+110 : solved -> 336 | 485
+111 : solved -> 1051 | 1305
+112 : solved -> 2757 | 3362
+113 : solved -> 256 | 461
+114 : solved -> 654 | 1025
+115 : solved -> 8117 | 9727
+116 : solved -> 18949 | 22052
+117 : solved -> 9894 | 11881
+118 : solved -> 2652 | 3233
+119 : solved -> 138 | 271
+120 : solved -> 409 | 596
+

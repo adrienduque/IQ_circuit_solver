@@ -128,6 +128,8 @@ Board *init_board(LevelHints *level_hints)
             board->open_obligatory_point_tile_array[i] = &(level_hints->obligatory_tile_array[level_hints->open_obligatory_point_tile_idx_array[i]]);
     }
 
+    board->nb_of_level_pieces = board->nb_of_added_pieces;
+
     return board;
 }
 
@@ -315,10 +317,14 @@ static int can_piece_be_added_to_board(Board *board, int piece_idx, Side *side, 
         if (!is_pos_inside_board(&(current_tile->absolute_pos)))
             return OUT_OF_BOUNDS;
 
+        existing_tile_stack = board->tile_matrix[current_tile->absolute_pos.i][current_tile->absolute_pos.j];
+        // @todo temp for alternative search algorithm
+        obligatory_tile = board->obligatory_tile_matrix[current_tile->absolute_pos.i][current_tile->absolute_pos.j];
+        if (existing_tile_stack == UNDEFINED_TILE && obligatory_tile != UNDEFINED_TILE && obligatory_tile->tile_type == point)
+            return TILE_NOT_MATCHING_LEVEL_HINTS;
+
         // connection directions are needed for all further checks
         tile_connection_directions_computation(); // see piece.h
-
-        existing_tile_stack = board->tile_matrix[current_tile->absolute_pos.i][current_tile->absolute_pos.j];
 
         if (existing_tile_stack == UNDEFINED_TILE)
             continue; // case where the board is free at this position, there's no further checks
