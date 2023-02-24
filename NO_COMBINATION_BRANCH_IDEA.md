@@ -28,7 +28,7 @@ I can see a few advantages :
 
 See main.c and search_algorithm_alternative.c
 
-You can see built binaries and their stats in showcase_binaries_and_assets/no_combination_branch_stats directory @todo:link.
+You can see built binaries and their stats in [showcase_binaries_and_assets/no_combination_branch_stats](https://github.com/adrienduque/IQ_circuit_solver/tree/no_combination_branch/showcase_binaries_and_assets/no_combination_branch_stats) directory.
 
 V1 differs from V0, as I wanted to not allow the superposition of missing connections to open points of a level, because there is a lot of valid boards with this pattern in V0.
 
