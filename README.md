@@ -324,6 +324,8 @@ How did I improved its performance ?
 - (To give you a glimpse of it, in the first complete version of the algorithm, the number of valid boards goes to tens of millions (level 120).
 Whereas, V5.2 only has 2365 valid boards to explore before finding the solution.)
 
+I also tried other derived algorithm ideas, see [no_combination_branch](https://github.com/adrienduque/IQ_circuit_solver/blob/no_combination_branch/NO_COMBINATION_BRANCH_IDEA.md).
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## License
