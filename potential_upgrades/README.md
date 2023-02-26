@@ -86,3 +86,19 @@ The issue with the board savestates improvement is that it will only improves pe
 Why don't we try to have a fixed priority order of pieces to play, the combination will only decide which pieces play their side with a point, and which don't.
 
 It would make the overall solver benefit more from the board savestates improvement.
+
+## Trying a better(?) default piece priority order
+
+In my other branch, I tried other default priority orders, the one that performed best was {Z_PIECE, SQUARE, T_PIECE, L_PIECE, CORNER_2, CORNER_1, LINE3_2, LINE3_1, LINE2_2, LINE2_1}. (E.g: 4 tiles point pieces, then the remaining 4 tiles pieces, then the 3 tiles pieces with only 2 playable sides, then 3 tiles pieces with 3 playable side, then the remaining smaller pieces).
+
+The current order is {Z_PIECE, T_PIECE, L_PIECE, SQUARE, CORNER_2, CORNER_1, LINE3_2, LINE3_1, LINE2_2, LINE2_1}.
+
+Thus this means promoting the square-shaped piece to an higher priority, because it has a point (compared to T and L shaped pieces), which constrains a lot of this side playable positions.
+
+## Reworking again double missing connection checks
+
+In my other branch, I realized that a superposition between a missing connection tile and an open level point, can be considered the same as a double missing connection case. (This is Case 1 of this readme @todo:link).
+
+And I successfully made a system which works as such : "as soon as a piece is making a superposition between a missing connection tile and an open level point, immediatly try to add the only piece that can fill this tile (i.e. : the CORNER 1 piece), and if it doesn't fit, remove the piece as if a check didn't pass".
+
+It was ugly, and seemed like over-specialized, but it worked well. And the same principle can be applied to the T and Line2 2 pieces, since they are the only pieces that can respectively fill a bend-shaped double missing connection tile, and a line-shaped double missing connection tile.
