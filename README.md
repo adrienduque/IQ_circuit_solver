@@ -22,7 +22,7 @@ Of course, I recommend to check out the actual puzzle, which has such a cool des
   <br>
   <br>
 
-This is my first big and "official" project not only in C, but in general. I'm pretty much self-taught and learned a lot through the making of this project. I'm open to upgrade suggestions on the actual code, and especially on the whole presentation/convention side of things, as I feel I'm missing on. I'm not a native English speaker as well, so let me know if you spot any mistake.
+This is my first big and "official" project not only in C, but in general. I'm pretty much self-taught and learned a lot through the making of this project. I'm open to upgrade suggestions on the actual code, and especially on the whole presentation/convention side of things, as I feel I'm missing on. I'm not a native English speaker as well.
 
 So if you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
 
@@ -105,7 +105,7 @@ The type of level hints depens on the difficulty, and they consist of pre-added 
 <img src= "https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/level_86_second_tested_combination.png">
 <img src= "https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/level_86_actual_solution_combination.png">
 
-This last combination leads to the solution ! Meaning that this is the correct choice (combination) to the question : "What pieces should we pick to fill the open points in level 86 ?".
+This last combination leads to the solution ! Meaning that this is the correct choice (combination) to the question : "Which pieces should we pick to fill the open points in level 86 ?".
 
 ---
 
@@ -296,11 +296,11 @@ Each new combination is a new tree.
 
 <img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/tree_example.png">
 
-Example of a tree (which is not fully represented of course).
+_Example of a tree (which is not fully represented of course)._
 
 <img src="https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/tree_example_path.png">
 
-The path that the algorithm is taking to explore this tree, based on the decisions made in [step 4) Game board checking](https://github.com/adrienduque/IQ_circuit_solver#4-game-board-checkingvalidation).
+_The path that the algorithm is taking to explore this tree, based on the decisions made in [step 4) Game board checking](https://github.com/adrienduque/IQ_circuit_solver#4-game-board-checkingvalidation)._
 
 While this project is still in development, we can mesure the pure logic performance of the algorithm by counting the number of valid boards that it had to go through to find the final one that is the solution to the level.
 It's like counting the number of explored nodes that the algorithm didn't close.
