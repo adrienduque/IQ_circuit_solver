@@ -97,7 +97,7 @@ Thus this means promoting the square-shaped piece to an higher priority, because
 
 ## Reworking again double missing connection checks
 
-In my other branch, I realized that a superposition between a missing connection tile and an open level point, can be considered the same as a double missing connection case. (This is Case 1 of this readme @todo:link).
+In my other branch, I realized that a superposition between a missing connection tile and an open level point, can be considered the same as a double missing connection case. (This is [Case 1](https://github.com/adrienduque/IQ_circuit_solver/tree/master/potential_upgrades#case-1) of this readme).
 
 And I successfully made a system which works as such : "as soon as a piece is making a superposition between a missing connection tile and an open level point, immediatly try to add the only piece that can fill this tile (i.e. : the CORNER 1 piece), and if it doesn't fit, remove the piece as if a check didn't pass".
 
