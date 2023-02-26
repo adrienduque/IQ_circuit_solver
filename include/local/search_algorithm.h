@@ -45,6 +45,4 @@ void run_algorithm_with_display(int level_num, int FPS);
 void run_algorithm_without_display(int level_num);
 void run_algorithm_with_extra_display(int level_num, int FPS);
 
-void run_alternative_algorithm(int level_num, int FPS);
-
 #endif

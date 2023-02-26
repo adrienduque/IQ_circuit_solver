@@ -36,13 +36,9 @@ static bool onTransition;
  * + record a video of solver when I decided to not upgrade the solver anymore
  * + https://ezgif.com/video-to-gif to show to github
  */
-void previous_main(void);
 
 int main(void)
 {
-    // @todo : temp while V8 is in development
-    previous_main();
-    return 0;
 
 #ifndef AUTOMATED_RUNS
 

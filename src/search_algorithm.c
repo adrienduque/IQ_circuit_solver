@@ -100,13 +100,12 @@
 
 #include <raylib/raylib.h> // WindowShouldClose, CloseWindow, BeginDrawing, EndDrawing, ClearBackground, DrawFPS, SetTargetFPS
 
-#include <local/utils.h>             // Vector2_int, generate_next_combination and defines
-#include <local/piece_data.h>        // Tile, Side, Piece and defines
-#include <local/level_data.h>        // LevelHints, and defines
-#include <local/board.h>             // Board, helper functions and defines
-#include <local/check_board.h>       // run_all_checks
-#include <local/display.h>           // tile_px_width, and other drawing functions
-#include <local/board_save_states.h> // savestates helper functions and defines
+#include <local/utils.h>       // Vector2_int, generate_next_combination and defines
+#include <local/piece_data.h>  // Tile, Side, Piece and defines
+#include <local/level_data.h>  // LevelHints, and defines
+#include <local/board.h>       // Board, helper functions and defines
+#include <local/check_board.h> // run_all_checks
+#include <local/display.h>     // tile_px_width, and other drawing functions
 
 #include <local/search_algorithm.h>
 
@@ -770,10 +769,6 @@ void run_algorithm_with_extra_display(int level_num, int FPS)
     int previous_piece_priority_array[NB_OF_PIECES];
     current_max_depth = 0;
     previous_piece_priority_array[0] = -1;
-
-    // @todo comment
-    PieceAddInfos board_savestates[MAX_DEPTH][MAX_SAVESTATES_PER_DEPTH][NB_OF_PIECES];
-    int number_of_savestates_per_depth[MAX_DEPTH] = {0};
 
     // variable to explore current piece_idx_priority_array
     // basically the depth at which the algorithm currently is, in the search tree
