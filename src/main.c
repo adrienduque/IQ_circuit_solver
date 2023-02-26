@@ -260,7 +260,7 @@ void previous_main(void)
 
 void alternative_main(void)
 {
-
+#ifndef AUTOMATED_RUNS
     int level_num;
 
     printf("Welcome to Spaghetti solver.\n\n");
@@ -274,8 +274,11 @@ void alternative_main(void)
     }
     run_alternative_algorithm(level_num, 10);
 
-    // for (int level_num = 49; level_num <= 120; level_num++)
-    //     run_alternative_algorithm(level_num, 0);
+#else
+    for (int level_num = 49; level_num <= 120; level_num++)
+        run_alternative_algorithm(level_num, 0);
+
+#endif
 
     printf("\n");
 }

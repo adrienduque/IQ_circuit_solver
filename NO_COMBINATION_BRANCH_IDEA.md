@@ -42,7 +42,17 @@ V1 is too focused on the CORNER_1 piece.
 
 If I would like to make this version of the algorithm actually perfect, I would make a system to only allow 1 superposition of a missing connection and an open level point, then try to play CORNER_1 point side immediatly after and see if it fits. e.g.: making the adding of CORNER_1 separated from the priority piece array.
 
-But I feel like it's over-engineered.
+But I feel like it's over-engineered, the resulting algorithm would be very specialized and this is not what I want to show.
+
+I did it anyway (see V2 prototype commit). It's ugly and not even more efficient (80544 total valid board states), it's relying to much on the position of the first piece.
+
+If the default priority order of V2 is the same as V1 (CORNER_1 is played first), V2 has the exact same performances as V1.
+
+If the default priority order of V2 is the same as V0, there are 26289 total board states, meaning that I was wrong above when I wanted to change the default priority order to promote 3 tiles piece with a point over 4 tiles pieces without point. It is called "v2_prototype_0".
+
+Maybe I can push this a little further by having the following priority order : {Z_PIECE, SQUARE, T_PIECE, L_PIECE, CORNER_2, CORNER_1, LINE3_2, LINE3_1, LINE2_2, LINE2_1}. (E.g: promoting the square piece to an higher priority, since it is a piece composed of 4 tiles and have a side with a point (compared to T and L pieces)).
+
+Results : 21313 total valid board states. It is called "v2_prototype_bis". Even if this is my current best performing algorithm, it's not a fair comparaison with the master branch version, since this idea could also be implemented with combinations.
 
 # Depth first search vs Breadth first search
 
@@ -68,6 +78,6 @@ To make the algorithm explore as less valid board states as possible, we must cr
 
 This is what explained the fact that giving the priority to bigger pieces, was an efficient choice.
 
-But it also applies to point pieces. If a piece is forced to play its side with a point, and if there is not much open level points on the board, the piece have very few playable positions. Therefore having a system to play point pieces first is efficient, even if we have to switch between multiple priority list of pieces to play (to test different point pieces to play first).
+But it also applies to point pieces. If a piece is forced to play its side with a point, and if there is not much open level points on the board, the piece have very few playable positions. Therefore having a system to play point pieces first is efficient, even if we have to switch between multiple priority list of pieces to play (to test different point pieces to play first). We also don't have to rely too much on the first piece played position, by having multiple trees to explore.
 
 The only real improvement of having only 1 tree to explore is that we don't have the issue where the algorithm may have duplicate computations (between different combinations). But this is what V8 of the master branch is built for.

@@ -31,16 +31,17 @@ static bool playable_side_per_piece_idx_mask[NB_OF_PIECES][MAX_NB_OF_SIDE_PER_PI
 static void prepare_piece_idx_priority_array(Board *board, int piece_idx_priority_array[NB_OF_PIECES], int *nb_of_playable_pieces)
 {
     static bool piece_found;
-    static int default_piece_idx_priority_array[NB_OF_PIECES] = {CORNER_1,
-                                                                 Z_PIECE,
-                                                                 SQUARE,
-                                                                 CORNER_2,
-                                                                 T_PIECE,
-                                                                 L_PIECE,
-                                                                 LINE3_2,
-                                                                 LINE3_1,
-                                                                 LINE2_2,
-                                                                 LINE2_1};
+    static int default_piece_idx_priority_array[NB_OF_PIECES] = {
+        Z_PIECE,
+        SQUARE,
+        CORNER_1,
+        CORNER_2,
+        T_PIECE,
+        L_PIECE,
+        LINE3_2,
+        LINE3_1,
+        LINE2_2,
+        LINE2_1};
 
     static int piece_idx;
 
@@ -64,6 +65,36 @@ static void prepare_piece_idx_priority_array(Board *board, int piece_idx_priorit
         piece_idx_priority_array[*nb_of_playable_pieces] = piece_idx;
         (*nb_of_playable_pieces)++;
     }
+}
+
+// returns 0 -> corner_1 has been requested but doesn't fit
+// returns 1 -> corner_1 doesn't have been requested
+// returns 2 -> corner_1 has been requested and it fit !
+static int is_corner_1_case_resolved(Board *board, bool enable_slow_operations)
+{
+    static int rotation_state;
+
+    if (board->has_corner_1_been_added || !is_pos_valid(&(board->requested_corner_1_adding_position)))
+        // corner_1 is already on the board or did not have been requested this time
+        return 1;
+
+    // case where the corner_1 adding has been requested
+    // if it's not successfully added, we must return false
+    for (rotation_state = 0; rotation_state < NB_OF_DIRECTIONS; rotation_state++)
+    {
+        if (add_piece_to_board(board, CORNER_1, 0, board->requested_corner_1_adding_position, rotation_state) != 1)
+            continue;
+        if (run_all_checks(board, enable_slow_operations) != 1)
+        {
+            undo_last_piece_adding(board);
+            continue;
+        }
+        update_piece_all_drawing((board->piece_array) + CORNER_1, false, false);
+        return 2;
+    }
+
+    set_invalid_pos(&(board->requested_corner_1_adding_position));
+    return 0;
 }
 
 static void setup_extra_draw(Board *board)
@@ -115,9 +146,28 @@ void run_alternative_algorithm(int level_num, int FPS)
 
     // "add_piece_to_board" input parameters
     int piece_idx;
-    int side_idx;
-    Vector2_int base_pos;
-    int rotation_state;
+
+    // Variables to retain where each piece was previously added to backtrack from it
+    // this is core to the main algorithm, a feature that was made possible by Piece::current_** members previously
+    // but "is_corner_1_case_resovled" function is corrupting these members values, skipping important board states
+    // This is my bad not doing thing in a modular way in the past, or at least not enough
+    PieceAddInfos current_pos_array[NB_OF_PIECES];
+    PieceAddInfos *current_pos;
+
+    for (int i = 0; i < NB_OF_PIECES; i++)
+    {
+        current_pos_array[i].piece_idx = 0; // we don't even need it
+        current_pos_array[i].base_pos = (Vector2_int){0, 0};
+        current_pos_array[i].side_idx = 0;
+        current_pos_array[i].rotation_state = 0;
+    }
+
+    // when a piece is successfully added with the corner_1 at the same time
+    //  (passing the check of "is_corner_1_case_resolved")
+    //  we might later backtrack to it, thus removing it, to try to play it in an other way
+    //  we have to remove corner_1 with it !
+    int piece_selected_that_added_corner_1_with_it = -1;
+    int return_value;
 
     // variable to count valid boards and mesure logic performance, see this file description
     int valid_board_count = 0;
@@ -154,30 +204,58 @@ void run_alternative_algorithm(int level_num, int FPS)
         }
         // ---
 
+        // setup
+        piece_idx = piece_idx_priority_array[piece_selected];
+
+        // Special cases when corner_1 is selected as a normal piece part of the priority list
+        if (piece_idx == CORNER_1)
+        {
+
+            if (!backtrack_iteration && board->has_corner_1_been_added)
+            {
+                // skip adding corner 1 normally, if the piece was already added by a previous "is_corner_1_case_resolved" function call
+                piece_selected++;
+                goto next_piece;
+            }
+            else if (backtrack_iteration && piece_selected_that_added_corner_1_with_it != -1)
+            {
+                // skip removing corner 1 normally, because it will be removed with the piece that added it with a "is_corner_1_case_resolved" function call
+                piece_selected--;
+                goto next_piece;
+            }
+        }
+
         // if we are currently backtracking, the piece needs to be removed
         // before being re-added
         if (backtrack_iteration)
+        {
             undo_last_piece_adding(board);
+
+            if (piece_selected == piece_selected_that_added_corner_1_with_it)
+            {
+                undo_last_piece_adding(board); // also remove corner_1
+                piece_selected_that_added_corner_1_with_it = -1;
+            }
+        }
 
         // Part where the algorithm try all current piece position possibilities
         // Starting from its previous position
 
-        // setup
-        piece_idx = piece_idx_priority_array[piece_selected];
         piece = (board->piece_array) + piece_idx;
+        current_pos = current_pos_array + piece_idx;
 
         // loop
-        for (side_idx = piece->current_side_idx; side_idx < piece->nb_of_sides; side_idx++)
+        for (; (current_pos->side_idx) < piece->nb_of_sides; (current_pos->side_idx)++)
         {
-            for (base_pos.i = piece->current_base_pos.i; base_pos.i < BOARD_WIDTH; (base_pos.i)++)
+            for (; (current_pos->base_pos.i) < BOARD_WIDTH; (current_pos->base_pos.i)++)
             {
-                for (base_pos.j = piece->current_base_pos.j; base_pos.j < BOARD_HEIGHT; (base_pos.j)++)
+                for (; (current_pos->base_pos.j) < BOARD_HEIGHT; (current_pos->base_pos.j)++)
                 {
                     // don't even consider adding the piece at this position if there's already a normal tile on the board
-                    if (is_position_already_occupied(board, &base_pos))
+                    if (is_position_already_occupied(board, &(current_pos->base_pos)))
                         continue;
 
-                    for (rotation_state = piece->current_rotation_state; rotation_state < piece->side_array[side_idx].max_nb_of_rotations; rotation_state++)
+                    for (; (current_pos->rotation_state) < piece->side_array[(current_pos->side_idx)].max_nb_of_rotations; (current_pos->rotation_state)++)
                     {
                         if (WindowShouldClose())
                             goto quit_algorithm;
@@ -192,13 +270,30 @@ void run_alternative_algorithm(int level_num, int FPS)
                         }
 
                         // Board pre-adding, adding piece, and post-adding checks
-                        if (add_piece_to_board(board, piece_idx, side_idx, base_pos, rotation_state) != 1)
+                        if (add_piece_to_board(board, piece_idx, (current_pos->side_idx), (current_pos->base_pos), (current_pos->rotation_state)) != 1)
                             continue;
                         if (run_all_checks(board, enable_slow_operations) != 1)
                         {
                             undo_last_piece_adding(board);
                             continue;
                         }
+
+                        // special case of corner_1
+                        return_value = is_corner_1_case_resolved(board, enable_slow_operations);
+                        if (!return_value)
+                        {
+                            // we requested adding corner_1 as part of a fit check
+                            // and it didn't pass
+                            undo_last_piece_adding(board);
+                            continue;
+                        }
+                        else if (return_value == 2)
+                        {
+                            // we successfully added corner_1 on a missing connection superposed to an open level point
+                            piece_selected_that_added_corner_1_with_it = piece_selected;
+                            valid_board_count++; // to not cheat on this stat
+                        }
+
                         // case where we successfully added a piece
                         update_piece_all_drawing(piece, false, false);
 
@@ -210,13 +305,13 @@ void run_alternative_algorithm(int level_num, int FPS)
 
                         goto next_piece;
                     }
-                    piece->current_rotation_state = 0;
+                    current_pos->rotation_state = 0;
                 }
-                piece->current_base_pos.j = 0;
+                current_pos->base_pos.j = 0;
             }
-            piece->current_base_pos.i = 0;
+            current_pos->base_pos.i = 0;
         }
-        piece->current_side_idx = 0;
+        current_pos->side_idx = 0;
         // the current piece has gone through all its possible positions
         // we need to backtrack (try to move the previous piece)
         piece_selected--;

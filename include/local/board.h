@@ -50,6 +50,11 @@ typedef struct Board
     Vector2_int temp_bend_double_missing_connection_position;
     Vector2_int temp_line_double_missing_connection_position;
 
+    Vector2_int requested_corner_1_adding_position;
+    Vector2_int temp_requested_corner_1_adding_position;
+
+    bool has_corner_1_been_added;
+
     // ------ Drawing data specific to the board
     Vector2 grid_lines_pt_array[NB_OF_GRID_LINES][2];
     Tile *obligatory_tile_array; // instead of finding them in obligatory tile matrix to draw them, this is a direct copy from level hints see level_data.c

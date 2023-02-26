@@ -55,6 +55,9 @@ Board *init_board(LevelHints *level_hints)
     board->has_T_piece_been_added = false;
     board->has_line2_2_been_added = false;
 
+    board->has_corner_1_been_added = false;
+    set_invalid_pos(&(board->requested_corner_1_adding_position));
+
     // 2) Set every tile pointer to UNDEFINED_TILE (NULL pointer)
     for (int i = 0; i < BOARD_WIDTH; i++)
     {
@@ -300,6 +303,8 @@ static int can_piece_be_added_to_board(Board *board, int piece_idx, Side *side, 
     board->temp_bend_double_missing_connection_position = board->bend_double_missing_connection_position;
     board->temp_line_double_missing_connection_position = board->line_double_missing_connection_position;
 
+    board->temp_requested_corner_1_adding_position = board->requested_corner_1_adding_position;
+
     // Missing connection tiles are checked in first, as there are usually less of them in game pieces
     // Less checks to be done to them compared to normal tiles
     // and they are more likely to be blitted out of bounds in the first place
@@ -318,10 +323,18 @@ static int can_piece_be_added_to_board(Board *board, int piece_idx, Side *side, 
             return OUT_OF_BOUNDS;
 
         existing_tile_stack = board->tile_matrix[current_tile->absolute_pos.i][current_tile->absolute_pos.j];
-        // @todo temp for alternative search algorithm
+
         obligatory_tile = board->obligatory_tile_matrix[current_tile->absolute_pos.i][current_tile->absolute_pos.j];
         if (existing_tile_stack == UNDEFINED_TILE && obligatory_tile != UNDEFINED_TILE && obligatory_tile->tile_type == point)
-            return TILE_NOT_MATCHING_LEVEL_HINTS;
+        {
+            if (board->has_corner_1_been_added || piece_idx == CORNER_1 || is_pos_valid(&(board->temp_requested_corner_1_adding_position)))
+                // in this case, we are trying to add more than one corner_1 piece
+                return TILE_NOT_MATCHING_LEVEL_HINTS;
+
+            // case where we request the algorithm to try to add corner_1 at this position next time
+            // to see even if this play is valid
+            board->temp_requested_corner_1_adding_position = current_tile->absolute_pos;
+        }
 
         // connection directions are needed for all further checks
         tile_connection_directions_computation(); // see piece.h
@@ -521,6 +534,9 @@ int add_piece_to_board(Board *board, int piece_idx, int side_idx, Vector2_int ba
     case T_PIECE:
         board->has_T_piece_been_added = true;
         break;
+    case CORNER_1:
+        board->has_corner_1_been_added = true;
+        break;
     default:
         break;
     }
@@ -528,6 +544,8 @@ int add_piece_to_board(Board *board, int piece_idx, int side_idx, Vector2_int ba
     // dump the proxy variable values, if we actually can add the piece to the board
     board->bend_double_missing_connection_position = board->temp_bend_double_missing_connection_position;
     board->line_double_missing_connection_position = board->temp_line_double_missing_connection_position;
+
+    board->requested_corner_1_adding_position = board->temp_requested_corner_1_adding_position;
 
     // Record that we actually added the piece
     board->added_piece_idx_array[board->nb_of_added_pieces] = piece_idx;
@@ -573,6 +591,9 @@ void undo_last_piece_adding(Board *board)
     if (is_pos_valid(&(board->line_double_missing_connection_position)) && get_number_of_missing_connection_in_stack(board->tile_matrix[board->line_double_missing_connection_position.i][board->line_double_missing_connection_position.j]) != 2)
         set_invalid_pos(&(board->line_double_missing_connection_position));
 
+    if (is_pos_valid(&(board->requested_corner_1_adding_position)) && get_number_of_missing_connection_in_stack(board->tile_matrix[board->requested_corner_1_adding_position.i][board->requested_corner_1_adding_position.j]) == 0)
+        set_invalid_pos(&(board->requested_corner_1_adding_position));
+
     // check if the piece added is a special piece that we care for double missing connection tiles
     // update state flags
     switch (piece_idx)
@@ -594,6 +615,12 @@ void undo_last_piece_adding(Board *board)
         if (get_number_of_missing_connection_in_stack(board->tile_matrix[current_tile->absolute_pos.i][current_tile->absolute_pos.j]) == 2)
             board->bend_double_missing_connection_position = current_tile->absolute_pos;
 
+        break;
+
+    case CORNER_1:
+        // reset the state of these variables
+        board->has_corner_1_been_added = false;
+        set_invalid_pos(&(board->requested_corner_1_adding_position));
         break;
     default:
         break;
