@@ -33,9 +33,7 @@ So if you have a suggestion that would make this better, please fork the repo an
 I don't feel like these assets are rightfully representing this project, because I mostly focused on its **speed** and that is what I want to show.
 Thus I really recommend to run yourself the demo **(see : [next section](https://github.com/adrienduque/IQ_circuit_solver#how-to-play-with-the-demo))**. Solving 1 level takes at most a few seconds on my mid range laptop, to give you an idea.
 
-+ @todo animated gif of the final version
-
-+ @todo maybe do a demo video in real time (ytb unlisted) ? with like a timer next to it, in order to better show the speed, regarding the note I just made
+<img src= "https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/demo_gif.gif">
 
 <img src= "https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/level_selection_screen.png">
 <img src= "https://github.com/adrienduque/IQ_circuit_solver/blob/master/showcase_binaries_and_assets/presentation_assets/game_screen.png">
