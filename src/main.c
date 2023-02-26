@@ -31,12 +31,6 @@ static void DrawTransition();
 static GameScreen currentScreen;
 static bool onTransition;
 
-/**
- * @todo : https://github.com/raysan5/raylib/discussions/1326
- * + record a video of solver when I decided to not upgrade the solver anymore
- * + https://ezgif.com/video-to-gif to show to github
- */
-
 int main(void)
 {
 
