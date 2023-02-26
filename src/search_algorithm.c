@@ -227,7 +227,7 @@ void load_combination_data(Board *board, StartCombinations *start_combinations, 
         }
         if (piece_found)
             continue;
-        for (i = 0; i < board->nb_of_added_pieces; i++)
+        for (i = 0; i < board->nb_of_level_pieces; i++)
         {
             if (board->added_piece_idx_array[i] == piece_idx)
             {
@@ -270,6 +270,21 @@ bool is_current_combination_skippable(int current_max_depth, int piece_priority_
             return false;
 
     return true;
+}
+
+//@todo maybe we can merge the combination skip and combination savestates functionnality
+// where the second feature would be the more general case that englobes the combination skip case
+
+int get_similarity_depth_from_previous_combination(int current_max_depth, int piece_priority_array[NB_OF_PIECES], int previous_piece_priority_array[NB_OF_PIECES])
+{
+
+    static int i;
+
+    for (i = 0; i < current_max_depth; i++)
+        if (piece_priority_array[i] != previous_piece_priority_array[i])
+            break;
+
+    return i; // similarity_depth of 0 means that the even the first piece of the combination is changed
 }
 
 // ----------------- Main algorithm mini sub routines ----------------------------------------------------------------------------
@@ -771,13 +786,15 @@ void run_algorithm_with_extra_display(int level_num, int FPS)
     current_max_depth = 0;
     previous_piece_priority_array[0] = -1;
 
-    // @todo comment
-    PieceAddInfos board_savestates[MAX_DEPTH][MAX_SAVESTATES_PER_DEPTH][NB_OF_PIECES];
-    int number_of_savestates_per_depth[MAX_DEPTH] = {0};
-
     // variable to explore current piece_idx_priority_array
-    // basically the depth at which the algorithm currently is, in the search tree
+    // basically the depth at which the algorithm currently is, in the search tree (actually piece_selected == depth - 1)
     int piece_selected;
+
+    // piece_selected (depth-1) at which instead of doing a normal backtrack, the algorithm start from a previous savestate
+    int piece_selected_trigger;
+    int savestate_selected;
+
+    init_board_savestates();
 
     // "add_piece_to_board" input parameters
     int piece_idx;
@@ -811,12 +828,27 @@ void run_algorithm_with_extra_display(int level_num, int FPS)
         if (is_current_combination_skippable(current_max_depth, piece_idx_priority_array, previous_piece_priority_array))
             continue;
 
-        // Setup the exploration of the current combination
-        piece_selected = 0;
-        backtrack_iteration = false;
-        current_max_depth = 0;
+        piece_selected_trigger = get_similarity_depth_from_previous_combination(current_max_depth, piece_idx_priority_array, previous_piece_priority_array) - 1;
 
-        extra_draw(board, level_num, piece_idx_priority_array, piece_selected, nb_of_playable_pieces, playable_side_per_piece_idx_mask);
+        // current depth is piece_selected + 1 (+ offset by board->nb_of_level_pieces) @todo refactor with new variables
+
+        reset_exceeding_board_savestates(piece_selected_trigger + 1 + board->nb_of_level_pieces);
+
+        // Setup the exploration of the current combination
+        if (piece_selected_trigger >= 0)
+        {
+            // to go to the first savestate directly
+            piece_selected = piece_selected_trigger;
+            backtrack_iteration = true;
+            current_max_depth = piece_selected + 1;
+        }
+        else
+        {
+            piece_selected = 0;
+            backtrack_iteration = 0;
+            current_max_depth = 0;
+        }
+        savestate_selected = 0;
 
         // Loop to explore the current combination
         // The backtracking part is made by decrementing "piece_selected"
@@ -831,17 +863,36 @@ void run_algorithm_with_extra_display(int level_num, int FPS)
                 // case where the first piece used all its position possibilities, which means there are no solution with current combination
 
                 // copy the current piece_priority_array up to the failure point
-                for (int i = 0; i < current_max_depth + 1; i++)
+                for (int i = piece_selected_trigger + 1; i < current_max_depth + 1; i++)
                     previous_piece_priority_array[i] = piece_idx_priority_array[i];
 
                 break;
             }
-
             else if (piece_selected == nb_of_playable_pieces)
             {
                 // case where the successfully added the last piece to the board
                 solved = true;
                 goto end_loop;
+            }
+            else if (backtrack_iteration && piece_selected == piece_selected_trigger)
+            {
+                if (savestate_selected < number_of_savestates_per_depth[piece_selected_trigger + 1 + board->nb_of_level_pieces])
+                {
+                    // instead of normal backtracking we start from a previous savestate
+                    start_from_board_savestate(board, piece_selected_trigger + 1 + board->nb_of_level_pieces, savestate_selected);
+                    // extra_dsraw(board, level_num, piece_idx_priority_array, piece_selected, nb_of_playable_pieces, playable_side_per_piece_idx_mask);
+                    backtrack_iteration = false;
+                    savestate_selected++;
+                    piece_selected++;
+                    goto next_piece;
+                }
+                else
+                {
+                    // all the savestates have been exhausted, we need to change combinations
+                    clean_board_pieces(board);
+                    piece_selected = -1;
+                    goto next_piece;
+                }
             }
             // ---
 
@@ -906,6 +957,18 @@ void run_algorithm_with_extra_display(int level_num, int FPS)
                             if (board->nb_of_added_pieces > current_max_depth)
                                 current_max_depth = board->nb_of_added_pieces; // @todo don't forget to change "screen_solver" here too
 
+                            if (piece_selected == nb_of_playable_pieces)
+                            {
+                                // case where the successfully added the last piece to the board
+                                solved = true;
+                                goto end_loop;
+                            }
+                            else
+                            {
+                                // record the new board state as a new savestate
+                                save_board_state(board, board->nb_of_added_pieces);
+                            }
+
                             goto next_piece;
                         }
                         piece->current_rotation_state = 0;
@@ -926,6 +989,8 @@ end_loop:
     end = clock();
     time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
 
+#ifndef AUTOMATED_RUNS
+
     if (solved)
         printf("Solution found !\n");
     else
@@ -936,6 +1001,16 @@ end_loop:
     // display last board state until user close the window
     while (!WindowShouldClose())
         extra_draw(board, level_num, piece_idx_priority_array, piece_selected, nb_of_playable_pieces, playable_side_per_piece_idx_mask);
+
+#else
+    printf("%3d : ", level_num);
+    if (solved)
+        printf("solved -> ");
+    else
+        printf("unsolved -> ");
+    printf("%d | %d\n", valid_board_count, (int)(time_spent * 1000));
+
+#endif
 
 quit_algorithm:
     CloseWindow();
