@@ -22,10 +22,6 @@ Of course, I recommend to check out the actual puzzle, which has such a cool des
   <br>
   <br>
 
-This is my first big and "official" project not only in C, but in general. I'm pretty much self-taught and learned a lot through the making of this project. I'm open to upgrade suggestions on the actual code, and especially on the whole presentation/convention side of things, as I feel I'm missing on. I'm not a native English speaker as well.
-
-So if you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
-
 ### Screenshots
 
 #### Important Note :
